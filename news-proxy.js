@@ -14,7 +14,21 @@ const app  = express();
 const PORT = process.env.PORT || 3002;
 const KEY  = process.env.NEWS_API_KEY;
 
-app.use(cors({ origin: ['http://localhost:3001', 'http://127.0.0.1:3001'] }));
+app.use(cors({ origin: true }));
+
+// ── In-memory cache — 60 min TTL ──────────────────────────
+const CACHE_TTL_MS = 60 * 60 * 1000; // 60 minuter
+const cache = new Map(); // key → { data, ts }
+
+function cacheGet(key) {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL_MS) { cache.delete(key); return null; }
+  return entry.data;
+}
+function cacheSet(key, data) {
+  cache.set(key, { data, ts: Date.now() });
+}
 app.use(express.json());
 
 // ── Sökämnen per kategori ──────────────────────────────────
@@ -31,9 +45,12 @@ const QUERIES = {
 
 const BASE = 'https://newsapi.org/v2/everything';
 
-// ── Hämta nyheter för en kategori ─────────────────────────
+// ── Hämta nyheter för en kategori (med cache) ─────────────
 async function fetchCategory(cat) {
   if (!KEY || KEY === 'din_nyckel_här') return [];
+
+  const cached = cacheGet(cat);
+  if (cached) { console.log(`[news-proxy] cache HIT: ${cat}`); return cached; }
 
   const query = QUERIES[cat] || QUERIES.all;
   const url   = new URL(BASE);
@@ -47,7 +64,7 @@ async function fetchCategory(cat) {
     const res  = await fetch(url.toString());
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'NewsAPI error');
-    return (data.articles || []).map(a => ({
+    const articles = (data.articles || []).map(a => ({
       title:       a.title,
       description: a.description,
       url:         a.url,
@@ -57,6 +74,9 @@ async function fetchCategory(cat) {
       author:      a.author,
       cat,
     }));
+    console.log(`[news-proxy] cache MISS: ${cat} — ${articles.length} artiklar hämtade`);
+    cacheSet(cat, articles);
+    return articles;
   } catch (err) {
     console.error(`[news-proxy] ${cat}:`, err.message);
     return [];
@@ -99,9 +119,15 @@ app.get('/api/news', async (req, res) => {
 
 // ── Hälsokoll ──────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
+  const cacheEntries = [...cache.entries()].map(([k, v]) => ({
+    cat: k,
+    ageMin: Math.round((Date.now() - v.ts) / 60000),
+    expiresMin: Math.round((CACHE_TTL_MS - (Date.now() - v.ts)) / 60000),
+  }));
   res.json({
     status: 'ok',
     keyConfigured: !!(KEY && KEY !== 'din_nyckel_här'),
+    cache: cacheEntries,
   });
 });
 
