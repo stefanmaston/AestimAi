@@ -80,8 +80,39 @@ function makeId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
+// ── Förhandskontroll — marknadsprisankar ───────────────────
+async function getMarketAnchor(description) {
+  try {
+    const msg = await client.messages.create({
+      model:      'claude-haiku-4-5',
+      max_tokens: 300,
+      messages: [{
+        role: 'user',
+        content: `Du är en prisexpert på svensk marknad. Identifiera vad följande är och ge ett realistiskt marknadsprisintervall.
+
+Objekt/tjänst: "${description}"
+
+Svara ENBART med giltig JSON:
+{
+  "object_type": "<vara|tjänst|fastighet|immateriell>",
+  "category_label": "<kort kategoribeskrivning, t.ex. 'Kvalificerat hantverksarbete'>",
+  "typical_price_low_sek": <heltal, nedre realistiskt marknadspris>,
+  "typical_price_high_sek": <heltal, övre realistiskt marknadspris>,
+  "price_basis": "<1 mening om vad priset baseras på, t.ex. 'Snickarlön 650-900 SEK/tim × 40 timmar'>",
+  "quantity_detected": "<beskriv detekterad kvantitet, t.ex. '40 timmar' eller '300 m²' eller '1 st'>"
+}`
+      }],
+    });
+    const raw  = msg.content[0].text.trim();
+    const json = raw.replace(/^```json\s*/i, '').replace(/```$/,'').trim();
+    return JSON.parse(json);
+  } catch (e) {
+    return null; // Tyst fallback — värdering körs ändå utan ankar
+  }
+}
+
 // ── Claude-värderingsprompt ────────────────────────────────
-function buildPrompt(item) {
+function buildPrompt(item, anchor) {
   const condLabels = { 1: 'Dåligt', 2: 'Slitet', 3: 'OK', 4: 'Bra', 5: 'Utmärkt' };
   const cond = condLabels[item.condition] || 'OK';
 
@@ -96,7 +127,14 @@ OBJEKT ATT VÄRDERA:
 - Skick: ${item.condition}/5 (${cond})
 ${item.location ? `- Plats: ${item.location}` : ''}
 
-KRITISKT — KVANTITET OCH ENHET:
+${anchor ? `MARKNADSPRISANKAR (förhandskontroll):
+Typ: ${anchor.category_label} (${anchor.object_type})
+Typiskt marknadspris: ${anchor.typical_price_low_sek.toLocaleString('sv-SE')}–${anchor.typical_price_high_sek.toLocaleString('sv-SE')} SEK
+Prisunderlag: ${anchor.price_basis}
+Detekterad kvantitet: ${anchor.quantity_detected}
+→ UCI-värdet MÅSTE ligga inom ±40% av detta intervall om inte starka skäl finns.
+
+` : ''}KRITISKT — KVANTITET OCH ENHET:
 - Läs beskrivningen noga och identifiera om det finns en kvantitet (antal, yta, vikt, tid, volym etc.)
 - Exempel: "byta tak på 300m²" → värdera HELA 300m², INTE 1m²
 - Exempel: "20 timmar snickeriarbete" → värdera ALLA 20 timmar
@@ -146,9 +184,24 @@ Returnera exakt detta JSON-format:
     {"name": "<jämförelseobjekt>", "uci": <heltal>}
   ],
   "depreciation_note": "<kort om värdeminskning/ökning över tid om relevant>",
-  "survey_question": "<en konkret fråga att ställa till respondenter, t.ex. 'Skulle du byta din X mot detta för Y UCI?'>"
+  "survey_question": "<en konkret fråga att ställa till respondenter, t.ex. 'Skulle du byta din X mot detta för Y UCI?'>",
+  "market_context": {
+    "category_label": "<vad objektet är>",
+    "typical_price_low_sek": <heltal>,
+    "typical_price_high_sek": <heltal>,
+    "price_basis": "<hur priset bestämdes>"
+  }
 }`;
 }
+
+// ── POST /api/uci/check — snabb förhandskontroll ──────────
+app.post('/api/uci/check', async (req, res) => {
+  const { description } = req.body;
+  if (!description) return res.status(400).json({ error: 'description krävs' });
+  const anchor = await getMarketAnchor(description);
+  if (!anchor) return res.status(500).json({ error: 'Förhandskontroll misslyckades' });
+  res.json(anchor);
+});
 
 // ── POST /api/uci/value ────────────────────────────────────
 app.post('/api/uci/value', async (req, res) => {
@@ -164,12 +217,16 @@ app.post('/api/uci/value', async (req, res) => {
   }
 
   try {
+    // Steg 1: förhandskontroll — marknadsprisankar (snabb haiku-call)
+    const anchor = await getMarketAnchor(description);
+
+    // Steg 2: full värdering med ankar injicerat i prompten
     const message = await client.messages.create({
       model:      'claude-opus-4-5',
       max_tokens: 1024,
       messages: [{
         role:    'user',
-        content: buildPrompt({ description, category, condition: parseInt(condition) || 3, location }),
+        content: buildPrompt({ description, category, condition: parseInt(condition) || 3, location }, anchor),
       }],
     });
 
@@ -192,6 +249,16 @@ app.post('/api/uci/value', async (req, res) => {
       createdAt:   Date.now(),
       surveyQuestion: data.survey_question,
     });
+
+    // Komplettera market_context med ankar om Claude utelämnade det
+    if (!data.market_context && anchor) {
+      data.market_context = {
+        category_label:        anchor.category_label,
+        typical_price_low_sek: anchor.typical_price_low_sek,
+        typical_price_high_sek: anchor.typical_price_high_sek,
+        price_basis:           anchor.price_basis,
+      };
+    }
 
     res.json({ ...data, itemId });
 

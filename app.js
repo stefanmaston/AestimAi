@@ -147,6 +147,31 @@ function renderUciResult(data) {
   dep.textContent = data.depreciation_note || '';
   dep.style.display = data.depreciation_note ? 'block' : 'none';
 
+  // Marknadsprisankar-kort
+  const mc = data.market_context;
+  let mcEl = document.getElementById('marketContextCard');
+  if (mc && mc.typical_price_low_sek) {
+    if (!mcEl) {
+      mcEl = document.createElement('div');
+      mcEl.id = 'marketContextCard';
+      mcEl.className = 'market-context-card';
+      document.getElementById('uciResult').insertBefore(mcEl, document.getElementById('uciResult').firstChild);
+    }
+    const lo = mc.typical_price_low_sek.toLocaleString('sv-SE');
+    const hi = mc.typical_price_high_sek.toLocaleString('sv-SE');
+    mcEl.innerHTML = `
+      <div class="mc-header">
+        <span class="mc-icon">⊛</span>
+        <span class="mc-label">Marknadsprisankar</span>
+        <span class="mc-category">${mc.category_label || ''}</span>
+      </div>
+      <div class="mc-range">${lo} – ${hi} SEK</div>
+      <div class="mc-basis">${mc.price_basis || ''}</div>`;
+    mcEl.style.display = 'block';
+  } else if (mcEl) {
+    mcEl.style.display = 'none';
+  }
+
   // Survey
   setupSurvey(data.uci_value, data.survey_question);
 

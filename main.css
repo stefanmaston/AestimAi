@@ -1190,6 +1190,25 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 .news-feature[hidden],
 .news-brief-item[hidden] { display: none !important; }
 
+/* ===== MARKNADSPRISANKAR-KORT ===== */
+.market-context-card {
+  background: linear-gradient(135deg, rgba(29,107,78,0.06), rgba(29,107,78,0.02));
+  border: 1px solid rgba(29,107,78,0.2);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+.mc-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.mc-icon  { color: var(--green); font-size: 0.9rem; }
+.mc-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--green); }
+.mc-category { font-size: 0.72rem; color: var(--gray-500); margin-left: auto; }
+.mc-range { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
+.mc-basis { font-size: 0.75rem; color: var(--gray-500); margin-top: 0.2rem; }
+
 /* ===== UCI DASHBOARD ===== */
 
 .dash-ticker-bar {
