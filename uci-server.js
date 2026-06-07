@@ -106,13 +106,28 @@ KRITISKT — KVANTITET OCH ENHET:
 - Om ingen kvantitet anges, anta 1 enhet av varan/tjänsten
 - Ange alltid i reasoning vilken total kvantitet du värderat
 
+KALIBRERING — MARKNADSPRISER SOM REFERENS:
+UCI speglar VERKLIGT marknadsvärde, inte ett rabatterat bytespris. Använd dessa riktmärken:
+
+ARBETE OCH TJÄNSTER (timpris i SEK på svensk marknad):
+- Ej kvalificerat arbete (städ, enkel trädgård): 200–350 SEK/tim → 3–6 UCI/tim
+- Hantverksarbete (målare, golvläggare): 450–650 SEK/tim → 7–10 UCI/tim
+- Kvalificerat hantverk (snickare, rörmokare, elektriker): 600–900 SEK/tim → 10–15 UCI/tim
+- Specialistarbete (arkitekt, ingenjör, läkare, advokat): 900–2000 SEK/tim → 15–32 UCI/tim
+- Byggnation total (inkl. material): lägg till 30–100% på arbetstimmar
+
+VAROR — tumregler:
+- Begagnade konsumentvaror: 20–50% av nypris
+- Begagnade kvalitetsprodukter (skick 4–5): 40–70% av nypris
+- Fastighet/mark: använd ortspris per m²
+
 INSTRUKTIONER:
-1. Analysera objektets verkliga bytevärde baserat på nyttighet, hållbarhet och marknadsnärvaro
-2. Ta hänsyn till kategorispecifika faktorer (avskrivning, sällsynthet, efterfrågan)
-3. För tjänster: inkludera material + arbete om det ingår i beskrivningen
-4. Sätt UCI-värdet så att det speglar vad en rimlig motpart faktiskt skulle acceptera i byte
-5. Konfidensintervallet ska vara realistiskt — brett för unika/sällsynta objekt, smalt för standardvaror
-6. Jämförelseobjekten ska vara konkreta och verklighetstrogna med samma kvantitet
+1. Basera värdet på VERKLIGT marknadsvärde — inte ett rabatterat bytespris
+2. För tjänster: välj rätt timprisintervall ovan baserat på kompetensnivå
+3. Multiplicera timpris × antal timmar för totalt värde
+4. För byggtjänster: addera materialkostad om det ingår i beskrivningen
+5. Konfidensintervallet ska vara realistiskt — brett för unika objekt, smalt för standardvaror
+6. Jämförelseobjekten ska ha samma kvantitet och marknadsprisnivå
 
 Returnera exakt detta JSON-format:
 {
