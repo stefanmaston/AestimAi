@@ -16,7 +16,7 @@ const cors      = require('cors');
 const Anthropic = require('@anthropic-ai/sdk');
 
 const app    = express();
-const PORT   = process.env.API_PORT || 3003;
+const PORT   = process.env.PORT || process.env.API_PORT || 3004;
 const client = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 app.use(cors({ origin: true })); // Tillåt alla localhost-portar
