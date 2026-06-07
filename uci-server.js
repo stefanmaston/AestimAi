@@ -365,6 +365,7 @@ function generateHistoricalData() {
 
     history.push({
       date:    d.toISOString().split('T')[0],
+      rateUCI: 1,   // UCI är alltid sin egen basenhet
       rateSEK: r,
       rateEUR: Math.round(r / FX.EUR * 100) / 100,
       rateUSD: Math.round(r / FX.USD * 100) / 100,
@@ -411,7 +412,7 @@ function calcStats(history) {
   const pct = (a, b) => +((a - b) / b * 100).toFixed(2);
 
   return {
-    current:   { SEK: cur.rateSEK, EUR: cur.rateEUR, USD: cur.rateUSD,
+    current:   { UCI: 1, SEK: cur.rateSEK, EUR: cur.rateEUR, USD: cur.rateUSD,
                  GBP: cur.rateGBP, NOK: cur.rateNOK, DKK: cur.rateDKK,
                  CHF: cur.rateCHF, JPY: cur.rateJPY },
     change24h:  pct(cur.rateSEK, prev.rateSEK),

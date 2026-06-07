@@ -770,6 +770,7 @@ async function loadMarketDashboard() {
 
 // Valuta-konfiguration
 const CURRENCIES = {
+  UCI: { label: 'UCI', decimals: 2, rateKey: 'rateUCI', statsKey: 'UCI' },
   SEK: { label: 'SEK', decimals: 2, rateKey: 'rateSEK', statsKey: 'SEK' },
   EUR: { label: 'EUR', decimals: 2, rateKey: 'rateEUR', statsKey: 'EUR' },
   USD: { label: 'USD', decimals: 2, rateKey: 'rateUSD', statsKey: 'USD' },
@@ -780,8 +781,8 @@ const CURRENCIES = {
   JPY: { label: 'JPY', decimals: 1, rateKey: 'rateJPY', statsKey: 'JPY' },
 };
 
-// FX mot SEK (för omräkning av cap-värden)
-const FX_TO_SEK = { SEK:1, EUR:11.28, USD:10.44, GBP:13.20, NOK:5.89, DKK:1.51, CHF:12.15, JPY:0.069 };
+// FX mot SEK (för omräkning av cap-värden). UCI = 1 (basenhet — allt annat omräknas via SEK-kursen)
+const FX_TO_SEK = { UCI: null, SEK:1, EUR:11.28, USD:10.44, GBP:13.20, NOK:5.89, DKK:1.51, CHF:12.15, JPY:0.069 };
 
 let activeCurrency = 'SEK';
 
@@ -800,11 +801,14 @@ function renderDashboard({ history, stats }, days) {
               : days === 0  ? history.filter(h => h.date >= `${new Date().getFullYear()}-01-01`)
               : history.slice(-days);
 
-  const cur  = CURRENCIES[activeCurrency] || CURRENCIES.SEK;
-  const sign = v => v >= 0 ? '+' : '';
-  const fmt  = (v, d = cur.decimals) => v.toFixed(d);
-  const curRate = stats.current[cur.statsKey];
-  const fxRate  = FX_TO_SEK[activeCurrency] || 1;
+  const cur      = CURRENCIES[activeCurrency] || CURRENCIES.SEK;
+  const isUCI    = activeCurrency === 'UCI';
+  const sign     = v => v >= 0 ? '+' : '';
+  const fmt      = (v, d = cur.decimals) => v.toFixed(d);
+  // UCI-läge: allt uttrycks i antal UCI-enheter (SEK-värde / aktuell UCI-kurs)
+  const uciRate  = stats.current.SEK;  // SEK per 1 UCI
+  const curRate  = isUCI ? 1 : stats.current[cur.statsKey];
+  const fxRate   = isUCI ? uciRate : (FX_TO_SEK[activeCurrency] || 1);
 
   // Ticker (alltid SEK i tickern)
   setEl('dtSEK',   stats.current.SEK.toFixed(2));
@@ -865,14 +869,15 @@ function renderDashboard({ history, stats }, days) {
 
   // Valutatabell — markera aktiv rad
   const currencies = [
-    { pair: 'UCI/SEK', val: stats.current.SEK, c24: stats.change24h, c7: stats.change7d, code: 'SEK' },
-    { pair: 'UCI/EUR', val: stats.current.EUR, c24: stats.change24h, c7: stats.change7d, code: 'EUR' },
-    { pair: 'UCI/USD', val: stats.current.USD, c24: stats.change24h, c7: stats.change7d, code: 'USD' },
-    { pair: 'UCI/GBP', val: stats.current.GBP, c24: stats.change24h, c7: stats.change7d, code: 'GBP' },
-    { pair: 'UCI/NOK', val: stats.current.NOK, c24: stats.change24h, c7: stats.change7d, code: 'NOK' },
-    { pair: 'UCI/DKK', val: stats.current.DKK, c24: stats.change24h, c7: stats.change7d, code: 'DKK' },
-    { pair: 'UCI/CHF', val: stats.current.CHF, c24: stats.change24h, c7: stats.change7d, code: 'CHF' },
-    { pair: 'UCI/JPY', val: stats.current.JPY, c24: stats.change24h, c7: stats.change7d, code: 'JPY' },
+    { pair: 'UCI',     val: 1,                  c24: 0,               c7: 0,               code: 'UCI', isBase: true },
+    { pair: 'UCI/SEK', val: stats.current.SEK,  c24: stats.change24h, c7: stats.change7d,  code: 'SEK' },
+    { pair: 'UCI/EUR', val: stats.current.EUR,  c24: stats.change24h, c7: stats.change7d,  code: 'EUR' },
+    { pair: 'UCI/USD', val: stats.current.USD,  c24: stats.change24h, c7: stats.change7d,  code: 'USD' },
+    { pair: 'UCI/GBP', val: stats.current.GBP,  c24: stats.change24h, c7: stats.change7d,  code: 'GBP' },
+    { pair: 'UCI/NOK', val: stats.current.NOK,  c24: stats.change24h, c7: stats.change7d,  code: 'NOK' },
+    { pair: 'UCI/DKK', val: stats.current.DKK,  c24: stats.change24h, c7: stats.change7d,  code: 'DKK' },
+    { pair: 'UCI/CHF', val: stats.current.CHF,  c24: stats.change24h, c7: stats.change7d,  code: 'CHF' },
+    { pair: 'UCI/JPY', val: stats.current.JPY,  c24: stats.change24h, c7: stats.change7d,  code: 'JPY' },
   ];
   const tbody = document.getElementById('dashFxTable');
   if (tbody) {
