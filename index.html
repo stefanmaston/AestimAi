@@ -58,8 +58,13 @@
       </div>
       <button class="btn-login" id="btnLogin">Logga in med AE ID</button>
 
-      <!-- Google Translate-widget -->
-      <div id="google_translate_element" class="gt-widget"></div>
+      <!-- Språkknapp -->
+      <button class="btn-lang" id="btnLang" onclick="toggleLangMenu()" title="Välj språk">
+        🌐 <span id="btnLangLabel">Välj språk</span>
+      </button>
+      <div class="lang-menu hidden" id="langMenu">
+        <div id="google_translate_element"></div>
+      </div>
 
       <!-- Wallet-widget -->
       <div class="wallet-widget" id="walletWidget">
@@ -1208,6 +1213,18 @@
         autoDisplay: false,
       }, 'google_translate_element');
     }
+    function toggleLangMenu() {
+      const menu = document.getElementById('langMenu');
+      menu.classList.toggle('hidden');
+    }
+    // Stäng menyn vid klick utanför
+    document.addEventListener('click', e => {
+      const btn  = document.getElementById('btnLang');
+      const menu = document.getElementById('langMenu');
+      if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 

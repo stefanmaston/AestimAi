@@ -1466,53 +1466,71 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   .idcoop-history { grid-column: 1; }
 }
 
-/* ===== GOOGLE TRANSLATE WIDGET ===== */
+/* ===== GOOGLE TRANSLATE / SPRÅKKNAPP ===== */
 
-/* Dölj Googles topbar-banner som annars dyker upp överst */
+/* Dölj Googles topbar-banner */
 .goog-te-banner-frame,
 .skiptranslate { display: none !important; }
 body { top: 0 !important; }
 
-/* Wrap i sidebaren */
-.gt-widget {
-  margin-top: 0.75rem;
-}
-
-/* Styla select-elementet som Google Translate injicerar */
-.gt-widget .goog-te-gadget {
-  font-family: inherit !important;
-  font-size: 0 !important;  /* dölj "Powered by Google"-texten */
-  color: transparent !important;
-}
-.gt-widget .goog-te-gadget a { display: none !important; }
-
-.gt-widget .goog-te-gadget select,
-#google_translate_element select {
+/* Språkknapp — samma stil som btn-login */
+.btn-lang {
   width: 100%;
-  padding: 0.4rem 0.6rem;
-  background: rgba(255,255,255,0.07);
+  padding: 0.55rem 1rem;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: inherit;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.btn-lang:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--white);
+  border-color: rgba(255,255,255,0.35);
+}
+
+/* Dropdown-panel */
+.lang-menu {
+  background: #1e2820;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.lang-menu.hidden { display: none; }
+
+/* Google Translate select inuti panelen */
+.lang-menu .goog-te-gadget {
+  font-size: 0 !important;
+  color: transparent !important;
+}
+.lang-menu .goog-te-gadget a,
+.lang-menu .goog-te-gadget span { display: none !important; }
+
+.lang-menu select,
+#google_translate_element select {
+  width: 100%;
+  padding: 0.55rem 2rem 0.55rem 0.75rem;
+  background: transparent;
+  border: none;
   color: rgba(255,255,255,0.85);
-  font-size: 0.8rem;
+  font-size: 0.83rem;
   font-family: inherit;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.5)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.4)'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.55rem center;
+  background-position: right 0.6rem center;
   background-size: 8px;
-  padding-right: 1.6rem;
-  transition: border-color var(--t), background var(--t);
 }
-.gt-widget select:hover,
-#google_translate_element select:hover {
-  border-color: rgba(255,255,255,0.4);
-  background-color: rgba(255,255,255,0.12);
-}
-.gt-widget select:focus,
-#google_translate_element select:focus {
-  outline: none;
-  border-color: var(--green);
-}
+.lang-menu select:focus,
+#google_translate_element select:focus { outline: none; }
