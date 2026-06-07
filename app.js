@@ -50,7 +50,7 @@ function navigateTo(moduleId) {
 function updatePanelHelp(moduleId) {
   const helpTexts = {
     uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Coin Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
-    market: '<h4>Om Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
+    market: '<h4>Om UCI Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
     pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med AE ID barter or pay DS-certifikat.</p><p>€75/mån — kräver AE ID barter or pay-kort.</p>',
     idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
     news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras dagligen.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
