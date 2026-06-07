@@ -96,12 +96,23 @@ OBJEKT ATT VÄRDERA:
 - Skick: ${item.condition}/5 (${cond})
 ${item.location ? `- Plats: ${item.location}` : ''}
 
+KRITISKT — KVANTITET OCH ENHET:
+- Läs beskrivningen noga och identifiera om det finns en kvantitet (antal, yta, vikt, tid, volym etc.)
+- Exempel: "byta tak på 300m²" → värdera HELA 300m², INTE 1m²
+- Exempel: "20 timmar snickeriarbete" → värdera ALLA 20 timmar
+- Exempel: "5 st stolar" → värdera ALLA 5 stolar
+- Exempel: "måla 150m² vägg" → värdera hela 150m²
+- UCI-värdet och priserna ska alltid avse den TOTALA mängden som beskrivs
+- Om ingen kvantitet anges, anta 1 enhet av varan/tjänsten
+- Ange alltid i reasoning vilken total kvantitet du värderat
+
 INSTRUKTIONER:
 1. Analysera objektets verkliga bytevärde baserat på nyttighet, hållbarhet och marknadsnärvaro
 2. Ta hänsyn till kategorispecifika faktorer (avskrivning, sällsynthet, efterfrågan)
-3. Sätt UCI-värdet så att det speglar vad en rimlig motpart faktiskt skulle acceptera i byte
-4. Konfidensintervallet ska vara realistiskt — brett för unika/sällsynta objekt, smalt för standardvaror
-5. Jämförelseobjekten ska vara konkreta och verklighetstrogna
+3. För tjänster: inkludera material + arbete om det ingår i beskrivningen
+4. Sätt UCI-värdet så att det speglar vad en rimlig motpart faktiskt skulle acceptera i byte
+5. Konfidensintervallet ska vara realistiskt — brett för unika/sällsynta objekt, smalt för standardvaror
+6. Jämförelseobjekten ska vara konkreta och verklighetstrogna med samma kvantitet
 
 Returnera exakt detta JSON-format:
 {
