@@ -24,6 +24,11 @@
         <span class="nav-label">UCI Värdering</span>
         <span class="nav-badge free">Gratis</span>
       </button>
+      <button class="nav-item" data-module="dashboard">
+        <span class="nav-icon">▲</span>
+        <span class="nav-label">UCI Dashboard</span>
+        <span class="nav-badge free">Live</span>
+      </button>
       <button class="nav-item" data-module="market">
         <span class="nav-icon">⇄</span>
         <span class="nav-label">Bytesmarknad</span>
@@ -262,6 +267,131 @@
     </section>
 
     <!-- Modul 2: Bytesmarknad -->
+    <!-- ── UCI DASHBOARD ───────────────────────────────── -->
+    <section class="module hidden" id="module-dashboard">
+      <div class="module-header">
+        <h2>UCI Marknadsdashboard</h2>
+        <p class="module-desc">Universal Commerce Index — kursutveckling, nyckeltal och valutaparitet</p>
+      </div>
+
+      <!-- Ticker-rad -->
+      <div class="dash-ticker-bar">
+        <span class="dash-tick"><span class="dash-tick-label">UCI/SEK</span><span class="dash-tick-val" id="dtSEK">—</span><span class="dash-tick-chg" id="dtChg24h">—</span></span>
+        <span class="dash-tick"><span class="dash-tick-label">UCI/EUR</span><span class="dash-tick-val" id="dtEUR">—</span></span>
+        <span class="dash-tick"><span class="dash-tick-label">UCI/USD</span><span class="dash-tick-val" id="dtUSD">—</span></span>
+        <span class="dash-tick"><span class="dash-tick-label">UCI/GBP</span><span class="dash-tick-val" id="dtGBP">—</span></span>
+        <span class="dash-tick"><span class="dash-tick-label">UCI/NOK</span><span class="dash-tick-val" id="dtNOK">—</span></span>
+        <span class="dash-tick"><span class="dash-tick-label">UCI/CHF</span><span class="dash-tick-val" id="dtCHF">—</span></span>
+        <span class="dash-tick"><span class="dash-tick-label">Volatilitet 30d</span><span class="dash-tick-val" id="dtVol">—</span></span>
+      </div>
+
+      <!-- Grafkort -->
+      <div class="dash-chart-card">
+        <div class="dash-chart-header">
+          <div class="dash-chart-price">
+            <span class="dash-price-big" id="dashPriceBig">—</span>
+            <span class="dash-price-currency">SEK / UCI</span>
+            <span class="dash-price-change" id="dashPriceChange">—</span>
+          </div>
+          <div class="dash-range-tabs">
+            <button class="range-tab active" data-days="7">1V</button>
+            <button class="range-tab" data-days="30">1M</button>
+            <button class="range-tab" data-days="90">3M</button>
+            <button class="range-tab" data-days="180">6M</button>
+            <button class="range-tab" data-days="0">ÅTD</button>
+            <button class="range-tab" data-days="-1">ALLT</button>
+          </div>
+        </div>
+        <div class="dash-chart-wrap">
+          <canvas id="uciChart"></canvas>
+        </div>
+        <div class="dash-chart-footer">
+          <span id="dashLaunchLabel">Sedan lansering 1 jan 2026</span>
+          <span id="dashLastUpdate">—</span>
+        </div>
+      </div>
+
+      <!-- Nyckeltal grid -->
+      <div class="dash-stats-grid">
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Förändring 24h</span>
+          <span class="dash-stat-val" id="dsStat24h">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Förändring 7d</span>
+          <span class="dash-stat-val" id="dsStat7d">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Förändring 30d</span>
+          <span class="dash-stat-val" id="dsStat30d">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Förändring ÅTD</span>
+          <span class="dash-stat-val" id="dsStatYTD">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">52v Högst</span>
+          <span class="dash-stat-val" id="dsHigh">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">52v Lägst</span>
+          <span class="dash-stat-val" id="dsLow">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">All-time High</span>
+          <span class="dash-stat-val" id="dsATH">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Volatilitet (ann.)</span>
+          <span class="dash-stat-val" id="dsVolatility">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Värderingar idag</span>
+          <span class="dash-stat-val" id="dsVolumeToday">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Totalt värderingar</span>
+          <span class="dash-stat-val" id="dsVolumeTotal">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Aktiva surveys</span>
+          <span class="dash-stat-val" id="dsSurveys">—</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-label">Lanserades</span>
+          <span class="dash-stat-val">1 jan 2026</span>
+        </div>
+      </div>
+
+      <!-- Valutatabell + info -->
+      <div class="dash-bottom">
+        <div class="dash-fx-card">
+          <h3 class="dash-section-title">UCI Valutaparitet</h3>
+          <table class="dash-fx-table">
+            <thead>
+              <tr><th>Par</th><th>Kurs</th><th>24h %</th><th>7d %</th></tr>
+            </thead>
+            <tbody id="dashFxTable">
+              <tr><td colspan="4" style="color:var(--gray-500);text-align:center">Laddar…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dash-info-card">
+          <h3 class="dash-section-title">Om UCI-indexet</h3>
+          <p class="dash-info-text">UCI (Universal Commerce Index) är ett valutaoberoende bytesindex som speglar det universella värdet av varor och tjänster oavsett geografisk marknad.</p>
+          <div class="dash-info-rows">
+            <div class="dash-info-row"><span>Indextyp</span><span>Komposit bytesindex</span></div>
+            <div class="dash-info-row"><span>Uppdatering</span><span>Dagligen (AI + respondenter)</span></div>
+            <div class="dash-info-row"><span>Metodik</span><span>Claude AI + Bayesian voting</span></div>
+            <div class="dash-info-row"><span>Basår</span><span>2026</span></div>
+            <div class="dash-info-row"><span>Basvärde</span><span>58.50 SEK</span></div>
+            <div class="dash-info-row"><span>On-chain</span><span>Base Sepolia (Ethereum L2)</span></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
     <section class="module hidden" id="module-market">
       <div class="module-header">
         <h1>Bytesmarknad</h1>
@@ -1144,6 +1274,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
   <script type="module" src="wallet-ui.js"></script>
 </body>

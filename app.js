@@ -40,6 +40,11 @@ function navigateTo(moduleId) {
   if (moduleId === 'news' && !newsLoaded) {
     loadNews('all');
   }
+
+  // Ladda dashboard första gången
+  if (moduleId === 'dashboard' && !dashLoaded) {
+    loadMarketDashboard();
+  }
 }
 
 function updatePanelHelp(moduleId) {
@@ -749,6 +754,176 @@ function filterNewsStatic(cat) {
   });
 }
 
+// ── UCI DASHBOARD ────────────────────────────────────
+
+let dashData   = null;
+let uciChart   = null;
+let dashLoaded = false;
+
+async function loadMarketDashboard() {
+  if (dashLoaded) return;
+  try {
+    const res  = await fetch(`${UCI_SERVER}/api/uci/history`);
+    dashData   = await res.json();
+    dashLoaded = true;
+    renderDashboard(dashData, 30);
+  } catch (e) {
+    console.warn('[Dashboard] Kunde inte ladda historik:', e.message);
+  }
+}
+
+function renderDashboard({ history, stats }, days) {
+  // Filtrera historik baserat på valt intervall
+  const slice = days === -1 ? history
+              : days === 0  ? history.filter(h => h.date >= `${new Date().getFullYear()}-01-01`)
+              : history.slice(-days);
+
+  // Ticker
+  const sign = v => v >= 0 ? '+' : '';
+  const fmt  = (v, d = 2) => v.toFixed(d);
+
+  setEl('dtSEK',   fmt(stats.current.SEK));
+  setEl('dtEUR',   fmt(stats.current.EUR));
+  setEl('dtUSD',   fmt(stats.current.USD));
+  setEl('dtGBP',   fmt(stats.current.GBP));
+  setEl('dtNOK',   fmt(stats.current.NOK));
+  setEl('dtCHF',   fmt(stats.current.CHF));
+  setEl('dtVol',   stats.volatility30d + '%');
+
+  const chg24El = document.getElementById('dtChg24h');
+  if (chg24El) {
+    chg24El.textContent = `${sign(stats.change24h)}${fmt(stats.change24h)}%`;
+    chg24El.className   = 'dash-tick-chg ' + (stats.change24h >= 0 ? 'pos' : 'neg');
+  }
+
+  // Stor prislapp
+  setEl('dashPriceBig', fmt(stats.current.SEK));
+  const chgEl = document.getElementById('dashPriceChange');
+  if (chgEl) {
+    const abs = (stats.current.SEK - history[history.length - 2]?.rateSEK || 0).toFixed(2);
+    chgEl.textContent = `${sign(stats.change24h)}${abs} (${sign(stats.change24h)}${fmt(stats.change24h)}%) idag`;
+    chgEl.className   = 'dash-price-change ' + (stats.change24h >= 0 ? 'pos' : 'neg');
+  }
+
+  // Nyckeltal
+  const statFmt = v => `${sign(v)}${fmt(v)}%`;
+  setEl('dsStat24h',    statFmt(stats.change24h), stats.change24h >= 0 ? 'pos' : 'neg');
+  setEl('dsStat7d',     statFmt(stats.change7d),  stats.change7d  >= 0 ? 'pos' : 'neg');
+  setEl('dsStat30d',    statFmt(stats.change30d), stats.change30d >= 0 ? 'pos' : 'neg');
+  setEl('dsStatYTD',    statFmt(stats.changeYTD), stats.changeYTD >= 0 ? 'pos' : 'neg');
+  setEl('dsHigh',       fmt(stats.high52w) + ' SEK');
+  setEl('dsLow',        fmt(stats.low52w) + ' SEK');
+  setEl('dsATH',        fmt(stats.allTimeHigh) + ' SEK');
+  setEl('dsVolatility', stats.volatility30d + '%');
+  setEl('dsVolumeToday',  stats.volumeToday + ' st');
+  setEl('dsVolumeTotal',  stats.volumeTotal + ' st');
+  setEl('dsSurveys',    stats.activeSurveys + ' aktiva');
+  setEl('dashLastUpdate', 'Uppdaterad: ' + new Date().toLocaleString('sv-SE'));
+
+  // Valutatabell
+  const currencies = [
+    { pair: 'UCI/SEK', val: stats.current.SEK, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/EUR', val: stats.current.EUR, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/USD', val: stats.current.USD, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/GBP', val: stats.current.GBP, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/NOK', val: stats.current.NOK, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/DKK', val: stats.current.DKK, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/CHF', val: stats.current.CHF, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/JPY', val: stats.current.JPY, c24: stats.change24h, c7: stats.change7d },
+  ];
+  const tbody = document.getElementById('dashFxTable');
+  if (tbody) {
+    tbody.innerHTML = currencies.map(c => `
+      <tr>
+        <td class="fx-pair">${c.pair}</td>
+        <td class="fx-val">${c.val.toFixed(c.pair.includes('JPY') ? 1 : 2)}</td>
+        <td class="fx-chg ${c.c24 >= 0 ? 'pos' : 'neg'}">${sign(c.c24)}${fmt(c.c24)}%</td>
+        <td class="fx-chg ${c.c7  >= 0 ? 'pos' : 'neg'}">${sign(c.c7)}${fmt(c.c7)}%</td>
+      </tr>`).join('');
+  }
+
+  // Ritning av graf
+  renderChart(slice);
+}
+
+function setEl(id, text, colorClass) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  if (colorClass) el.className = el.className.replace(/\bpos\b|\bneg\b/g, '') + ' ' + colorClass;
+}
+
+function renderChart(slice) {
+  const ctx = document.getElementById('uciChart');
+  if (!ctx) return;
+
+  const labels = slice.map(h => h.date);
+  const values = slice.map(h => h.rateSEK);
+  const first  = values[0];
+  const isUp   = values[values.length - 1] >= first;
+  const color  = isUp ? '#1D6B4E' : '#BA7517';
+
+  if (uciChart) uciChart.destroy();
+
+  uciChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data:            values,
+        borderColor:     color,
+        borderWidth:     2,
+        pointRadius:     0,
+        pointHoverRadius: 4,
+        fill:            true,
+        backgroundColor: ctx2d => {
+          const g = ctx2d.chart.ctx.createLinearGradient(0, 0, 0, 300);
+          g.addColorStop(0, isUp ? 'rgba(29,107,78,0.18)' : 'rgba(186,117,23,0.18)');
+          g.addColorStop(1, 'rgba(255,255,255,0)');
+          return g;
+        },
+        tension: 0.3,
+      }],
+    },
+    options: {
+      responsive:          true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111210',
+          titleColor:      '#fff',
+          bodyColor:       'rgba(255,255,255,0.7)',
+          callbacks: {
+            title: items => items[0].label,
+            label: item => ` ${item.raw.toFixed(2)} SEK`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid:  { color: 'rgba(0,0,0,0.05)', drawTicks: false },
+          ticks: {
+            color: '#888780', maxTicksLimit: 8, maxRotation: 0,
+            callback: (_, i, arr) => {
+              if (i === 0 || i === arr.length - 1 || i % Math.ceil(arr.length / 6) === 0)
+                return labels[i];
+            },
+          },
+          border: { display: false },
+        },
+        y: {
+          position: 'right',
+          grid:  { color: 'rgba(0,0,0,0.05)' },
+          ticks: { color: '#888780', callback: v => v.toFixed(1) + ' SEK' },
+          border: { display: false },
+        },
+      },
+    },
+  });
+}
+
 // ── Init ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   // Sidebar-navigation
@@ -776,6 +951,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Survey vote-knapp
   document.getElementById('btnSubmitVote')?.addEventListener('click', submitVote);
+
+  // Dashboard range-tabs
+  document.querySelectorAll('.dash-range-tabs .range-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.dash-range-tabs .range-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (dashData) renderDashboard(dashData, parseInt(btn.dataset.days));
+    });
+  });
 
   // Starta EaaS-kalkylatorn
   updateEaasCalc();

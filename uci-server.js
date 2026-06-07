@@ -234,6 +234,113 @@ app.get('/api/uci/result/:id', (req, res) => {
   });
 });
 
+// ── UCI historisk kursdata ─────────────────────────────────
+
+function seededRng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = Math.imul(s ^ (s >>> 17), 0x45d9f3b);
+    s = Math.imul(s ^ (s >>> 11), 0xac4ca5b5);
+    return ((s ^ (s >>> 16)) >>> 0) / 0xffffffff;
+  };
+}
+
+function generateHistoricalData() {
+  const start   = new Date('2026-01-01');
+  const today   = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days    = Math.floor((today - start) / 86400000) + 1;
+  const rng     = seededRng(20260101);
+
+  const START_SEK  = 58.50;
+  const TARGET_SEK = 62.40;
+  const growth     = Math.pow(TARGET_SEK / START_SEK, 1 / Math.max(days - 1, 1));
+
+  // FX-rates (approx medel 2026)
+  const FX = { EUR: 11.28, USD: 10.44, GBP: 13.20, NOK: 5.89, DKK: 1.51, CHF: 12.15, JPY: 0.069 };
+
+  let rateSEK = START_SEK;
+  const history = [];
+
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+
+    if (i > 0) {
+      const trend = growth - 1;
+      const noise = (rng() - 0.499) * 0.014;
+      rateSEK = rateSEK * (1 + trend + noise);
+    }
+
+    const r = Math.round(rateSEK * 100) / 100;
+    const volume = Math.round((isWeekend ? 2 : 7) + rng() * (isWeekend ? 4 : 14));
+
+    history.push({
+      date:    d.toISOString().split('T')[0],
+      rateSEK: r,
+      rateEUR: Math.round(r / FX.EUR * 100) / 100,
+      rateUSD: Math.round(r / FX.USD * 100) / 100,
+      rateGBP: Math.round(r / FX.GBP * 100) / 100,
+      rateNOK: Math.round(r / FX.NOK * 100) / 100,
+      rateDKK: Math.round(r / FX.DKK * 100) / 100,
+      rateCHF: Math.round(r / FX.CHF * 100) / 100,
+      rateJPY: Math.round(r / FX.JPY * 10) / 10,
+      volume,
+    });
+  }
+  return history;
+}
+
+function calcStats(history) {
+  const cur  = history[history.length - 1];
+  const prev = history[history.length - 2] || cur;
+  const w1   = history[Math.max(0, history.length - 8)];
+  const m1   = history[Math.max(0, history.length - 31)];
+  const m3   = history[Math.max(0, history.length - 91)];
+  const ytd  = history[0];
+
+  const allSEK    = history.map(h => h.rateSEK);
+  const high52w   = Math.max(...allSEK);
+  const low52w    = Math.min(...allSEK);
+  const volTotal  = history.reduce((s, h) => s + h.volume, 0);
+
+  // Annualiserad volatilitet (30d)
+  const slice30   = history.slice(-31);
+  const returns   = slice30.slice(1).map((h, i) => (h.rateSEK - slice30[i].rateSEK) / slice30[i].rateSEK);
+  const mean      = returns.reduce((a, b) => a + b, 0) / returns.length;
+  const variance  = returns.reduce((s, r) => s + (r - mean) ** 2, 0) / returns.length;
+  const vol30d    = (Math.sqrt(variance * 252) * 100).toFixed(1);
+
+  const pct = (a, b) => +((a - b) / b * 100).toFixed(2);
+
+  return {
+    current:   { SEK: cur.rateSEK, EUR: cur.rateEUR, USD: cur.rateUSD,
+                 GBP: cur.rateGBP, NOK: cur.rateNOK, DKK: cur.rateDKK,
+                 CHF: cur.rateCHF, JPY: cur.rateJPY },
+    change24h:  pct(cur.rateSEK, prev.rateSEK),
+    change7d:   pct(cur.rateSEK, w1.rateSEK),
+    change30d:  pct(cur.rateSEK, m1.rateSEK),
+    change3m:   pct(cur.rateSEK, m3.rateSEK),
+    changeYTD:  pct(cur.rateSEK, ytd.rateSEK),
+    high52w, low52w,
+    allTimeHigh: high52w,
+    allTimeLow:  low52w,
+    volumeTotal: volTotal,
+    volumeToday: cur.volume,
+    volatility30d: vol30d,
+    activeSurveys: surveys.size,
+    launchDate: '2026-01-01',
+  };
+}
+
+// ── GET /api/uci/history ───────────────────────────────────
+app.get('/api/uci/history', (req, res) => {
+  const history = generateHistoricalData();
+  const stats   = calcStats(history);
+  res.json({ history, stats });
+});
+
 // ── GET /api/uci/health ────────────────────────────────────
 app.get('/api/uci/health', (req, res) => {
   const key = process.env.ANTHROPIC_API_KEY;
