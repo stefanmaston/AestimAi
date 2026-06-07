@@ -784,7 +784,7 @@ const CURRENCIES = {
 // FX mot SEK (för omräkning av cap-värden). UCI = 1 (basenhet — allt annat omräknas via SEK-kursen)
 const FX_TO_SEK = { UCI: null, SEK:1, EUR:11.28, USD:10.44, GBP:13.20, NOK:5.89, DKK:1.51, CHF:12.15, JPY:0.069 };
 
-let activeCurrency = 'UCI';
+let activeCurrency = 'EUR';
 
 function onDashCurrencyChange() {
   const sel = document.getElementById('dashCurrencySelect');
