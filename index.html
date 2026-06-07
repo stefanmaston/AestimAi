@@ -40,11 +40,6 @@
         <span class="nav-label">AestimAi Pro</span>
         <span class="nav-badge pro">Pro</span>
       </button>
-      <button class="nav-item" data-module="eaas">
-        <span class="nav-icon">⚡</span>
-        <span class="nav-label">EaaS-kalkylator</span>
-        <span class="nav-badge free">Gratis</span>
-      </button>
       <button class="nav-item" data-module="idcoop">
         <span class="nav-icon">⊙</span>
         <span class="nav-label">AE ID barter or pay</span>
@@ -709,106 +704,6 @@
       </div>
     </section>
 
-    <!-- Modul 4: EaaS-kalkylator -->
-    <section class="module hidden" id="module-eaas">
-      <div class="module-header">
-        <h1>EaaS-kalkylator</h1>
-        <p class="module-desc">Energisimulering och CHP2X-dimensionering — gratis för alla</p>
-      </div>
-
-      <div class="eaas-layout">
-        <div class="eaas-form">
-          <h2>Systemkonfiguration</h2>
-
-          <div class="form-group">
-            <label>Solcellstak — installerad effekt (kWp)</label>
-            <input type="range" min="0" max="500" value="50" id="solarKwp" oninput="updateEaasCalc()">
-            <div class="range-labels">
-              <span>0 kWp</span>
-              <span class="range-val" id="solarVal">50 kWp</span>
-              <span>500 kWp</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>CHP2X-genset storlek</label>
-            <select id="chpSize" onchange="updateEaasCalc()">
-              <option value="5">S-5 (5 kWe)</option>
-              <option value="20">S-20 (20 kWe)</option>
-              <option value="50">S-50 (50 kWe)</option>
-              <option value="100" selected>S-100 (100 kWe)</option>
-              <option value="250">S-250 (250 kWe)</option>
-              <option value="500">S-500 (500 kWe)</option>
-              <option value="1000">S-1000 (1000 kWe)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Drifttimmar CHP2X (h/år)</label>
-            <input type="range" min="1000" max="1500" value="1250" id="chpHours" oninput="updateEaasCalc()">
-            <div class="range-labels">
-              <span>1 000 h</span>
-              <span class="range-val" id="chpHoursVal">1 250 h</span>
-              <span>1 500 h</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Bränslepris (€/L)</label>
-            <input type="number" value="0.70" step="0.01" id="fuelPrice" oninput="updateEaasCalc()">
-          </div>
-
-          <div class="form-group">
-            <label>Avtalsperiod (år)</label>
-            <select id="contractYears" onchange="updateEaasCalc()">
-              <option value="5">5 år</option>
-              <option value="7" selected>7 år (standard)</option>
-              <option value="10">10 år</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="eaas-results" id="eaasResults">
-          <h2>Beräkningsresultat</h2>
-          <div class="result-grid">
-            <div class="result-tile">
-              <span class="tile-label">Solproduktion/år</span>
-              <span class="tile-value" id="solarProd">—</span>
-              <span class="tile-unit">kWh</span>
-            </div>
-            <div class="result-tile">
-              <span class="tile-label">CHP2X-produktion/år</span>
-              <span class="tile-value" id="chpProd">—</span>
-              <span class="tile-unit">kWh</span>
-            </div>
-            <div class="result-tile highlight">
-              <span class="tile-label">Total energiproduktion</span>
-              <span class="tile-value" id="totalProd">—</span>
-              <span class="tile-unit">kWh/år</span>
-            </div>
-            <div class="result-tile uci-tile">
-              <span class="tile-label">UCI-värde energiproduktion</span>
-              <span class="tile-value" id="energyUci">—</span>
-              <span class="tile-unit">UCI/år</span>
-            </div>
-            <div class="result-tile">
-              <span class="tile-label">Bränslekostnad/år</span>
-              <span class="tile-value" id="fuelCost">—</span>
-              <span class="tile-unit">EUR/år</span>
-            </div>
-            <div class="result-tile">
-              <span class="tile-label">EaaS-avtalkostnad (tot)</span>
-              <span class="tile-value" id="eaasTotal">—</span>
-              <span class="tile-unit">EUR</span>
-            </div>
-          </div>
-          <div class="eaas-cta">
-            <p>Intresserad av ett EaaS-avtal med Sunthetics?</p>
-            <a href="https://www.sunthetics.se" target="_blank" rel="noopener sponsored" class="btn-cta-amber">Kontakta EaaS-avdelningen →</a>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Modul 5: AE ID barter or pay -->
     <section class="module hidden" id="module-idcoop">

@@ -52,7 +52,6 @@ function updatePanelHelp(moduleId) {
     uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Coin Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
     market: '<h4>Om Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
     pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med AE ID barter or pay DS-certifikat.</p><p>€75/mån — kräver AE ID barter or pay-kort.</p>',
-    eaas: '<h4>Om EaaS-kalkylatorn</h4><p>Simulera energiproduktion från solceller och CHP2X-elverk. Beräknar UCI-värdet på din energiproduktion och EaaS-avtalskostnaden.</p>',
     idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
     news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras dagligen.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
   };
@@ -354,34 +353,6 @@ function setupProTabs() {
       if (target) target.classList.remove('hidden');
     });
   });
-}
-
-// ── EaaS-kalkylator ─────────────────────────────────
-function updateEaasCalc() {
-  const solarKwp   = parseFloat(document.getElementById('solarKwp').value) || 0;
-  const chpKwe     = parseFloat(document.getElementById('chpSize').value) || 0;
-  const chpHours   = parseFloat(document.getElementById('chpHours').value) || 1250;
-  const fuelPrice  = parseFloat(document.getElementById('fuelPrice').value) || 0.70;
-  const contractYr = parseInt(document.getElementById('contractYears').value) || 7;
-
-  document.getElementById('solarVal').textContent    = solarKwp + ' kWp';
-  document.getElementById('chpHoursVal').textContent = chpHours + ' h';
-
-  const solarProd = Math.round(solarKwp * 950);        // ~950 kWh/kWp/år (Sverige)
-  const chpProd   = Math.round(chpKwe * chpHours);
-  const total     = solarProd + chpProd;
-  const energyUci = Math.round(total / 62.4);          // 1 UCI = 62.4 kWh ungefärligt
-
-  const fuelPerKwe   = 400;                            // L/kWe/år (spec)
-  const fuelCostYear = Math.round(chpKwe * fuelPerKwe * fuelPrice);
-  const eaasTotal    = Math.round(fuelCostYear * contractYr);
-
-  document.getElementById('solarProd').textContent = solarProd.toLocaleString('sv-SE');
-  document.getElementById('chpProd').textContent   = chpProd.toLocaleString('sv-SE');
-  document.getElementById('totalProd').textContent = total.toLocaleString('sv-SE');
-  document.getElementById('energyUci').textContent = energyUci.toLocaleString('sv-SE');
-  document.getElementById('fuelCost').textContent  = fuelCostYear.toLocaleString('sv-SE');
-  document.getElementById('eaasTotal').textContent = eaasTotal.toLocaleString('sv-SE');
 }
 
 // ── Höger panel ─────────────────────────────────────
@@ -1036,9 +1007,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Starta EaaS-kalkylatorn
-  updateEaasCalc();
-
   // Initial hjälptext
   updatePanelHelp('uci');
 
@@ -1050,5 +1018,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Exponera globalt (används av inline oninput)
-window.updateEaasCalc    = updateEaasCalc;
 window.updateSliderPreview = updateSliderPreview;
