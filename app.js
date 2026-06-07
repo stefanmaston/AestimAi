@@ -797,58 +797,94 @@ async function loadMarketDashboard() {
   }
 }
 
+// Valuta-konfiguration
+const CURRENCIES = {
+  SEK: { label: 'SEK', decimals: 2, rateKey: 'rateSEK', statsKey: 'SEK' },
+  EUR: { label: 'EUR', decimals: 2, rateKey: 'rateEUR', statsKey: 'EUR' },
+  USD: { label: 'USD', decimals: 2, rateKey: 'rateUSD', statsKey: 'USD' },
+  GBP: { label: 'GBP', decimals: 2, rateKey: 'rateGBP', statsKey: 'GBP' },
+  NOK: { label: 'NOK', decimals: 2, rateKey: 'rateNOK', statsKey: 'NOK' },
+  DKK: { label: 'DKK', decimals: 2, rateKey: 'rateDKK', statsKey: 'DKK' },
+  CHF: { label: 'CHF', decimals: 2, rateKey: 'rateCHF', statsKey: 'CHF' },
+  JPY: { label: 'JPY', decimals: 1, rateKey: 'rateJPY', statsKey: 'JPY' },
+};
+
+// FX mot SEK (för omräkning av cap-värden)
+const FX_TO_SEK = { SEK:1, EUR:11.28, USD:10.44, GBP:13.20, NOK:5.89, DKK:1.51, CHF:12.15, JPY:0.069 };
+
+let activeCurrency = 'SEK';
+
+function onDashCurrencyChange() {
+  const sel = document.getElementById('dashCurrencySelect');
+  if (!sel || !dashData) return;
+  activeCurrency = sel.value;
+  const activeDaysBtn = document.querySelector('.range-tab.active');
+  const days = activeDaysBtn ? parseInt(activeDaysBtn.dataset.days) : 30;
+  renderDashboard(dashData, days);
+}
+
 function renderDashboard({ history, stats }, days) {
   // Filtrera historik baserat på valt intervall
   const slice = days === -1 ? history
               : days === 0  ? history.filter(h => h.date >= `${new Date().getFullYear()}-01-01`)
               : history.slice(-days);
 
-  // Ticker
+  const cur  = CURRENCIES[activeCurrency] || CURRENCIES.SEK;
   const sign = v => v >= 0 ? '+' : '';
-  const fmt  = (v, d = 2) => v.toFixed(d);
+  const fmt  = (v, d = cur.decimals) => v.toFixed(d);
+  const curRate = stats.current[cur.statsKey];
+  const fxRate  = FX_TO_SEK[activeCurrency] || 1;
 
-  setEl('dtSEK',   fmt(stats.current.SEK));
-  setEl('dtEUR',   fmt(stats.current.EUR));
-  setEl('dtUSD',   fmt(stats.current.USD));
-  setEl('dtGBP',   fmt(stats.current.GBP));
-  setEl('dtNOK',   fmt(stats.current.NOK));
-  setEl('dtCHF',   fmt(stats.current.CHF));
+  // Ticker (alltid SEK i tickern)
+  setEl('dtSEK',   stats.current.SEK.toFixed(2));
+  setEl('dtEUR',   stats.current.EUR.toFixed(2));
+  setEl('dtUSD',   stats.current.USD.toFixed(2));
+  setEl('dtGBP',   stats.current.GBP.toFixed(2));
+  setEl('dtNOK',   stats.current.NOK.toFixed(2));
+  setEl('dtCHF',   stats.current.CHF.toFixed(2));
   setEl('dtVol',   stats.volatility30d + '%');
 
   const chg24El = document.getElementById('dtChg24h');
   if (chg24El) {
-    chg24El.textContent = `${sign(stats.change24h)}${fmt(stats.change24h)}%`;
+    chg24El.textContent = `${sign(stats.change24h)}${stats.change24h.toFixed(2)}%`;
     chg24El.className   = 'dash-tick-chg ' + (stats.change24h >= 0 ? 'pos' : 'neg');
   }
 
-  // Stor prislapp
-  setEl('dashPriceBig', fmt(stats.current.SEK));
+  // Stor prislapp — i vald valuta
+  setEl('dashPriceBig', fmt(curRate));
+  setEl('dashPriceCurrency', cur.label + ' / UCI');
   const chgEl = document.getElementById('dashPriceChange');
   if (chgEl) {
-    const abs = (stats.current.SEK - history[history.length - 2]?.rateSEK || 0).toFixed(2);
-    chgEl.textContent = `${sign(stats.change24h)}${abs} (${sign(stats.change24h)}${fmt(stats.change24h)}%) idag`;
+    const prevSEK = history[history.length - 2]?.rateSEK || stats.current.SEK;
+    const prevCur = prevSEK / fxRate;
+    const abs = (curRate - prevCur).toFixed(cur.decimals);
+    chgEl.textContent = `${sign(stats.change24h)}${abs} (${sign(stats.change24h)}${stats.change24h.toFixed(2)}%) idag`;
     chgEl.className   = 'dash-price-change ' + (stats.change24h >= 0 ? 'pos' : 'neg');
   }
 
-  // Nyckeltal
-  const statFmt = v => `${sign(v)}${fmt(v)}%`;
+  // Nyckeltal — procentförändringar är valutaoberoende
+  const statFmt = v => `${sign(v)}${v.toFixed(2)}%`;
   setEl('dsStat24h',    statFmt(stats.change24h), stats.change24h >= 0 ? 'pos' : 'neg');
   setEl('dsStat7d',     statFmt(stats.change7d),  stats.change7d  >= 0 ? 'pos' : 'neg');
   setEl('dsStat30d',    statFmt(stats.change30d), stats.change30d >= 0 ? 'pos' : 'neg');
   setEl('dsStatYTD',    statFmt(stats.changeYTD), stats.changeYTD >= 0 ? 'pos' : 'neg');
-  setEl('dsHigh',       fmt(stats.high52w) + ' SEK');
-  setEl('dsLow',        fmt(stats.low52w) + ' SEK');
-  setEl('dsATH',        fmt(stats.allTimeHigh) + ' SEK');
+  // High/Low/ATH i vald valuta
+  const toC = sek => (sek / fxRate).toFixed(cur.decimals);
+  setEl('dsHigh',       toC(stats.high52w)     + ' ' + cur.label);
+  setEl('dsLow',        toC(stats.low52w)      + ' ' + cur.label);
+  setEl('dsATH',        toC(stats.allTimeHigh) + ' ' + cur.label);
   setEl('dsVolatility', stats.volatility30d + '%');
   setEl('dsVolumeToday',  stats.volumeToday + ' st');
   setEl('dsVolumeTotal',  stats.volumeTotal + ' st');
   setEl('dsSurveys',    stats.activeSurveys + ' aktiva');
 
-  // Search Cap & Verified Cap
-  const capFmt = n => n >= 1_000_000
-    ? (n / 1_000_000).toFixed(2) + ' Mkr'
-    : n >= 1_000 ? (n / 1_000).toFixed(1) + ' tkr'
-    : n + ' SEK';
+  // Search Cap & Verified Cap — omräknat till vald valuta
+  const capFmt = (sek) => {
+    const val = sek / fxRate;
+    if (val >= 1_000_000) return (val / 1_000_000).toFixed(2) + ' M' + cur.label;
+    if (val >= 1_000)     return (val / 1_000).toFixed(1)     + ' t' + cur.label;
+    return val.toFixed(cur.decimals) + ' ' + cur.label;
+  };
   setEl('dsSearchCapSEK',    capFmt(stats.searchCap || 0));
   setEl('dsSearchCapCount',  (stats.totalSearches || 0).toLocaleString('sv-SE') + ' värderingar');
   setEl('dsVerifiedCapSEK',  capFmt(stats.verifiedCap || 0));
@@ -856,30 +892,32 @@ function renderDashboard({ history, stats }, days) {
 
   setEl('dashLastUpdate', 'Uppdaterad: ' + new Date().toLocaleString('sv-SE'));
 
-  // Valutatabell
+  // Valutatabell — markera aktiv rad
   const currencies = [
-    { pair: 'UCI/SEK', val: stats.current.SEK, c24: stats.change24h, c7: stats.change7d },
-    { pair: 'UCI/EUR', val: stats.current.EUR, c24: stats.change24h, c7: stats.change7d },
-    { pair: 'UCI/USD', val: stats.current.USD, c24: stats.change24h, c7: stats.change7d },
-    { pair: 'UCI/GBP', val: stats.current.GBP, c24: stats.change24h, c7: stats.change7d },
-    { pair: 'UCI/NOK', val: stats.current.NOK, c24: stats.change24h, c7: stats.change7d },
-    { pair: 'UCI/DKK', val: stats.current.DKK, c24: stats.change24h, c7: stats.change7d },
-    { pair: 'UCI/CHF', val: stats.current.CHF, c24: stats.change24h, c7: stats.change7d },
-    { pair: 'UCI/JPY', val: stats.current.JPY, c24: stats.change24h, c7: stats.change7d },
+    { pair: 'UCI/SEK', val: stats.current.SEK, c24: stats.change24h, c7: stats.change7d, code: 'SEK' },
+    { pair: 'UCI/EUR', val: stats.current.EUR, c24: stats.change24h, c7: stats.change7d, code: 'EUR' },
+    { pair: 'UCI/USD', val: stats.current.USD, c24: stats.change24h, c7: stats.change7d, code: 'USD' },
+    { pair: 'UCI/GBP', val: stats.current.GBP, c24: stats.change24h, c7: stats.change7d, code: 'GBP' },
+    { pair: 'UCI/NOK', val: stats.current.NOK, c24: stats.change24h, c7: stats.change7d, code: 'NOK' },
+    { pair: 'UCI/DKK', val: stats.current.DKK, c24: stats.change24h, c7: stats.change7d, code: 'DKK' },
+    { pair: 'UCI/CHF', val: stats.current.CHF, c24: stats.change24h, c7: stats.change7d, code: 'CHF' },
+    { pair: 'UCI/JPY', val: stats.current.JPY, c24: stats.change24h, c7: stats.change7d, code: 'JPY' },
   ];
   const tbody = document.getElementById('dashFxTable');
   if (tbody) {
     tbody.innerHTML = currencies.map(c => `
-      <tr>
+      <tr class="${c.code === activeCurrency ? 'fx-row-active' : ''}"
+          onclick="document.getElementById('dashCurrencySelect').value='${c.code}';onDashCurrencyChange()"
+          style="cursor:pointer">
         <td class="fx-pair">${c.pair}</td>
         <td class="fx-val">${c.val.toFixed(c.pair.includes('JPY') ? 1 : 2)}</td>
-        <td class="fx-chg ${c.c24 >= 0 ? 'pos' : 'neg'}">${sign(c.c24)}${fmt(c.c24)}%</td>
-        <td class="fx-chg ${c.c7  >= 0 ? 'pos' : 'neg'}">${sign(c.c7)}${fmt(c.c7)}%</td>
+        <td class="fx-chg ${c.c24 >= 0 ? 'pos' : 'neg'}">${sign(c.c24)}${c.c24.toFixed(2)}%</td>
+        <td class="fx-chg ${c.c7  >= 0 ? 'pos' : 'neg'}">${sign(c.c7)}${c.c7.toFixed(2)}%</td>
       </tr>`).join('');
   }
 
-  // Ritning av graf
-  renderChart(slice);
+  // Ritning av graf i vald valuta
+  renderChart(slice, cur);
 }
 
 function setEl(id, text, colorClass) {
@@ -889,12 +927,13 @@ function setEl(id, text, colorClass) {
   if (colorClass) el.className = el.className.replace(/\bpos\b|\bneg\b/g, '') + ' ' + colorClass;
 }
 
-function renderChart(slice) {
+function renderChart(slice, cur) {
+  cur = cur || CURRENCIES[activeCurrency] || CURRENCIES.SEK;
   const ctx = document.getElementById('uciChart');
   if (!ctx) return;
 
   const labels = slice.map(h => h.date);
-  const values = slice.map(h => h.rateSEK);
+  const values = slice.map(h => h[cur.rateKey] || h.rateSEK);
   const first  = values[0];
   const isUp   = values[values.length - 1] >= first;
   const color  = isUp ? '#1D6B4E' : '#BA7517';
@@ -933,7 +972,7 @@ function renderChart(slice) {
           bodyColor:       'rgba(255,255,255,0.7)',
           callbacks: {
             title: items => items[0].label,
-            label: item => ` ${item.raw.toFixed(2)} SEK`,
+            label: item => ` ${item.raw.toFixed(cur.decimals)} ${cur.label}`,
           },
         },
       },
@@ -952,7 +991,7 @@ function renderChart(slice) {
         y: {
           position: 'right',
           grid:  { color: 'rgba(0,0,0,0.05)' },
-          ticks: { color: '#888780', callback: v => v.toFixed(1) + ' SEK' },
+          ticks: { color: '#888780', callback: v => v.toFixed(cur.decimals) + ' ' + cur.label },
           border: { display: false },
         },
       },

@@ -292,16 +292,28 @@
         <div class="dash-chart-header">
           <div class="dash-chart-price">
             <span class="dash-price-big" id="dashPriceBig">—</span>
-            <span class="dash-price-currency">SEK / UCI</span>
+            <span class="dash-price-currency" id="dashPriceCurrency">SEK / UCI</span>
             <span class="dash-price-change" id="dashPriceChange">—</span>
           </div>
-          <div class="dash-range-tabs">
-            <button class="range-tab active" data-days="7">1V</button>
-            <button class="range-tab" data-days="30">1M</button>
-            <button class="range-tab" data-days="90">3M</button>
-            <button class="range-tab" data-days="180">6M</button>
-            <button class="range-tab" data-days="0">ÅTD</button>
-            <button class="range-tab" data-days="-1">ALLT</button>
+          <div class="dash-chart-controls">
+            <select id="dashCurrencySelect" class="dash-currency-select" onchange="onDashCurrencyChange()">
+              <option value="SEK" selected>🇸🇪 SEK</option>
+              <option value="EUR">🇪🇺 EUR</option>
+              <option value="USD">🇺🇸 USD</option>
+              <option value="GBP">🇬🇧 GBP</option>
+              <option value="NOK">🇳🇴 NOK</option>
+              <option value="DKK">🇩🇰 DKK</option>
+              <option value="CHF">🇨🇭 CHF</option>
+              <option value="JPY">🇯🇵 JPY</option>
+            </select>
+            <div class="dash-range-tabs">
+              <button class="range-tab active" data-days="7">1V</button>
+              <button class="range-tab" data-days="30">1M</button>
+              <button class="range-tab" data-days="90">3M</button>
+              <button class="range-tab" data-days="180">6M</button>
+              <button class="range-tab" data-days="0">ÅTD</button>
+              <button class="range-tab" data-days="-1">ALLT</button>
+            </div>
           </div>
         </div>
         <div class="dash-chart-wrap">

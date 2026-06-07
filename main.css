@@ -1270,6 +1270,25 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 .dash-price-change.pos { color: var(--green); }
 .dash-price-change.neg { color: var(--amber); }
 
+/* Valuta-dropdown + range-tabs i rad */
+.dash-chart-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+
+.dash-currency-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.3rem 2rem 0.3rem 0.7rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 0.55rem center;
+  background-size: 8px;
+  font-size: 0.8rem; font-weight: 700;
+  color: var(--gray-900);
+  cursor: pointer;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.dash-currency-select:hover  { border-color: var(--green); }
+.dash-currency-select:focus  { outline: none; border-color: var(--green); box-shadow: 0 0 0 2px rgba(29,107,78,0.15); }
+
 .dash-range-tabs { display: flex; gap: 0.25rem; }
 .range-tab {
   padding: 0.3rem 0.65rem; border-radius: var(--radius-sm);
@@ -1280,6 +1299,10 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .range-tab:hover { border-color: var(--green); color: var(--green); }
 .range-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* Aktiv valutarad i FX-tabell */
+.fx-row-active { background: #f0f7f3; font-weight: 700; }
+.fx-row-active .fx-pair { color: var(--green); }
 
 .dash-chart-wrap { position: relative; height: 280px; }
 .dash-chart-footer {
