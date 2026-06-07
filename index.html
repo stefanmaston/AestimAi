@@ -58,12 +58,32 @@
       </div>
       <button class="btn-login" id="btnLogin">Logga in med AE ID</button>
 
-      <!-- Språkknapp -->
-      <button class="btn-lang" id="btnLang" onclick="toggleLangMenu()" title="Välj språk">
-        🌐 <span id="btnLangLabel">Välj språk</span>
-      </button>
-      <div class="lang-menu hidden" id="langMenu">
-        <div id="google_translate_element"></div>
+      <!-- Språkväljare -->
+      <div class="lang-wrap">
+        <button class="btn-lang" id="btnLang" onclick="toggleLangMenu(event)" title="Välj språk">
+          <span id="btnLangFlag">🌐</span>
+          <span id="btnLangLabel">Välj språk</span>
+          <span class="lang-arrow">▾</span>
+        </button>
+        <div class="lang-menu" id="langMenu">
+          <button class="lang-opt" onclick="setLang('en','🇬🇧','English')">🇬🇧 English</button>
+          <button class="lang-opt" onclick="setLang('no','🇳🇴','Norsk')">🇳🇴 Norsk</button>
+          <button class="lang-opt" onclick="setLang('da','🇩🇰','Dansk')">🇩🇰 Dansk</button>
+          <button class="lang-opt" onclick="setLang('fi','🇫🇮','Suomi')">🇫🇮 Suomi</button>
+          <button class="lang-opt" onclick="setLang('de','🇩🇪','Deutsch')">🇩🇪 Deutsch</button>
+          <button class="lang-opt" onclick="setLang('fr','🇫🇷','Français')">🇫🇷 Français</button>
+          <button class="lang-opt" onclick="setLang('es','🇪🇸','Español')">🇪🇸 Español</button>
+          <button class="lang-opt" onclick="setLang('it','🇮🇹','Italiano')">🇮🇹 Italiano</button>
+          <button class="lang-opt" onclick="setLang('nl','🇳🇱','Nederlands')">🇳🇱 Nederlands</button>
+          <button class="lang-opt" onclick="setLang('pl','🇵🇱','Polski')">🇵🇱 Polski</button>
+          <button class="lang-opt" onclick="setLang('ar','🇸🇦','العربية')">🇸🇦 العربية</button>
+          <button class="lang-opt" onclick="setLang('zh-CN','🇨🇳','中文')">🇨🇳 中文</button>
+          <button class="lang-opt" onclick="setLang('ja','🇯🇵','日本語')">🇯🇵 日本語</button>
+          <button class="lang-opt" onclick="setLang('ko','🇰🇷','한국어')">🇰🇷 한국어</button>
+          <button class="lang-opt" onclick="setLang('ru','🇷🇺','Русский')">🇷🇺 Русский</button>
+          <hr class="lang-divider">
+          <button class="lang-opt lang-opt--reset" onclick="setLang('sv','🌐','Välj språk')">↩ Svenska (original)</button>
+        </div>
       </div>
 
       <!-- Wallet-widget -->
@@ -1203,30 +1223,32 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
   <script type="module" src="wallet-ui.js"></script>
-  <!-- Google Translate -->
+  <!-- Språkväljare via Google Translate cookie -->
   <script>
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'sv',
-        includedLanguages: 'en,no,da,fi,de,fr,es,it,nl,pl,pt,ar,zh-CN,ja,ko,ru,uk',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-        autoDisplay: false,
-      }, 'google_translate_element');
+    function toggleLangMenu(e) {
+      e.stopPropagation();
+      document.getElementById('langMenu').classList.toggle('lang-menu--open');
     }
-    function toggleLangMenu() {
-      const menu = document.getElementById('langMenu');
-      menu.classList.toggle('hidden');
-    }
-    // Stäng menyn vid klick utanför
-    document.addEventListener('click', e => {
-      const btn  = document.getElementById('btnLang');
-      const menu = document.getElementById('langMenu');
-      if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.add('hidden');
+    function setLang(code, flag, label) {
+      // Sätt Google Translate-cookie och ladda om
+      document.cookie = 'googtrans=/sv/' + code + '; path=/; domain=' + location.hostname;
+      document.cookie = 'googtrans=/sv/' + code + '; path=/';
+      document.getElementById('btnLangFlag').textContent  = flag;
+      document.getElementById('btnLangLabel').textContent = label;
+      document.getElementById('langMenu').classList.remove('lang-menu--open');
+      if (code === 'sv') {
+        // Återställ — ta bort cookie och ladda om
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
       }
+      location.reload();
+    }
+    document.addEventListener('click', () => {
+      document.getElementById('langMenu')?.classList.remove('lang-menu--open');
     });
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+  <script>function googleTranslateElementInit(){}</script>
 
   <!-- Aktivera AdSense-annonser -->
   <script>

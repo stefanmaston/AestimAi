@@ -1466,14 +1466,14 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   .idcoop-history { grid-column: 1; }
 }
 
-/* ===== GOOGLE TRANSLATE / SPRÅKKNAPP ===== */
+/* ===== SPRÅKVÄLJARE ===== */
 
-/* Dölj Googles topbar-banner */
-.goog-te-banner-frame,
-.skiptranslate { display: none !important; }
+/* Dölj Googles topbar om den dyker upp */
+.goog-te-banner-frame, .skiptranslate { display: none !important; }
 body { top: 0 !important; }
 
-/* Språkknapp — samma stil som btn-login */
+.lang-wrap { position: relative; }
+
 .btn-lang {
   width: 100%;
   padding: 0.55rem 1rem;
@@ -1496,41 +1496,37 @@ body { top: 0 !important; }
   color: var(--white);
   border-color: rgba(255,255,255,0.35);
 }
+.lang-arrow { margin-left: auto; font-size: 0.7rem; opacity: 0.5; }
 
-/* Dropdown-panel */
 .lang-menu {
-  background: #1e2820;
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0; right: 0;
+  background: #1a2318;
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+  z-index: 500;
+  max-height: 320px;
+  overflow-y: auto;
 }
-.lang-menu.hidden { display: none; }
+.lang-menu--open { display: block !important; }
 
-/* Google Translate select inuti panelen */
-.lang-menu .goog-te-gadget {
-  font-size: 0 !important;
-  color: transparent !important;
-}
-.lang-menu .goog-te-gadget a,
-.lang-menu .goog-te-gadget span { display: none !important; }
-
-.lang-menu select,
-#google_translate_element select {
+.lang-opt {
   width: 100%;
-  padding: 0.55rem 2rem 0.55rem 0.75rem;
-  background: transparent;
+  padding: 0.5rem 0.9rem;
+  background: none;
   border: none;
-  color: rgba(255,255,255,0.85);
-  font-size: 0.83rem;
+  color: rgba(255,255,255,0.75);
+  font-size: 0.82rem;
   font-family: inherit;
+  text-align: left;
   cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.4)'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.6rem center;
-  background-size: 8px;
+  transition: background var(--t);
+  display: block;
 }
-.lang-menu select:focus,
-#google_translate_element select:focus { outline: none; }
+.lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.lang-opt--reset { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+.lang-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 0.2rem 0; }
