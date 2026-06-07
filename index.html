@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="main.css">
+  <script src="i18n.js" defer></script>
   <!-- Google AdSense — byt ut ca=pub-XXXXXXXXXXXXXXXX mot ditt Publisher-ID -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 </head>
@@ -23,40 +24,43 @@
     <nav class="sidebar-nav">
       <button class="nav-item active" data-module="uci">
         <span class="nav-icon">○</span>
-        <span class="nav-label">UCI Värdering</span>
-        <span class="nav-badge free">Gratis</span>
+        <span class="nav-label" data-i18n="nav.uci">UCI Värdering</span>
+        <span class="nav-badge free" data-i18n="badge.free">Gratis</span>
       </button>
       <button class="nav-item" data-module="dashboard">
         <span class="nav-icon">▲</span>
-        <span class="nav-label">UCI Marknadsdata</span>
-        <span class="nav-badge free">Live</span>
+        <span class="nav-label" data-i18n="nav.dashboard">UCI Marknadsdata</span>
+        <span class="nav-badge free" data-i18n="badge.live">Live</span>
       </button>
       <button class="nav-item" data-module="market">
         <span class="nav-icon">⇄</span>
-        <span class="nav-label">UCI Bytesmarknad</span>
+        <span class="nav-label" data-i18n="nav.market">UCI Bytesmarknad</span>
       </button>
       <button class="nav-item" data-module="pro">
         <span class="nav-icon">▣</span>
-        <span class="nav-label">AestimAi Pro</span>
+        <span class="nav-label" data-i18n="nav.pro">AestimAi Pro</span>
         <span class="nav-badge pro">Pro</span>
       </button>
       <button class="nav-item" data-module="idcoop">
         <span class="nav-icon">⊙</span>
-        <span class="nav-label">AE ID barter or pay</span>
+        <span class="nav-label" data-i18n="nav.idcoop">AE ID barter or pay</span>
       </button>
       <button class="nav-item" data-module="news">
         <span class="nav-icon">◉</span>
-        <span class="nav-label">Nyheter</span>
-        <span class="nav-badge free">Nytt</span>
+        <span class="nav-label" data-i18n="nav.news">Nyheter</span>
+        <span class="nav-badge free" data-i18n="badge.new">Nytt</span>
       </button>
     </nav>
 
     <div class="sidebar-footer">
       <div class="idcoop-status" id="idcoopStatus">
         <span class="status-dot" id="statusDot"></span>
-        <span class="status-text" id="statusText">Ej inloggad</span>
+        <span class="status-text" id="statusText" data-i18n="auth.notLoggedIn">Ej inloggad</span>
       </div>
-      <button class="btn-login" id="btnLogin">Logga in med AE ID</button>
+      <button class="btn-login" id="btnLogin" data-i18n="auth.login">Logga in med AE ID</button>
+
+      <!-- Språkväljare -->
+      <div class="lang-selector-wrap" id="langSelectorWrap"></div>
 
       <!-- Wallet-widget -->
       <div class="wallet-widget" id="walletWidget">
@@ -92,8 +96,8 @@
     <!-- Modul 1: UCI Värdering -->
     <section class="module" id="module-uci">
       <div class="module-header">
-        <h1>UCI Värdering</h1>
-        <p class="module-desc">AI-driven värdering med respondentvalidering — ingen inloggning krävs</p>
+        <h1 data-i18n="uci.title">UCI Värdering</h1>
+        <p class="module-desc" data-i18n="uci.desc">AI-driven värdering med respondentvalidering — ingen inloggning krävs</p>
       </div>
 
       <!-- Inmatning -->
@@ -267,8 +271,8 @@
     <!-- ── UCI DASHBOARD ───────────────────────────────── -->
     <section class="module hidden" id="module-dashboard">
       <div class="module-header">
-        <h1>UCI Marknadsdata</h1>
-        <p class="module-desc">Universal Coin Index — kursutveckling, nyckeltal och valutaparitet</p>
+        <h1 data-i18n="dash.title">UCI Marknadsdata</h1>
+        <p class="module-desc" data-i18n="dash.desc">Universal Coin Index — kursutveckling, nyckeltal och valutaparitet</p>
       </div>
 
       <!-- Ticker-rad -->
@@ -415,8 +419,8 @@
 
     <section class="module hidden" id="module-market">
       <div class="module-header">
-        <h1>UCI Bytesmarknad</h1>
-        <p class="module-desc">Registrera och byt varor, tjänster och tillgångar via UCI</p>
+        <h1 data-i18n="market.title">UCI Bytesmarknad</h1>
+        <p class="module-desc" data-i18n="market.desc">Registrera och byt varor, tjänster och tillgångar via UCI</p>
       </div>
 
       <div class="market-tabs">

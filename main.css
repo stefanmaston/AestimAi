@@ -1465,3 +1465,61 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   .idcoop-grid { grid-template-columns: 1fr; }
   .idcoop-history { grid-column: 1; }
 }
+
+/* ===== SPRÅKVÄLJARE ===== */
+.lang-selector-wrap {
+  position: relative;
+  margin-top: 0.75rem;
+}
+
+.lang-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-sm);
+  color: rgba(255,255,255,0.75);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background var(--t), border-color var(--t);
+}
+.lang-btn:hover {
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.lang-dropdown {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0; right: 0;
+  background: #1e2820;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.35);
+  z-index: 200;
+}
+.lang-dropdown.open { display: block; }
+
+.lang-option {
+  width: 100%;
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.55rem 0.9rem;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--t);
+}
+.lang-option:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.lang-option.active { color: #fff; font-weight: 700; }
+.lang-option.active::after { content: '✓'; margin-left: auto; color: var(--green); font-size: 0.8rem; }
+
+.lang-flag { font-size: 1.1rem; line-height: 1; }
+.lang-name { font-size: 0.82rem; }
