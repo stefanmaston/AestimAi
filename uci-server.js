@@ -233,8 +233,8 @@ app.get('/api/uci/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`[AestimAi uci-server] http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[AestimAi uci-server] http://0.0.0.0:${PORT}`);
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key || key === 'din_claude_nyckel_här') {
     console.warn('[uci-server] OBS: Ingen Anthropic API-nyckel konfigurerad i .env');

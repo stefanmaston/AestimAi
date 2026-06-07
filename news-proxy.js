@@ -105,8 +105,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`[AestimAi news-proxy] http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[AestimAi news-proxy] http://0.0.0.0:${PORT}`);
   if (!KEY || KEY === 'din_nyckel_här') {
     console.warn('[news-proxy] OBS: Ingen API-nyckel konfigurerad i .env');
   }
