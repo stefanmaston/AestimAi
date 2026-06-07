@@ -45,7 +45,7 @@
       </button>
       <button class="nav-item" data-module="idcoop">
         <span class="nav-icon">⊙</span>
-        <span class="nav-label">IDCoop</span>
+        <span class="nav-label">AE ID barter or pay</span>
       </button>
       <button class="nav-item" data-module="news">
         <span class="nav-icon">◉</span>
@@ -59,7 +59,7 @@
         <span class="status-dot" id="statusDot"></span>
         <span class="status-text" id="statusText">Ej inloggad</span>
       </div>
-      <button class="btn-login" id="btnLogin">Logga in med IDCoop</button>
+      <button class="btn-login" id="btnLogin">Logga in med AE ID</button>
 
       <!-- Wallet-widget -->
       <div class="wallet-widget" id="walletWidget">
@@ -260,7 +260,7 @@
         <!-- CTA -->
         <div class="uci-cta" id="uciCta">
           <p>Vill du byta detta?</p>
-          <button class="btn-cta" data-module="idcoop">Registrera med IDCoop-kort →</button>
+          <button class="btn-cta" data-module="idcoop">Registrera med AE ID-kort →</button>
         </div>
 
       </div><!-- /uci-result -->
@@ -435,7 +435,7 @@
         <div class="filter-row">
           <label class="toggle-label">
             <input type="checkbox" id="filterVerified" checked>
-            Visa bara IDCoop-verifierade
+            Visa bara AE ID-verifierade
           </label>
         </div>
         <div class="market-grid" id="marketGrid">
@@ -447,7 +447,7 @@
               <p class="card-cat">Fordon</p>
               <div class="card-uci">
                 <span class="uci-badge">420 UCI</span>
-                <span class="card-verified">✓ IDCoop</span>
+                <span class="card-verified">✓ AE ID</span>
               </div>
               <p class="card-condition">Skick: 4 — Bra</p>
               <button class="btn-secondary btn-propose">Föreslå byte</button>
@@ -460,7 +460,7 @@
               <p class="card-cat">Elektronik</p>
               <div class="card-uci">
                 <span class="uci-badge">1 850 UCI</span>
-                <span class="card-verified">✓ IDCoop</span>
+                <span class="card-verified">✓ AE ID</span>
               </div>
               <p class="card-condition">Skick: 5 — Utmärkt</p>
               <button class="btn-secondary btn-propose">Föreslå byte</button>
@@ -473,7 +473,7 @@
               <p class="card-cat">Tjänster / Tid</p>
               <div class="card-uci">
                 <span class="uci-badge">600 UCI</span>
-                <span class="card-verified">✓ IDCoop</span>
+                <span class="card-verified">✓ AE ID</span>
               </div>
               <p class="card-condition">Skick: 5 — Utmärkt</p>
               <button class="btn-secondary btn-propose">Föreslå byte</button>
@@ -486,9 +486,9 @@
       <div class="tab-content hidden" id="tab-register">
         <div class="register-gate" id="registerGate">
           <div class="gate-icon">⊙</div>
-          <h2>IDCoop-kort krävs</h2>
-          <p>För att registrera objekt på bytesmarknaden behöver du ett IDCoop-kort (engångskostnad €15–25). Kortet är din identitet och din signatur.</p>
-          <button class="btn-primary" data-module="idcoop">Beställ IDCoop-kort</button>
+          <h2>AE ID-kort krävs</h2>
+          <p>För att registrera objekt på bytesmarknaden behöver du ett AE ID-kort (engångskostnad €15–25). Kortet är din identitet och din signatur.</p>
+          <button class="btn-primary" data-module="idcoop">Beställ AE ID-kort</button>
         </div>
         <form class="register-form hidden" id="registerForm">
           <h2>Registrera nytt objekt</h2>
@@ -551,9 +551,9 @@
             <input type="number" id="itemUciPrice" placeholder="UCI-värde">
           </div>
           <div class="signing-box">
-            <h3>IDCoop-signering</h3>
+            <h3>AE ID-signering</h3>
             <p>Genom att signera bekräftar du kryptografiskt att objektet är lagligt och korrekt beskrivet.</p>
-            <button type="button" class="btn-primary" id="btnSign">Signera med IDCoop-kort</button>
+            <button type="button" class="btn-primary" id="btnSign">Signera med AE ID-kort</button>
           </div>
         </form>
       </div>
@@ -563,7 +563,7 @@
         <div class="empty-state">
           <div class="empty-icon">⇄</div>
           <h2>Inga registrerade objekt</h2>
-          <p>Logga in med ditt IDCoop-kort och registrera ditt första objekt för byte.</p>
+          <p>Logga in med ditt AE ID-kort och registrera ditt första objekt för byte.</p>
           <button class="btn-primary" data-tab="register">Registrera objekt</button>
         </div>
       </div>
@@ -583,7 +583,7 @@
         <ul class="gate-features">
           <li>✓ Fastighetsvärdering med AestimAi-motor</li>
           <li>✓ Energitillgångsvärdering (solceller, CHP2X, batteri)</li>
-          <li>✓ Investerarrapport — PDF, IDCoop DS-signerad</li>
+          <li>✓ Investerarrapport — PDF, AE ID-signerad</li>
           <li>✓ Portföljvy med UCI-totalvärde</li>
           <li>✓ API-nycklar för systemintegration</li>
         </ul>
@@ -784,10 +784,10 @@
       </div>
     </section>
 
-    <!-- Modul 5: IDCoop -->
+    <!-- Modul 5: AE ID barter or pay -->
     <section class="module hidden" id="module-idcoop">
       <div class="module-header">
-        <h1>IDCoop</h1>
+        <h1>AE ID barter or pay</h1>
         <p class="module-desc">Korthantering, koopandel och identitet</p>
       </div>
 
@@ -796,7 +796,7 @@
         <div class="idcoop-unauth" id="idcoopUnauth">
           <div class="card-visual">
             <div class="id-card-mock">
-              <div class="card-logo">Æ IDCoop</div>
+              <div class="card-logo">Æ AE ID</div>
               <div class="card-chip">▪▪▪</div>
               <div class="card-nfc">))))</div>
               <div class="card-number">•••• •••• •••• ••••</div>
@@ -804,8 +804,8 @@
             </div>
           </div>
           <div class="idcoop-intro">
-            <h2>Ditt IDCoop-kort</h2>
-            <p>IDCoop-kortet är din identitet, din signatur och din nyckel till bytesmarknaden. Det är fysiskt, kryptografiskt och kooperativt ägt.</p>
+            <h2>Ditt AE ID-kort</h2>
+            <p>AE ID-kortet är din identitet, din signatur och din nyckel till bytesmarknaden. Det är fysiskt, kryptografiskt och kooperativt ägt.</p>
             <ul class="idcoop-benefits">
               <li>✓ WebAuthn-autentisering — ingen lösenord</li>
               <li>✓ Kryptografisk signering av alla byten</li>
@@ -814,7 +814,7 @@
               <li>✓ Engångskostnad €15–25</li>
             </ul>
             <div class="idcoop-actions">
-              <button class="btn-primary" id="btnOrderCard">Beställ IDCoop-kort</button>
+              <button class="btn-primary" id="btnOrderCard">Beställ AE ID-kort</button>
               <button class="btn-secondary" id="btnActivateCard">Aktivera befintligt kort</button>
             </div>
           </div>
@@ -832,7 +832,7 @@
               <div class="card-info-table">
                 <div class="info-row"><span>Koopandel</span><span id="coopShare">—</span></div>
                 <div class="info-row"><span>Rösträtt</span><span id="votingPower">—</span></div>
-                <div class="info-row"><span>Korttyp</span><span>IDCoop Standard</span></div>
+                <div class="info-row"><span>Korttyp</span><span>AE ID Standard</span></div>
               </div>
             </div>
             <div class="idcoop-web-of-trust">
@@ -975,7 +975,7 @@
               </div>
               <div class="news-card-body">
                 <span class="news-section-label coop">Kooperativ</span>
-                <h3 class="news-card-headline">IDCoop passerar 12 000 kortinnehavare i Norden — web-of-trust-nätverket växer organiskt</h3>
+                <h3 class="news-card-headline">AE ID barter or pay passerar 12 000 kortinnehavare i Norden — web-of-trust-nätverket växer organiskt</h3>
                 <p class="news-card-deck">Det kryptografiska kooperativet nådde kritisk massa i Sverige och Finland. Introduktionskvoterna är stängda i Stockholm.</p>
                 <div class="news-byline">
                   <span class="news-author">Maria Björk</span>
@@ -1143,7 +1143,7 @@
               <div class="ad-img-placeholder">🏠</div>
               <div class="ad-body">
                 <span class="ad-source">Re.lease Europa</span>
-                <p class="ad-text">Hyr ut din fastighet via tokeniserad nyttjanderätt — UCI-värderad och IDCoop-signerad. Redan 400+ objekt i Norden.</p>
+                <p class="ad-text">Hyr ut din fastighet via tokeniserad nyttjanderätt — UCI-värderad och AE ID-signerad. Redan 400+ objekt i Norden.</p>
                 <span class="ad-cta">Se objekt →</span>
               </div>
             </a>
@@ -1159,7 +1159,7 @@
               </li>
               <li>
                 <span class="mostread-num">2</span>
-                <span class="mostread-title">IDCoop passerar 12 000 kortinnehavare i Norden</span>
+                <span class="mostread-title">AE ID barter or pay passerar 12 000 kortinnehavare i Norden</span>
               </li>
               <li>
                 <span class="mostread-num">3</span>

@@ -50,10 +50,10 @@ function navigateTo(moduleId) {
 function updatePanelHelp(moduleId) {
   const helpTexts = {
     uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Commerce Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
-    market: '<h4>Om Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med IDCoop-kort.</p><p>Kräver IDCoop-kort (engångskostnad €15–25).</p>',
-    pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med IDCoop DS-certifikat.</p><p>€75/mån — kräver IDCoop-kort.</p>',
+    market: '<h4>Om Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
+    pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med AE ID barter or pay DS-certifikat.</p><p>€75/mån — kräver AE ID barter or pay-kort.</p>',
     eaas: '<h4>Om EaaS-kalkylatorn</h4><p>Simulera energiproduktion från solceller och CHP2X-elverk. Beräknar UCI-värdet på din energiproduktion och EaaS-avtalskostnaden.</p>',
-    idcoop: '<h4>Om IDCoop</h4><p>IDCoop-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
+    idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
     news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras dagligen.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
   };
   const el = document.getElementById('panelHelp');
@@ -432,18 +432,18 @@ function closeModal() {
   document.getElementById('modalOverlay').classList.add('hidden');
 }
 
-// ── Inloggning / IDCoop ─────────────────────────────
+// ── Inloggning / AE ID barter or pay ─────────────────────────────
 function setupAuth() {
   document.getElementById('btnLogin').addEventListener('click', simulateLogin);
   document.getElementById('btnActivateCard')?.addEventListener('click', simulateLogin);
   document.getElementById('btnOrderCard')?.addEventListener('click', () => {
-    showToast('Kortbeställning öppnas — WebAuthn-enrolment via IDCoop');
+    showToast('Kortbeställning öppnas — WebAuthn-enrolment via AE ID barter or pay');
   });
 }
 
 function simulateLogin() {
   // Simulerad WebAuthn-inloggning
-  showToast('Håll IDCoop-kortet mot NFC-läsaren…');
+  showToast('Håll AE ID barter or pay-kortet mot NFC-läsaren…');
   setTimeout(() => {
     state.isLoggedIn = true;
     updateAuthUI();
@@ -469,7 +469,7 @@ function updateAuthUI() {
   } else {
     dot.classList.remove('active');
     text.textContent = 'Ej inloggad';
-    btn.textContent  = 'Logga in med IDCoop';
+    btn.textContent  = 'Logga in med AE ID barter or pay';
     btn.onclick      = simulateLogin;
 
     document.getElementById('idcoopUnauth')?.classList.remove('hidden');
