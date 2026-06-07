@@ -19,3 +19,6 @@ USER aestimai
 
 # Port exponeras av docker-compose per service
 EXPOSE 3002 3004
+
+# Standard: starta uci-server (kan overridas av Railway start command)
+CMD ["node", "uci-server.js"]
