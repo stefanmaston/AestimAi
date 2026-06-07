@@ -255,10 +255,12 @@ textarea { resize: vertical; }
 .btn-cta:hover { background: #9e6312; }
 
 .btn-cta-amber {
+  display: inline-block;
   padding: 0.6rem 1.35rem;
   background: var(--amber); color: var(--white);
   border: none; border-radius: var(--radius-sm);
   cursor: pointer; font-weight: 600; font-size: 0.9rem;
+  text-decoration: none;
   transition: background var(--t);
 }
 .btn-cta-amber:hover { background: #9e6312; }
@@ -1120,6 +1122,24 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .news-ad-card:hover { border-color: var(--green); box-shadow: var(--shadow-sm); }
 
+/* Sunthetics-annons — pinnad featured */
+.ad-pinned { order: -99; }
+.news-ad-card--featured {
+  border: 2px solid var(--green);
+  box-shadow: 0 2px 8px rgba(29,107,78,0.12);
+}
+.news-ad-card--featured:hover {
+  box-shadow: 0 4px 16px rgba(29,107,78,0.22);
+  border-color: var(--amber);
+}
+.ad-img-sunthetics {
+  background: linear-gradient(135deg, #f0f7f3 0%, #fff8ec 100%);
+  padding: 14px 18px;
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--gray-200);
+}
+.ad-img-sunthetics svg { width: 180px; height: 48px; }
+
 .ad-img-placeholder {
   height: 80px;
   background: var(--gray-100);
@@ -1135,6 +1155,10 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .ad-text { font-size: 0.78rem; color: var(--gray-700); line-height: 1.5; margin-bottom: 0.4rem; }
 .ad-cta  { font-size: 0.75rem; font-weight: 700; color: var(--green); }
+
+/* Google AdSense-slots */
+.news-ad--adsense { min-height: 120px; }
+.adsense-sidebar { width: 100%; min-height: 120px; }
 
 /* Mest läst */
 .news-mostread { border-top: 3px solid var(--gray-900); padding-top: 0.75rem; }

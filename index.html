@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="main.css">
+  <!-- Google AdSense — byt ut ca=pub-XXXXXXXXXXXXXXXX mot ditt Publisher-ID -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -271,7 +273,7 @@
     <section class="module hidden" id="module-dashboard">
       <div class="module-header">
         <h2>UCI Marknadsdashboard</h2>
-        <p class="module-desc">Universal Commerce Index — kursutveckling, nyckeltal och valutaparitet</p>
+        <p class="module-desc">Universal Coin Index — kursutveckling, nyckeltal och valutaparitet</p>
       </div>
 
       <!-- Ticker-rad -->
@@ -378,7 +380,7 @@
         </div>
         <div class="dash-info-card">
           <h3 class="dash-section-title">Om UCI-indexet</h3>
-          <p class="dash-info-text">UCI (Universal Commerce Index) är ett valutaoberoende bytesindex som speglar det universella värdet av varor och tjänster oavsett geografisk marknad.</p>
+          <p class="dash-info-text">UCI (Universal Coin Index) är ett valutaoberoende bytesindex som speglar det universella värdet av varor och tjänster oavsett geografisk marknad.</p>
           <div class="dash-info-rows">
             <div class="dash-info-row"><span>Indextyp</span><span>Komposit bytesindex</span></div>
             <div class="dash-info-row"><span>Uppdatering</span><span>Dagligen (AI + respondenter)</span></div>
@@ -778,7 +780,7 @@
           </div>
           <div class="eaas-cta">
             <p>Intresserad av ett EaaS-avtal med Sunthetics?</p>
-            <button class="btn-cta-amber">Kontakta EaaS-avdelningen →</button>
+            <a href="https://www.sunthetics.se" target="_blank" rel="noopener sponsored" class="btn-cta-amber">Kontakta EaaS-avdelningen →</a>
           </div>
         </div>
       </div>
@@ -1123,30 +1125,48 @@
             </div>
           </div>
 
-          <!-- Annons 1 -->
-          <div class="news-ad">
-            <span class="ad-label">Annons</span>
-            <a class="news-ad-card" href="https://www.sunthetics.se" target="_blank" rel="noopener">
-              <div class="ad-img-placeholder">⚡</div>
+          <!-- Annons 1 — Sunthetics (pinnad, alltid överst) -->
+          <div class="news-ad ad-pinned">
+            <span class="ad-label">Samarbetspartner</span>
+            <a class="news-ad-card news-ad-card--featured" href="https://www.sunthetics.se" target="_blank" rel="noopener sponsored">
+              <div class="ad-img-sunthetics">
+                <!-- Sunthetics logotyp SVG -->
+                <svg viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg" aria-label="Sunthetics">
+                  <!-- Solsymbol -->
+                  <circle cx="30" cy="30" r="12" fill="#BA7517"/>
+                  <g stroke="#BA7517" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="30" y1="5"  x2="30" y2="13"/>
+                    <line x1="30" y1="47" x2="30" y2="55"/>
+                    <line x1="5"  y1="30" x2="13" y2="30"/>
+                    <line x1="47" y1="30" x2="55" y2="30"/>
+                    <line x1="13" y1="13" x2="18.5" y2="18.5"/>
+                    <line x1="41.5" y1="41.5" x2="47" y2="47"/>
+                    <line x1="47" y1="13" x2="41.5" y2="18.5"/>
+                    <line x1="18.5" y1="41.5" x2="13" y2="47"/>
+                  </g>
+                  <!-- Blixt/energi -->
+                  <polygon points="34,18 26,32 31,32 27,46 38,28 33,28" fill="#1D6B4E"/>
+                  <!-- Wordmark -->
+                  <text x="65" y="37" font-family="Georgia,serif" font-size="22" font-weight="700" fill="#1D6B4E" letter-spacing="-0.5">Sunthetics</text>
+                </svg>
+              </div>
               <div class="ad-body">
-                <span class="ad-source">Sunthetics AB</span>
+                <span class="ad-source">Sunthetics AB — Officiell partner</span>
                 <p class="ad-text">EaaS-avtal för din fastighet — solceller + CHP2X från €0,70/L. 7-årskontrakt med garanterad produktion.</p>
-                <span class="ad-cta">Läs mer →</span>
+                <span class="ad-cta">www.sunthetics.se →</span>
               </div>
             </a>
           </div>
 
-          <!-- Annons 2 -->
-          <div class="news-ad">
+          <!-- Annons 2 — Google AdSense (byt data-ad-slot mot ditt slot-ID) -->
+          <div class="news-ad news-ad--adsense">
             <span class="ad-label">Annons</span>
-            <a class="news-ad-card" href="https://re.lease" target="_blank" rel="noopener">
-              <div class="ad-img-placeholder">🏠</div>
-              <div class="ad-body">
-                <span class="ad-source">Re.lease Europa</span>
-                <p class="ad-text">Hyr ut din fastighet via tokeniserad nyttjanderätt — UCI-värderad och AE ID-signerad. Redan 400+ objekt i Norden.</p>
-                <span class="ad-cta">Se objekt →</span>
-              </div>
-            </a>
+            <ins class="adsbygoogle adsense-sidebar"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="1111111111"
+                 data-ad-format="rectangle"
+                 data-full-width-responsive="false"></ins>
           </div>
 
           <!-- Mest läst -->
@@ -1176,30 +1196,26 @@
             </ol>
           </div>
 
-          <!-- Annons 3 -->
-          <div class="news-ad">
+          <!-- Annons 3 — Google AdSense -->
+          <div class="news-ad news-ad--adsense">
             <span class="ad-label">Annons</span>
-            <a class="news-ad-card" href="https://www.circulareconomy.eu" target="_blank" rel="noopener">
-              <div class="ad-img-placeholder">♻️</div>
-              <div class="ad-body">
-                <span class="ad-source">Ellen MacArthur Foundation</span>
-                <p class="ad-text">Cirkulär ekonomi i praktiken — rapporter, verktyg och partnerprogram för europeiska företag 2026.</p>
-                <span class="ad-cta">Hämta rapport →</span>
-              </div>
-            </a>
+            <ins class="adsbygoogle adsense-sidebar"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="2222222222"
+                 data-ad-format="rectangle"
+                 data-full-width-responsive="false"></ins>
           </div>
 
-          <!-- Annons 4 -->
-          <div class="news-ad">
+          <!-- Annons 4 — Google AdSense -->
+          <div class="news-ad news-ad--adsense">
             <span class="ad-label">Annons</span>
-            <a class="news-ad-card" href="https://www.fido2.com" target="_blank" rel="noopener">
-              <div class="ad-img-placeholder">🔐</div>
-              <div class="ad-body">
-                <span class="ad-source">FIDO Alliance</span>
-                <p class="ad-text">Implementera lösenordsfri autentisering med FIDO2/WebAuthn — certifiering och teknisk vägledning för utvecklare.</p>
-                <span class="ad-cta">Certifiera dig →</span>
-              </div>
-            </a>
+            <ins class="adsbygoogle adsense-sidebar"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="3333333333"
+                 data-ad-format="rectangle"
+                 data-full-width-responsive="false"></ins>
           </div>
 
           <!-- Prenumerations-CTA -->
@@ -1235,7 +1251,7 @@
 
     <div class="panel-help" id="panelHelp">
       <h4>Om UCI-värdering</h4>
-      <p>UCI (Universal Commerce Index) är ett valuta-oberoende värderingsindex som mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata.</p>
+      <p>UCI (Universal Coin Index) är ett valuta-oberoende värderingsindex som mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata.</p>
       <p>Värderingen är gratis och kräver ingen inloggning.</p>
     </div>
 
@@ -1277,5 +1293,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
   <script type="module" src="wallet-ui.js"></script>
+  <!-- Aktivera AdSense-annonser -->
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
 </body>
 </html>
