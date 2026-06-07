@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+
+  # ── Nyhetsproxy (NewsAPI) ──────────────────────────
+  news-proxy:
+    build: .
+    command: node news-proxy.js
+    ports:
+      - "3002:3002"
+    env_file: .env
+    environment:
+      - NEWS_PORT=3002
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002/api/news?cat=all"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ── UCI-server (Claude AI + Bayesian) ─────────────
+  uci-server:
+    build: .
+    command: node uci-server.js
+    ports:
+      - "3004:3004"
+    env_file: .env
+    environment:
+      - API_PORT=3004
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3004/api/uci/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── UCI Index Updater (daglig blockchain-push) ─────
+  uci-updater:
+    build: .
+    command: node uci-index-updater.js
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - uci-server

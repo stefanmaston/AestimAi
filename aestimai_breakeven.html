@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>AestimAi Break-even Kalkylator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  h1 { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .subtitle { font-size: 0.82rem; color: #64748b; margin-bottom: 24px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card {
+    background: #1e2332;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2d3448;
+  }
+  .card h2 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 16px; }
+
+  .slider-row { margin-bottom: 14px; }
+  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .slider-label span { font-size: 0.85rem; color: #cbd5e1; }
+  .slider-label strong { font-size: 0.95rem; color: #7dd3fc; font-weight: 600; }
+  input[type=range] {
+    width: 100%; -webkit-appearance: none; appearance: none;
+    height: 5px; border-radius: 3px; background: #2d3448; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: #38bdf8; cursor: pointer;
+  }
+
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .metric { background: #131825; border-radius: 8px; padding: 14px; border: 1px solid #2d3448; }
+  .metric .label { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .metric .value { font-size: 1.25rem; font-weight: 700; }
+  .green { color: #4ade80; } .red { color: #f87171; } .yellow { color: #fbbf24; }
+  .blue { color: #38bdf8; } .purple { color: #c084fc; }
+
+  .status-bar { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-align: center; }
+  .status-loss { background: #2d1515; border: 1px solid #7f1d1d; color: #fca5a5; }
+  .status-break { background: #1a2a1a; border: 1px solid #14532d; color: #86efac; }
+  .status-profit { background: #162040; border: 1px solid #1e3a5f; color: #7dd3fc; }
+
+  canvas { width: 100% !important; margin-top: 8px; }
+  .full-width { grid-column: 1 / -1; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .note { font-size: 0.75rem; color: #475569; margin-top: 10px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h1>AestimAi / IDCoop — Break-even Kalkylator</h1>
+<p class="subtitle">AestimAi Tech AB · Månatlig ekonomi</p>
+
+<div class="grid">
+  <div class="card">
+    <h2>Intäktsparametrar</h2>
+    <div class="slider-row">
+      <div class="slider-label"><span>IDCoop-kort sålda / mån</span><strong id="v-kort">100</strong></div>
+      <input type="range" id="s-kort" min="0" max="2000" step="10" value="100">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Kortpris (€, engång)</span><strong id="v-kortpris">25</strong></div>
+      <input type="range" id="s-kortpris" min="10" max="100" step="5" value="25">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Pro-medlemmar (ackumulerat)</span><strong id="v-pro">100</strong></div>
+      <input type="range" id="s-pro" min="0" max="5000" step="25" value="100">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Pro-pris (€/mån)</span><strong id="v-propris">75</strong></div>
+      <input type="range" id="s-propris" min="25" max="200" step="5" value="75">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Månadsvis Pro-churn (%)</span><strong id="v-churn">3</strong></div>
+      <input type="range" id="s-churn" min="0" max="15" step="0.5" value="3">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Kostnadsprofil (€/mån)</h2>
+    <div class="slider-row">
+      <div class="slider-label"><span>Vercel + infrastruktur</span><strong id="v-vercel">500</strong></div>
+      <input type="range" id="s-vercel" min="100" max="5000" step="100" value="500">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Nyhets-API</span><strong id="v-news">150</strong></div>
+      <input type="range" id="s-news" min="0" max="1000" step="25" value="150">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Personal / underhåll</span><strong id="v-personal">4000</strong></div>
+      <input type="range" id="s-personal" min="0" max="30000" step="500" value="4000">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Juridik / compliance</span><strong id="v-juridik">500</strong></div>
+      <input type="range" id="s-juridik" min="0" max="5000" step="100" value="500">
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Kortproduktion (€/st)</span><strong id="v-kortprod">8</strong></div>
+      <input type="range" id="s-kortprod" min="3" max="20" step="1" value="8">
+    </div>
+  </div>
+
+  <div class="card full-width">
+    <h2>Månatligt resultat</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="label">Kortintäkt</div><div class="value blue" id="r-kortrev">€2,500</div></div>
+      <div class="metric"><div class="label">Pro-abonnemangsintäkt</div><div class="value purple" id="r-prorev">€7,500</div></div>
+      <div class="metric"><div class="label">Total intäkt</div><div class="value blue" id="r-totrev">€10,000</div></div>
+      <div class="metric"><div class="label">Total kostnad</div><div class="value red" id="r-totcost">€6,950</div></div>
+      <div class="metric"><div class="label">Stripe-avgift (2.9%)</div><div class="value yellow" id="r-stripe">€290</div></div>
+      <div class="metric"><div class="label">Rörelsemarginal</div><div class="value green" id="r-margin">28%</div></div>
+    </div>
+    <div class="status-bar status-profit" id="status-bar">✓ Lönsamt</div>
+  </div>
+
+  <div class="card full-width">
+    <h2>12-månaders projektion (Pro-tillväxt +15%/mån netto)</h2>
+    <canvas id="chart" height="180"></canvas>
+    <div class="row-3">
+      <div class="metric"><div class="label">Break-even Pro-medlemmar</div><div class="value yellow" id="r-be">—</div></div>
+      <div class="metric"><div class="label">ARR vid mån 12</div><div class="value green" id="r-arr">—</div></div>
+      <div class="metric"><div class="label">Ackumulerad vinst år 1</div><div class="value blue" id="r-cumprofit">—</div></div>
+    </div>
+    <p class="note">Projektionen antar konstant kortförsäljning och att Pro-basen växer 15% per månad (netto efter churn) från nuvarande nivå. Stripe-avgift 2.9% inkluderad i alla beräkningar.</p>
+  </div>
+</div>
+
+<script>
+const ids = ['kort','kortpris','pro','propris','churn','vercel','news','personal','juridik','kortprod'];
+ids.forEach(id => {
+  document.getElementById('s-'+id).addEventListener('input', function() {
+    document.getElementById('v-'+id).textContent = this.value;
+    recalc();
+  });
+});
+
+function fmt(n) {
+  if (Math.abs(n) >= 1000000) return '€' + (n/1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return '€' + Math.round(n).toLocaleString('sv-SE');
+  return '€' + Math.round(n);
+}
+
+function recalc() {
+  const kort = +document.getElementById('s-kort').value;
+  const kortpris = +document.getElementById('s-kortpris').value;
+  const pro = +document.getElementById('s-pro').value;
+  const propris = +document.getElementById('s-propris').value;
+  const churnPct = +document.getElementById('s-churn').value / 100;
+  const vercel = +document.getElementById('s-vercel').value;
+  const news = +document.getElementById('s-news').value;
+  const personal = +document.getElementById('s-personal').value;
+  const juridik = +document.getElementById('s-juridik').value;
+  const kortprod = +document.getElementById('s-kortprod').value;
+
+  const kortrev = kort * kortpris;
+  const prorev = pro * propris;
+  const totrev = kortrev + prorev;
+  const stripe = totrev * 0.029;
+  const kortcost = kort * kortprod;
+  const fixedCost = vercel + news + personal + juridik;
+  const totcost = fixedCost + kortcost + stripe;
+  const profit = totrev - totcost;
+  const margin = totrev > 0 ? (profit / totrev) * 100 : -100;
+
+  document.getElementById('r-kortrev').textContent = fmt(kortrev);
+  document.getElementById('r-prorev').textContent = fmt(prorev);
+  document.getElementById('r-totrev').textContent = fmt(totrev);
+  document.getElementById('r-totcost').textContent = fmt(totcost);
+  document.getElementById('r-stripe').textContent = fmt(stripe);
+  document.getElementById('r-margin').textContent = Math.round(margin) + '%';
+  document.getElementById('r-margin').className = 'value ' + (margin > 20 ? 'green' : margin > 0 ? 'yellow' : 'red');
+
+  const bar = document.getElementById('status-bar');
+  if (profit > 0) {
+    bar.className = 'status-bar status-profit';
+    bar.textContent = '✓ Lönsamt — ' + fmt(profit) + ' överskott per månad';
+  } else if (profit > -1000) {
+    bar.className = 'status-bar status-break';
+    bar.textContent = '≈ Nära break-even — ' + fmt(Math.abs(profit)) + ' från lönsamhet';
+  } else {
+    bar.className = 'status-bar status-loss';
+    bar.textContent = '✗ Förlust — ' + fmt(Math.abs(profit)) + ' underskott per månad';
+  }
+
+  const netProPrice = propris * (1 - 0.029);
+  const beMembers = Math.max(0, Math.ceil((fixedCost + kortcost) / netProPrice));
+  document.getElementById('r-be').textContent = beMembers + ' Pro-medl.';
+
+  const growthRate = 0.15;
+  const labels = [], revenues = [], costs = [], profits = [];
+  let proBase = pro, cumProfit = 0;
+  for (let m = 1; m <= 12; m++) {
+    proBase = proBase * (1 + growthRate) * (1 - churnPct);
+    const mKortRev = kort * kortpris;
+    const mProRev = proBase * propris;
+    const mTotRev = mKortRev + mProRev;
+    const mStripe = mTotRev * 0.029;
+    const mCost = fixedCost + (kort * kortprod) + mStripe;
+    const mProfit = mTotRev - mCost;
+    cumProfit += mProfit;
+    labels.push('M' + m);
+    revenues.push(Math.round(mTotRev));
+    costs.push(Math.round(mCost));
+    profits.push(Math.round(mProfit));
+  }
+
+  document.getElementById('r-arr').textContent = fmt(revenues[11] * 12);
+  document.getElementById('r-cumprofit').textContent = fmt(cumProfit);
+  document.getElementById('r-cumprofit').className = 'value ' + (cumProfit > 0 ? 'green' : 'red');
+
+  drawChart(labels, revenues, costs, profits);
+}
+
+function drawChart(labels, revenues, costs, profits) {
+  const canvas = document.getElementById('chart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 800;
+  const H = 180;
+  canvas.width = W * (window.devicePixelRatio || 1);
+  canvas.height = H * (window.devicePixelRatio || 1);
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 20, right: 16, bottom: 32, left: 60 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+
+  const allVals = [...revenues, ...costs, ...profits];
+  const maxV = Math.max(...allVals) * 1.12;
+  const minV = Math.min(0, Math.min(...profits)) * 1.12;
+  const range = maxV - minV || 1;
+
+  function xPos(i) { return pad.left + (i / (labels.length - 1)) * cw; }
+  function yPos(v) { return pad.top + ch - ((v - minV) / range) * ch; }
+
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (i / 4) * ch;
+    ctx.strokeStyle = '#2d3448'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
+    const val = maxV - (i / 4) * range;
+    ctx.fillStyle = '#475569'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(fmt(val), pad.left - 4, y + 4);
+  }
+
+  if (minV < 0) {
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+    const zy = yPos(0);
+    ctx.beginPath(); ctx.moveTo(pad.left, zy); ctx.lineTo(pad.left + cw, zy); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  profits.forEach((v, i) => {
+    const x = xPos(i);
+    const barW = Math.max(8, cw / labels.length * 0.45);
+    const zy = yPos(0); const vy = yPos(v);
+    ctx.fillStyle = v >= 0 ? 'rgba(74,222,128,0.25)' : 'rgba(248,113,113,0.25)';
+    ctx.fillRect(x - barW/2, Math.min(zy,vy), barW, Math.abs(zy-vy));
+  });
+
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5; ctx.beginPath();
+  revenues.forEach((v,i) => i===0 ? ctx.moveTo(xPos(i),yPos(v)) : ctx.lineTo(xPos(i),yPos(v)));
+  ctx.stroke();
+
+  ctx.strokeStyle = '#f87171'; ctx.lineWidth = 2; ctx.beginPath();
+  costs.forEach((v,i) => i===0 ? ctx.moveTo(xPos(i),yPos(v)) : ctx.lineTo(xPos(i),yPos(v)));
+  ctx.stroke();
+
+  ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  labels.forEach((l,i) => ctx.fillText(l, xPos(i), H - 8));
+
+  const legend = [['Intäkt','#38bdf8'],['Kostnad','#f87171'],['Rörelseresultat','rgba(74,222,128,0.6)']];
+  let lx = pad.left;
+  legend.forEach(([lbl, col]) => {
+    ctx.fillStyle = col; ctx.fillRect(lx, 4, 12, 8);
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(lbl, lx + 16, 12);
+    lx += ctx.measureText(lbl).width + 36;
+  });
+}
+
+recalc();
+window.addEventListener('resize', recalc);
+</script>
+</body>
+</html>

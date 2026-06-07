@@ -1,0 +1,17 @@
+# Miljövariabler — innehåller API-nycklar och privata nycklar
+.env
+.env.*
+
+# Node
+node_modules/
+
+# Blockchain build-artefakter
+blockchain/out/
+blockchain/cache/
+blockchain/lib/
+
+# Deployment-logg (innehåller kontraktsadress men ej nycklar — valfritt att committa)
+blockchain/update-log.json
+
+# macOS
+.DS_Store

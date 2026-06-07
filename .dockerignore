@@ -1,0 +1,26 @@
+# Frontend (serveras av Vercel, inte Docker)
+index.html
+main.css
+app.js
+wallet.js
+wallet-ui.js
+aestimai_breakeven.html
+
+# Känsliga filer
+.env
+.env.*
+
+# Verktyg och cache
+node_modules/
+.git/
+.gitignore
+*.log
+npm-debug.log*
+
+# Blockchain-verktyg (byggs lokalt)
+blockchain/out/
+blockchain/cache/
+blockchain/lib/
+
+# Docs
+*.md

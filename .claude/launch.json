@@ -1,0 +1,41 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aestimai-static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-p", "3001", "/Users/stefanlarsson-mastonstrale/Documents/Sunthetics/Websida/AestimAi"],
+      "port": 3001
+    },
+    {
+      "name": "aestimai-news-proxy",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/stefanlarsson-mastonstrale/Documents/Sunthetics/Websida/AestimAi/news-proxy.js"],
+      "port": 3002
+    },
+    {
+      "name": "aestimai-uci-server",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/stefanlarsson-mastonstrale/Documents/Sunthetics/Websida/AestimAi/uci-server.js"],
+      "port": 3004
+    },
+    {
+      "name": "aestimai-frontend",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd /Users/stefanlarsson-mastonstrale/discovery-valuation-mvp && npm run dev"],
+      "port": 5173
+    },
+    {
+      "name": "aestimai-api",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd /Users/stefanlarsson-mastonstrale/discovery-valuation-mvp/server && npm run dev"],
+      "port": 4000
+    },
+    {
+      "name": "netmon",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd /Users/stefanlarsson-mastonstrale/Documents/netmon && python3 app.py"],
+      "port": 5000
+    }
+  ]
+}

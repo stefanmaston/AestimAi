@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AestimAi — Värdering & Bytesmarknad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-mark">Æ</span>
+      <span class="logo-text">AestimAi</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-module="uci">
+        <span class="nav-icon">○</span>
+        <span class="nav-label">UCI Värdering</span>
+        <span class="nav-badge free">Gratis</span>
+      </button>
+      <button class="nav-item" data-module="market">
+        <span class="nav-icon">⇄</span>
+        <span class="nav-label">Bytesmarknad</span>
+      </button>
+      <button class="nav-item" data-module="pro">
+        <span class="nav-icon">▣</span>
+        <span class="nav-label">AestimAi Pro</span>
+        <span class="nav-badge pro">Pro</span>
+      </button>
+      <button class="nav-item" data-module="eaas">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label">EaaS-kalkylator</span>
+        <span class="nav-badge free">Gratis</span>
+      </button>
+      <button class="nav-item" data-module="idcoop">
+        <span class="nav-icon">⊙</span>
+        <span class="nav-label">IDCoop</span>
+      </button>
+      <button class="nav-item" data-module="news">
+        <span class="nav-icon">◉</span>
+        <span class="nav-label">Nyheter</span>
+        <span class="nav-badge free">Nytt</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="idcoop-status" id="idcoopStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Ej inloggad</span>
+      </div>
+      <button class="btn-login" id="btnLogin">Logga in med IDCoop</button>
+
+      <!-- Wallet-widget -->
+      <div class="wallet-widget" id="walletWidget">
+        <div class="wallet-disconnected" id="walletDisconnected">
+          <button class="btn-wallet-connect" id="btnConnectWallet">
+            <span class="wallet-icon">⬡</span> Anslut MetaMask
+          </button>
+        </div>
+        <div class="wallet-connected hidden" id="walletConnected">
+          <div class="wallet-info">
+            <span class="wallet-dot" id="walletDot"></span>
+            <div class="wallet-details">
+              <span class="wallet-address" id="walletAddress">—</span>
+              <span class="wallet-network" id="walletNetwork">—</span>
+            </div>
+            <button class="wallet-disconnect-btn" id="btnDisconnectWallet" title="Koppla från">×</button>
+          </div>
+          <div class="wallet-balance-row">
+            <span class="wallet-balance-label">ETH</span>
+            <span class="wallet-balance" id="walletBalance">—</span>
+          </div>
+          <button class="btn-switch-network hidden" id="btnSwitchNetwork">
+            Byt till Base Sepolia
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== HUVUDYTA ===== -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Modul 1: UCI Värdering -->
+    <section class="module" id="module-uci">
+      <div class="module-header">
+        <h1>UCI Värdering</h1>
+        <p class="module-desc">AI-driven värdering med respondentvalidering — ingen inloggning krävs</p>
+      </div>
+
+      <!-- Inmatning -->
+      <div class="uci-search-area">
+        <div class="search-box">
+          <input type="text" id="uciInput" placeholder="Beskriv vad du vill värdera, ju mer detaljer desto bättre…" autocomplete="off">
+          <select id="uciCategory">
+            <option value="">Välj kategori</option>
+            <option value="Fastighet">Fastighet</option>
+            <option value="Fordon">Fordon</option>
+            <option value="Verktyg">Verktyg</option>
+            <option value="Elektronik">Elektronik</option>
+            <option value="Kläder">Kläder</option>
+            <option value="Möbler">Möbler</option>
+            <option value="Värdemetaller">Värdemetaller</option>
+            <option value="Tjänster / Tid">Tjänster / Tid</option>
+            <option value="Energiutrustning">Energiutrustning</option>
+            <option value="Tokeniserade tillgångar">Tokeniserade tillgångar</option>
+            <option value="Övrigt">Övrigt</option>
+          </select>
+          <button class="btn-primary" id="btnUciValue">
+            <span id="btnUciText">Värdera</span>
+          </button>
+        </div>
+        <div class="condition-row">
+          <label>Skick:</label>
+          <div class="condition-buttons">
+            <button class="cond-btn" data-cond="1">1 — Dåligt</button>
+            <button class="cond-btn" data-cond="2">2 — Slitet</button>
+            <button class="cond-btn active" data-cond="3">3 — OK</button>
+            <button class="cond-btn" data-cond="4">4 — Bra</button>
+            <button class="cond-btn" data-cond="5">5 — Utmärkt</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Laddning -->
+      <div class="uci-loading hidden" id="uciLoading">
+        <div class="uci-loading-inner">
+          <div class="uci-spinner"></div>
+          <p>AestimAi analyserar objektet…</p>
+        </div>
+      </div>
+
+      <!-- Resultat -->
+      <div class="uci-result hidden" id="uciResult">
+
+        <!-- Huvud-resultat-kort -->
+        <div class="result-card">
+
+          <!-- Stor UCI-siffra + källa-badge -->
+          <div class="result-uci-header">
+            <div class="result-uci-value">
+              <div>
+                <span class="uci-label">UCI-värde</span>
+                <div class="uci-number-row">
+                  <span class="uci-number" id="uciValue">—</span>
+                  <span class="uci-unit">UCI</span>
+                </div>
+              </div>
+              <div class="uci-source-badge" id="uciSourceBadge">
+                <span class="badge-ai">✦ AI-estimat</span>
+              </div>
+            </div>
+            <div class="result-conversions">
+              <div class="conversion-item">
+                <span class="conv-label">SEK</span>
+                <span class="conv-value" id="convSEK">—</span>
+              </div>
+              <div class="conversion-item">
+                <span class="conv-label">EUR</span>
+                <span class="conv-value" id="convEUR">—</span>
+              </div>
+              <div class="conversion-item">
+                <span class="conv-label">USD</span>
+                <span class="conv-value" id="convUSD">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Konfidensintervall -->
+          <div class="result-confidence">
+            <div class="conf-meta">
+              <span class="conf-label">Konfidensintervall (90%)</span>
+              <span class="conf-pct" id="confPct">—</span>
+            </div>
+            <div class="conf-bar-wrap">
+              <div class="conf-bar" id="confBar"></div>
+            </div>
+            <span class="conf-range" id="confRange">—</span>
+          </div>
+
+          <!-- AI-analys -->
+          <div class="result-reasoning" id="resultReasoning">
+            <h4>AI-analys</h4>
+            <p id="reasoningText">—</p>
+            <div class="key-factors" id="keyFactors"></div>
+          </div>
+
+          <!-- Jämförelseobjekt -->
+          <div class="result-comparables" id="resultComparables">
+            <h4>Jämförelseobjekt</h4>
+            <div class="comparables-list" id="comparablesList"></div>
+          </div>
+
+          <!-- Avskrivningsnotering -->
+          <p class="depreciation-note" id="depreciationNote"></p>
+
+        </div><!-- /result-card -->
+
+        <!-- Survey-panel -->
+        <div class="survey-panel" id="surveyPanel">
+          <div class="survey-header">
+            <div>
+              <h3>Respondentvalidering</h3>
+              <p class="survey-desc" id="surveyQuestion">Vad är din bedömning av värdet?</p>
+            </div>
+            <div class="survey-stats">
+              <span class="survey-n" id="surveyN">0 svar</span>
+              <span class="survey-sig hidden" id="surveySig">✓ Statistiskt signifikant</span>
+            </div>
+          </div>
+
+          <div class="survey-slider-area">
+            <div class="slider-labels">
+              <span>Mycket lägre</span>
+              <span class="slider-anchor" id="sliderAnchor">—</span>
+              <span>Mycket högre</span>
+            </div>
+            <input type="range" id="surveySlider" min="1" max="100" value="50"
+                   class="survey-slider" oninput="updateSliderPreview()">
+            <div class="slider-preview">
+              <span>Ditt estimat:</span>
+              <strong id="sliderPreview">—</strong>
+              <span>UCI</span>
+            </div>
+          </div>
+
+          <div class="survey-actions">
+            <button class="btn-primary" id="btnSubmitVote">Skicka in bedömning</button>
+            <span class="survey-anon">Anonymt · ingen inloggning krävs</span>
+          </div>
+
+          <!-- Bayesian resultat efter röstning -->
+          <div class="bayesian-result hidden" id="bayesianResult">
+            <div class="bayesian-header">
+              <h4>Justerat värde efter respondenter</h4>
+              <span class="bayesian-badge">Bayesian uppdaterat</span>
+            </div>
+            <div class="bayesian-numbers">
+              <div class="bayesian-main">
+                <span class="bayesian-value" id="bayesValue">—</span>
+                <span class="bayesian-unit">UCI</span>
+              </div>
+              <div class="bayesian-range" id="bayesRange">—</div>
+            </div>
+            <div class="bayesian-meta" id="bayesMeta"></div>
+          </div>
+        </div><!-- /survey-panel -->
+
+        <!-- CTA -->
+        <div class="uci-cta" id="uciCta">
+          <p>Vill du byta detta?</p>
+          <button class="btn-cta" data-module="idcoop">Registrera med IDCoop-kort →</button>
+        </div>
+
+      </div><!-- /uci-result -->
+    </section>
+
+    <!-- Modul 2: Bytesmarknad -->
+    <section class="module hidden" id="module-market">
+      <div class="module-header">
+        <h1>Bytesmarknad</h1>
+        <p class="module-desc">Registrera och byt varor, tjänster och tillgångar via UCI</p>
+      </div>
+
+      <div class="market-tabs">
+        <button class="tab-btn active" data-tab="search">Sök & Byt</button>
+        <button class="tab-btn" data-tab="register">Registrera objekt</button>
+        <button class="tab-btn" data-tab="my-items">Mina objekt</button>
+      </div>
+
+      <!-- Sökvyn -->
+      <div class="tab-content" id="tab-search">
+        <div class="market-search-bar">
+          <input type="text" placeholder="Sök på kategori, nyckelord…" id="marketSearch">
+          <select id="marketCatFilter">
+            <option value="">Alla kategorier</option>
+            <option value="vardagssaker">Vardagssaker</option>
+            <option value="verktyg">Verktyg</option>
+            <option value="elektronik">Elektronik</option>
+            <option value="kläder">Kläder</option>
+            <option value="möbler">Möbler</option>
+            <option value="fordon">Fordon</option>
+            <option value="fastigheter">Småfastigheter / Nyttjanderätter</option>
+            <option value="metaller">Värdemetaller</option>
+            <option value="juveler">Juveler</option>
+            <option value="energi">Energiutrustning</option>
+            <option value="ip">Immateriella rättigheter</option>
+            <option value="tjänster">Tjänster / Tid</option>
+            <option value="tokeniserade">Tokeniserade tillgångar</option>
+          </select>
+          <div class="uci-range-filter">
+            <label>UCI-värde:</label>
+            <input type="number" id="uciMin" placeholder="Min">
+            <span>–</span>
+            <input type="number" id="uciMax" placeholder="Max">
+          </div>
+          <button class="btn-primary" id="btnMarketSearch">Sök</button>
+        </div>
+        <div class="filter-row">
+          <label class="toggle-label">
+            <input type="checkbox" id="filterVerified" checked>
+            Visa bara IDCoop-verifierade
+          </label>
+        </div>
+        <div class="market-grid" id="marketGrid">
+          <!-- Demo-objekt -->
+          <div class="market-card">
+            <div class="card-image placeholder-img">📷</div>
+            <div class="card-body">
+              <h3>Vintage cykel, 1970-tal</h3>
+              <p class="card-cat">Fordon</p>
+              <div class="card-uci">
+                <span class="uci-badge">420 UCI</span>
+                <span class="card-verified">✓ IDCoop</span>
+              </div>
+              <p class="card-condition">Skick: 4 — Bra</p>
+              <button class="btn-secondary btn-propose">Föreslå byte</button>
+            </div>
+          </div>
+          <div class="market-card">
+            <div class="card-image placeholder-img">📷</div>
+            <div class="card-body">
+              <h3>Professionell kamera, Canon EOS R5</h3>
+              <p class="card-cat">Elektronik</p>
+              <div class="card-uci">
+                <span class="uci-badge">1 850 UCI</span>
+                <span class="card-verified">✓ IDCoop</span>
+              </div>
+              <p class="card-condition">Skick: 5 — Utmärkt</p>
+              <button class="btn-secondary btn-propose">Föreslå byte</button>
+            </div>
+          </div>
+          <div class="market-card">
+            <div class="card-image placeholder-img">📷</div>
+            <div class="card-body">
+              <h3>Timmar webbutveckling (10h)</h3>
+              <p class="card-cat">Tjänster / Tid</p>
+              <div class="card-uci">
+                <span class="uci-badge">600 UCI</span>
+                <span class="card-verified">✓ IDCoop</span>
+              </div>
+              <p class="card-condition">Skick: 5 — Utmärkt</p>
+              <button class="btn-secondary btn-propose">Föreslå byte</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registrera objekt -->
+      <div class="tab-content hidden" id="tab-register">
+        <div class="register-gate" id="registerGate">
+          <div class="gate-icon">⊙</div>
+          <h2>IDCoop-kort krävs</h2>
+          <p>För att registrera objekt på bytesmarknaden behöver du ett IDCoop-kort (engångskostnad €15–25). Kortet är din identitet och din signatur.</p>
+          <button class="btn-primary" data-module="idcoop">Beställ IDCoop-kort</button>
+        </div>
+        <form class="register-form hidden" id="registerForm">
+          <h2>Registrera nytt objekt</h2>
+          <div class="form-group">
+            <label>Titel</label>
+            <input type="text" placeholder="Vad vill du byta?" id="itemTitle">
+          </div>
+          <div class="form-group">
+            <label>Beskrivning</label>
+            <textarea placeholder="Beskriv objektet noggrant…" id="itemDesc" rows="4"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Kategori</label>
+              <select id="itemCategory">
+                <option value="">Välj kategori…</option>
+                <option>Vardagssaker</option>
+                <option>Verktyg</option>
+                <option>Elektronik</option>
+                <option>Kläder</option>
+                <option>Möbler</option>
+                <option>Fordon</option>
+                <option>Småfastigheter / Nyttjanderätter</option>
+                <option>Värdemetaller</option>
+                <option>Juveler</option>
+                <option>Energiutrustning</option>
+                <option>Immateriella rättigheter</option>
+                <option>Tjänster / Tid</option>
+                <option>Tokeniserade tillgångar</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Skick (1–5)</label>
+              <select id="itemCondition">
+                <option value="1">1 — Dåligt</option>
+                <option value="2">2 — Slitet</option>
+                <option value="3">3 — OK</option>
+                <option value="4">4 — Bra</option>
+                <option value="5">5 — Utmärkt</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Foton (upp till 8)</label>
+            <div class="photo-upload-grid" id="photoGrid">
+              <div class="photo-slot add-photo" id="addPhotoBtn">
+                <span>+</span>
+                <input type="file" accept="image/*" multiple id="photoInput" hidden>
+              </div>
+            </div>
+          </div>
+          <div class="uci-auto-box" id="uciAutoBox">
+            <span class="uci-auto-label">AestimAi föreslår:</span>
+            <span class="uci-auto-value" id="uciAutoValue">—</span>
+            <span class="uci-auto-unit">UCI</span>
+            <button type="button" class="btn-text" id="btnAdjustUci">Justera</button>
+          </div>
+          <div class="form-group hidden" id="uciAdjustGroup">
+            <label>Ditt UCI-pris</label>
+            <input type="number" id="itemUciPrice" placeholder="UCI-värde">
+          </div>
+          <div class="signing-box">
+            <h3>IDCoop-signering</h3>
+            <p>Genom att signera bekräftar du kryptografiskt att objektet är lagligt och korrekt beskrivet.</p>
+            <button type="button" class="btn-primary" id="btnSign">Signera med IDCoop-kort</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Mina objekt -->
+      <div class="tab-content hidden" id="tab-my-items">
+        <div class="empty-state">
+          <div class="empty-icon">⇄</div>
+          <h2>Inga registrerade objekt</h2>
+          <p>Logga in med ditt IDCoop-kort och registrera ditt första objekt för byte.</p>
+          <button class="btn-primary" data-tab="register">Registrera objekt</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modul 3: AestimAi Pro -->
+    <section class="module hidden" id="module-pro">
+      <div class="module-header">
+        <h1>AestimAi Pro</h1>
+        <p class="module-desc">Fastighets- och energivärdering — investerarrapporter med UCI-index</p>
+      </div>
+
+      <div class="pro-gate" id="proGate">
+        <div class="gate-icon">▣</div>
+        <h2>AestimAi Pro — €75/mån</h2>
+        <p>Professionell värdering för fastigheter, energitillgångar och portföljer. Exportera kryptografiskt signerade investerarrapporter med UCI-index.</p>
+        <ul class="gate-features">
+          <li>✓ Fastighetsvärdering med AestimAi-motor</li>
+          <li>✓ Energitillgångsvärdering (solceller, CHP2X, batteri)</li>
+          <li>✓ Investerarrapport — PDF, IDCoop DS-signerad</li>
+          <li>✓ Portföljvy med UCI-totalvärde</li>
+          <li>✓ API-nycklar för systemintegration</li>
+        </ul>
+        <button class="btn-primary" data-module="idcoop">Aktivera Pro-prenumeration</button>
+      </div>
+
+      <div class="pro-content hidden" id="proContent">
+        <div class="pro-tabs">
+          <button class="tab-btn active" data-pro-tab="property">Fastighet</button>
+          <button class="tab-btn" data-pro-tab="energy">Energitillgång</button>
+          <button class="tab-btn" data-pro-tab="portfolio">Portfölj</button>
+          <button class="tab-btn" data-pro-tab="api">API-nycklar</button>
+        </div>
+
+        <div class="pro-tab-content" id="pro-tab-property">
+          <h2>Fastighetsvärdering</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Adress</label>
+              <input type="text" placeholder="Gatuadress, postnummer, ort">
+            </div>
+            <div class="form-group">
+              <label>Fastighetstyp</label>
+              <select>
+                <option>Villa</option>
+                <option>Bostadsrätt</option>
+                <option>Kommersiell fastighet</option>
+                <option>Industrifastighet</option>
+                <option>Jordbruksfastighet</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Area (m²)</label>
+              <input type="number" placeholder="m²">
+            </div>
+            <div class="form-group">
+              <label>Energiprestanda (kWh/m²/år)</label>
+              <input type="number" placeholder="kWh/m²/år">
+            </div>
+            <div class="form-group">
+              <label>Skick</label>
+              <select>
+                <option value="5">5 — Nyskick</option>
+                <option value="4">4 — Bra</option>
+                <option value="3">3 — OK</option>
+                <option value="2">2 — Renoveringsbehov</option>
+                <option value="1">1 — Dåligt skick</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary">Generera värdering</button>
+        </div>
+
+        <div class="pro-tab-content hidden" id="pro-tab-energy">
+          <h2>Energitillgångsvärdering</h2>
+          <p class="form-hint">Värdera solcellsanläggning, CHP2X-elverk eller batterilager i UCI.</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Typ av anläggning</label>
+              <select>
+                <option>Solcellsanläggning</option>
+                <option>CHP2X-elverk</option>
+                <option>Batterilager</option>
+                <option>Kombinerad anläggning</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Installerad effekt (kWp / kWe)</label>
+              <input type="number" placeholder="kWp eller kWe">
+            </div>
+          </div>
+          <button class="btn-primary">Generera energivärdering</button>
+        </div>
+
+        <div class="pro-tab-content hidden" id="pro-tab-portfolio">
+          <div class="empty-state">
+            <div class="empty-icon">▣</div>
+            <h2>Portföljen är tom</h2>
+            <p>Värderingar du genomför sparas här automatiskt.</p>
+          </div>
+        </div>
+
+        <div class="pro-tab-content hidden" id="pro-tab-api">
+          <h2>API-nycklar</h2>
+          <p>Integrera AestimAi i dina egna system med REST API.</p>
+          <div class="api-key-box">
+            <label>Din API-nyckel</label>
+            <div class="api-key-row">
+              <input type="password" value="aestim_sk_••••••••••••••••" readonly id="apiKeyField">
+              <button class="btn-secondary" id="btnRevealKey">Visa</button>
+              <button class="btn-secondary" id="btnCopyKey">Kopiera</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modul 4: EaaS-kalkylator -->
+    <section class="module hidden" id="module-eaas">
+      <div class="module-header">
+        <h1>EaaS-kalkylator</h1>
+        <p class="module-desc">Energisimulering och CHP2X-dimensionering — gratis för alla</p>
+      </div>
+
+      <div class="eaas-layout">
+        <div class="eaas-form">
+          <h2>Systemkonfiguration</h2>
+
+          <div class="form-group">
+            <label>Solcellstak — installerad effekt (kWp)</label>
+            <input type="range" min="0" max="500" value="50" id="solarKwp" oninput="updateEaasCalc()">
+            <div class="range-labels">
+              <span>0 kWp</span>
+              <span class="range-val" id="solarVal">50 kWp</span>
+              <span>500 kWp</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>CHP2X-genset storlek</label>
+            <select id="chpSize" onchange="updateEaasCalc()">
+              <option value="5">S-5 (5 kWe)</option>
+              <option value="20">S-20 (20 kWe)</option>
+              <option value="50">S-50 (50 kWe)</option>
+              <option value="100" selected>S-100 (100 kWe)</option>
+              <option value="250">S-250 (250 kWe)</option>
+              <option value="500">S-500 (500 kWe)</option>
+              <option value="1000">S-1000 (1000 kWe)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Drifttimmar CHP2X (h/år)</label>
+            <input type="range" min="1000" max="1500" value="1250" id="chpHours" oninput="updateEaasCalc()">
+            <div class="range-labels">
+              <span>1 000 h</span>
+              <span class="range-val" id="chpHoursVal">1 250 h</span>
+              <span>1 500 h</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Bränslepris (€/L)</label>
+            <input type="number" value="0.70" step="0.01" id="fuelPrice" oninput="updateEaasCalc()">
+          </div>
+
+          <div class="form-group">
+            <label>Avtalsperiod (år)</label>
+            <select id="contractYears" onchange="updateEaasCalc()">
+              <option value="5">5 år</option>
+              <option value="7" selected>7 år (standard)</option>
+              <option value="10">10 år</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="eaas-results" id="eaasResults">
+          <h2>Beräkningsresultat</h2>
+          <div class="result-grid">
+            <div class="result-tile">
+              <span class="tile-label">Solproduktion/år</span>
+              <span class="tile-value" id="solarProd">—</span>
+              <span class="tile-unit">kWh</span>
+            </div>
+            <div class="result-tile">
+              <span class="tile-label">CHP2X-produktion/år</span>
+              <span class="tile-value" id="chpProd">—</span>
+              <span class="tile-unit">kWh</span>
+            </div>
+            <div class="result-tile highlight">
+              <span class="tile-label">Total energiproduktion</span>
+              <span class="tile-value" id="totalProd">—</span>
+              <span class="tile-unit">kWh/år</span>
+            </div>
+            <div class="result-tile uci-tile">
+              <span class="tile-label">UCI-värde energiproduktion</span>
+              <span class="tile-value" id="energyUci">—</span>
+              <span class="tile-unit">UCI/år</span>
+            </div>
+            <div class="result-tile">
+              <span class="tile-label">Bränslekostnad/år</span>
+              <span class="tile-value" id="fuelCost">—</span>
+              <span class="tile-unit">EUR/år</span>
+            </div>
+            <div class="result-tile">
+              <span class="tile-label">EaaS-avtalkostnad (tot)</span>
+              <span class="tile-value" id="eaasTotal">—</span>
+              <span class="tile-unit">EUR</span>
+            </div>
+          </div>
+          <div class="eaas-cta">
+            <p>Intresserad av ett EaaS-avtal med Sunthetics?</p>
+            <button class="btn-cta-amber">Kontakta EaaS-avdelningen →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modul 5: IDCoop -->
+    <section class="module hidden" id="module-idcoop">
+      <div class="module-header">
+        <h1>IDCoop</h1>
+        <p class="module-desc">Korthantering, koopandel och identitet</p>
+      </div>
+
+      <div class="idcoop-layout">
+        <!-- Ej inloggad -->
+        <div class="idcoop-unauth" id="idcoopUnauth">
+          <div class="card-visual">
+            <div class="id-card-mock">
+              <div class="card-logo">Æ IDCoop</div>
+              <div class="card-chip">▪▪▪</div>
+              <div class="card-nfc">))))</div>
+              <div class="card-number">•••• •••• •••• ••••</div>
+              <div class="card-name">DITT NAMN</div>
+            </div>
+          </div>
+          <div class="idcoop-intro">
+            <h2>Ditt IDCoop-kort</h2>
+            <p>IDCoop-kortet är din identitet, din signatur och din nyckel till bytesmarknaden. Det är fysiskt, kryptografiskt och kooperativt ägt.</p>
+            <ul class="idcoop-benefits">
+              <li>✓ WebAuthn-autentisering — ingen lösenord</li>
+              <li>✓ Kryptografisk signering av alla byten</li>
+              <li>✓ Offline-kapacitet med OTP-matris</li>
+              <li>✓ Koopandel och rösträtt</li>
+              <li>✓ Engångskostnad €15–25</li>
+            </ul>
+            <div class="idcoop-actions">
+              <button class="btn-primary" id="btnOrderCard">Beställ IDCoop-kort</button>
+              <button class="btn-secondary" id="btnActivateCard">Aktivera befintligt kort</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inloggad (dold som standard) -->
+        <div class="idcoop-auth hidden" id="idcoopAuth">
+          <div class="idcoop-grid">
+            <div class="idcoop-card-status">
+              <h2>Kortstatus</h2>
+              <div class="card-status-row">
+                <span class="status-dot active"></span>
+                <span>Aktivt kort — WebAuthn registrerat</span>
+              </div>
+              <div class="card-info-table">
+                <div class="info-row"><span>Koopandel</span><span id="coopShare">—</span></div>
+                <div class="info-row"><span>Rösträtt</span><span id="votingPower">—</span></div>
+                <div class="info-row"><span>Korttyp</span><span>IDCoop Standard</span></div>
+              </div>
+            </div>
+            <div class="idcoop-web-of-trust">
+              <h2>Web-of-Trust</h2>
+              <p>Introducera en ny medlem i kooperativet.</p>
+              <button class="btn-secondary">Generera signeringslänk</button>
+            </div>
+            <div class="idcoop-otp">
+              <h2>OTP-matris</h2>
+              <p>Engångskoder för offline-autentisering finns på kortbaksidan.</p>
+              <button class="btn-secondary">Hantera OTP-koder</button>
+            </div>
+            <div class="idcoop-history">
+              <h2>Kontohistorik</h2>
+              <div class="history-list" id="historyList">
+                <div class="history-empty">Ingen historik ännu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- On-chain UCI-panel (syns alltid) -->
+      <div class="onchain-panel" id="onchainPanel">
+        <div class="onchain-header">
+          <span class="onchain-icon">⬡</span>
+          <div>
+            <h3>UCI-index on-chain</h3>
+            <p class="onchain-sub">Base Sepolia testnet</p>
+          </div>
+          <button class="btn-secondary btn-sm" id="btnRefreshChain">↻ Uppdatera</button>
+        </div>
+
+        <div class="onchain-no-wallet" id="onchainNoWallet">
+          <p>Anslut MetaMask i sidebaren för att se on-chain UCI-data.</p>
+        </div>
+
+        <div class="onchain-no-contract hidden" id="onchainNoContract">
+          <p>Kontraktet är inte deployd ännu. Kör <code>forge script Deploy.s.sol --broadcast</code> och ladda om.</p>
+        </div>
+
+        <div class="onchain-data hidden" id="onchainData">
+          <div class="onchain-grid">
+            <div class="onchain-tile">
+              <span class="onchain-label">UCI/SEK</span>
+              <span class="onchain-value" id="chainSEK">—</span>
+            </div>
+            <div class="onchain-tile">
+              <span class="onchain-label">UCI/EUR</span>
+              <span class="onchain-value" id="chainEUR">—</span>
+            </div>
+            <div class="onchain-tile">
+              <span class="onchain-label">UCI/USD</span>
+              <span class="onchain-value" id="chainUSD">—</span>
+            </div>
+            <div class="onchain-tile">
+              <span class="onchain-label">Uppdateringar</span>
+              <span class="onchain-value" id="chainUpdates">—</span>
+            </div>
+          </div>
+          <div class="onchain-meta">
+            <span id="chainTimestamp">—</span>
+            <a id="chainExplorerLink" href="#" target="_blank" rel="noopener" class="chain-link">Visa på Basescan →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modul 6: Nyheter -->
+    <section class="module hidden" id="module-news">
+
+      <div class="news-masthead">
+        <div class="news-masthead-inner">
+          <div class="news-date" id="newsDate"></div>
+          <h1 class="news-title">AestimAi Nyheter</h1>
+          <p class="news-subtitle">Värdering · Byteshandel · Energi · Kooperativ ekonomi</p>
+        </div>
+        <div class="news-categories">
+          <button class="news-cat-btn active" data-cat="all">Allt</button>
+          <button class="news-cat-btn" data-cat="valuation">Värdering</button>
+          <button class="news-cat-btn" data-cat="energy">Energi</button>
+          <button class="news-cat-btn" data-cat="coop">Kooperativ</button>
+          <button class="news-cat-btn" data-cat="market">Marknad</button>
+          <button class="news-cat-btn" data-cat="tech">Fintech</button>
+          <button class="news-cat-btn" data-cat="sustainability">Hållbarhet</button>
+          <button class="news-cat-btn" data-cat="resources">Resurser</button>
+        </div>
+      </div>
+
+      <div class="news-layout">
+
+        <!-- Vänster: artiklar -->
+        <div class="news-main">
+
+          <!-- Ledarartikeln -->
+          <article class="news-lead" data-cat="valuation">
+            <div class="news-lead-img">
+              <div class="news-img-placeholder news-img-large">
+                <span class="img-icon">📊</span>
+              </div>
+            </div>
+            <div class="news-lead-body">
+              <span class="news-section-label valuation">Värdering</span>
+              <h2 class="news-lead-headline">UCI-indexet når rekordnivå — byteshandeln ökar med 34 procent under andra kvartalet</h2>
+              <p class="news-lead-deck">Det universella bytesindexet UCI steg till 64,80 SEK per enhet under juni, drivet av stark efterfrågan på energiutrustning och immateriella rättigheter. Plattformar som erbjuder valuta-oberoende värdering upplever ett genombrott i Europa.</p>
+              <div class="news-byline">
+                <span class="news-author">AestimAi Redaktion</span>
+                <span class="news-dot">·</span>
+                <span class="news-time">6 juni 2026</span>
+                <span class="news-dot">·</span>
+                <span class="news-read">4 min läsning</span>
+              </div>
+            </div>
+          </article>
+
+          <hr class="news-divider">
+
+          <!-- Artikelgrid — rad 1 -->
+          <div class="news-grid-row">
+
+            <article class="news-card" data-cat="energy">
+              <div class="news-img-placeholder news-img-small">
+                <span class="img-icon">⚡</span>
+              </div>
+              <div class="news-card-body">
+                <span class="news-section-label energy">Energi</span>
+                <h3 class="news-card-headline">CHP2X-teknik slår solceller i nordisk vinterproduktion — Sunthetics S-100 noterar 1 480 drifttimmar</h3>
+                <p class="news-card-deck">Kombinations­generatorer visar sig mer robusta än solcellstak under lågsäsongens soltimmar. EaaS-avtal ökar kraftigt.</p>
+                <div class="news-byline">
+                  <span class="news-author">Erik Lindström</span>
+                  <span class="news-dot">·</span>
+                  <span class="news-time">5 juni 2026</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="news-card" data-cat="coop">
+              <div class="news-img-placeholder news-img-small">
+                <span class="img-icon">⊙</span>
+              </div>
+              <div class="news-card-body">
+                <span class="news-section-label coop">Kooperativ</span>
+                <h3 class="news-card-headline">IDCoop passerar 12 000 kortinnehavare i Norden — web-of-trust-nätverket växer organiskt</h3>
+                <p class="news-card-deck">Det kryptografiska kooperativet nådde kritisk massa i Sverige och Finland. Introduktionskvoterna är stängda i Stockholm.</p>
+                <div class="news-byline">
+                  <span class="news-author">Maria Björk</span>
+                  <span class="news-dot">·</span>
+                  <span class="news-time">4 juni 2026</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="news-card" data-cat="market">
+              <div class="news-img-placeholder news-img-small">
+                <span class="img-icon">⇄</span>
+              </div>
+              <div class="news-card-body">
+                <span class="news-section-label market">Marknad</span>
+                <h3 class="news-card-headline">Bytesmarknadens mest eftertraktade kategori: energiutrustning går om fordon för första gången</h3>
+                <p class="news-card-deck">Solcellspaket, batterilager och elverk dominerar nu topp 10-listan på AestimAi-plattformen. UCI-priserna är stabila.</p>
+                <div class="news-byline">
+                  <span class="news-author">Jonas Holm</span>
+                  <span class="news-dot">·</span>
+                  <span class="news-time">3 juni 2026</span>
+                </div>
+              </div>
+            </article>
+
+          </div>
+
+          <hr class="news-divider">
+
+          <!-- Stor artikel med bild till vänster -->
+          <article class="news-feature" data-cat="tech">
+            <div class="news-img-placeholder news-img-medium">
+              <span class="img-icon">▣</span>
+            </div>
+            <div class="news-feature-body">
+              <span class="news-section-label tech">Fintech</span>
+              <h3 class="news-feature-headline">WebAuthn ersätter bankID i kooperativa plattformar — säkerhetsanalytiker välkomnar skiftet</h3>
+              <p class="news-feature-deck">Hårdvarubaserad autentisering via NFC-kort eliminerar beroendet av centraliserade identitetstjänster. Rättslig granskning pågår i tre EU-länder.</p>
+              <div class="news-byline">
+                <span class="news-author">Petra Sandström</span>
+                <span class="news-dot">·</span>
+                <span class="news-time">2 juni 2026</span>
+                <span class="news-dot">·</span>
+                <span class="news-read">6 min läsning</span>
+              </div>
+            </div>
+          </article>
+
+          <hr class="news-divider">
+
+          <!-- Artikelgrid — rad 2 -->
+          <div class="news-grid-row">
+
+            <article class="news-card" data-cat="valuation">
+              <div class="news-card-body no-img">
+                <span class="news-section-label valuation">Värdering</span>
+                <h3 class="news-card-headline">EU-kommissionen föreslår standardiserat bytesindex för cirkulär ekonomi — UCI pekas ut som modell</h3>
+                <div class="news-byline">
+                  <span class="news-author">Reuters / AestimAi</span>
+                  <span class="news-dot">·</span>
+                  <span class="news-time">1 juni 2026</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="news-card" data-cat="energy">
+              <div class="news-card-body no-img">
+                <span class="news-section-label energy">Energi</span>
+                <h3 class="news-card-headline">Norska kommuner testar EaaS-modellen — Sunthetics tecknar pilotavtal med tre fjällkommuner</h3>
+                <div class="news-byline">
+                  <span class="news-author">Karin Nylund</span>
+                  <span class="news-dot">·</span>
+                  <span class="news-time">31 maj 2026</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="news-card" data-cat="coop">
+              <div class="news-card-body no-img">
+                <span class="news-section-label coop">Kooperativ</span>
+                <h3 class="news-card-headline">"Do ut des" — den romerska principen som driver den moderna delningsekonomins nästa fas</h3>
+                <div class="news-byline">
+                  <span class="news-author">David Larsson</span>
+                  <span class="news-dot">·</span>
+                  <span class="news-time">29 maj 2026</span>
+                </div>
+              </div>
+            </article>
+
+          </div>
+
+          <hr class="news-divider">
+
+          <!-- Lång lista — kortnotiser -->
+          <div class="news-briefs">
+            <h4 class="news-briefs-title">Kortnotiser</h4>
+            <div class="news-brief-item" data-cat="market">
+              <span class="news-section-label market">Marknad</span>
+              <p><strong>Tokeniserade fastigheter:</strong> UCI-värdet på tokeniserade nyttjanderätter i Stockholm steg 8 procent under maj efter att tre kommuner godkänt upplägget.</p>
+              <span class="news-time">28 maj 2026</span>
+            </div>
+            <div class="news-brief-item" data-cat="tech">
+              <span class="news-section-label tech">Fintech</span>
+              <p><strong>Offline-autentisering:</strong> AestimAi Pro stöder nu fullständig offline-drift via OTP-matris — kritiskt för glesbygdsanvändare utan stabil uppkoppling.</p>
+              <span class="news-time">27 maj 2026</span>
+            </div>
+            <div class="news-brief-item" data-cat="valuation">
+              <span class="news-section-label valuation">Värdering</span>
+              <p><strong>API-lansering:</strong> AestimAi Pro API når version 2.0 med stöd för batch-värdering av upp till 500 objekt per anrop och webhook-notifieringar.</p>
+              <span class="news-time">26 maj 2026</span>
+            </div>
+            <div class="news-brief-item" data-cat="energy">
+              <span class="news-section-label energy">Energi</span>
+              <p><strong>UCI-energiindex:</strong> Genomsnittligt UCI-värde för 1 kWh el i Norden uppgår till 0,016 UCI — stabilt sedan mars trots volatila elpriser.</p>
+              <span class="news-time">25 maj 2026</span>
+            </div>
+          </div>
+
+        </div><!-- /news-main -->
+
+        <!-- Höger: annonser och ticker -->
+        <aside class="news-sidebar">
+
+          <div class="news-uci-ticker">
+            <h4>UCI-index live</h4>
+            <div class="ticker-row">
+              <span class="ticker-name">UCI/SEK</span>
+              <span class="ticker-price green">62,40</span>
+              <span class="ticker-change green">+0,3%</span>
+            </div>
+            <div class="ticker-row">
+              <span class="ticker-name">UCI/EUR</span>
+              <span class="ticker-price green">5,52</span>
+              <span class="ticker-change green">+0,1%</span>
+            </div>
+            <div class="ticker-row">
+              <span class="ticker-name">UCI/USD</span>
+              <span class="ticker-price">5,98</span>
+              <span class="ticker-change red">−0,2%</span>
+            </div>
+            <div class="ticker-row">
+              <span class="ticker-name">Byten/dag</span>
+              <span class="ticker-price green">1 248</span>
+              <span class="ticker-change green">+12%</span>
+            </div>
+          </div>
+
+          <!-- Annons 1 -->
+          <div class="news-ad">
+            <span class="ad-label">Annons</span>
+            <a class="news-ad-card" href="https://www.sunthetics.se" target="_blank" rel="noopener">
+              <div class="ad-img-placeholder">⚡</div>
+              <div class="ad-body">
+                <span class="ad-source">Sunthetics AB</span>
+                <p class="ad-text">EaaS-avtal för din fastighet — solceller + CHP2X från €0,70/L. 7-årskontrakt med garanterad produktion.</p>
+                <span class="ad-cta">Läs mer →</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Annons 2 -->
+          <div class="news-ad">
+            <span class="ad-label">Annons</span>
+            <a class="news-ad-card" href="https://re.lease" target="_blank" rel="noopener">
+              <div class="ad-img-placeholder">🏠</div>
+              <div class="ad-body">
+                <span class="ad-source">Re.lease Europa</span>
+                <p class="ad-text">Hyr ut din fastighet via tokeniserad nyttjanderätt — UCI-värderad och IDCoop-signerad. Redan 400+ objekt i Norden.</p>
+                <span class="ad-cta">Se objekt →</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Mest läst -->
+          <div class="news-mostread">
+            <h4>Mest läst</h4>
+            <ol class="mostread-list">
+              <li>
+                <span class="mostread-num">1</span>
+                <span class="mostread-title">UCI-indexet når rekordnivå under andra kvartalet</span>
+              </li>
+              <li>
+                <span class="mostread-num">2</span>
+                <span class="mostread-title">IDCoop passerar 12 000 kortinnehavare i Norden</span>
+              </li>
+              <li>
+                <span class="mostread-num">3</span>
+                <span class="mostread-title">WebAuthn ersätter BankID i kooperativa plattformar</span>
+              </li>
+              <li>
+                <span class="mostread-num">4</span>
+                <span class="mostread-title">CHP2X slår solceller i nordisk vinterproduktion</span>
+              </li>
+              <li>
+                <span class="mostread-num">5</span>
+                <span class="mostread-title">EU föreslår standardiserat bytesindex — UCI pekas ut</span>
+              </li>
+            </ol>
+          </div>
+
+          <!-- Annons 3 -->
+          <div class="news-ad">
+            <span class="ad-label">Annons</span>
+            <a class="news-ad-card" href="https://www.circulareconomy.eu" target="_blank" rel="noopener">
+              <div class="ad-img-placeholder">♻️</div>
+              <div class="ad-body">
+                <span class="ad-source">Ellen MacArthur Foundation</span>
+                <p class="ad-text">Cirkulär ekonomi i praktiken — rapporter, verktyg och partnerprogram för europeiska företag 2026.</p>
+                <span class="ad-cta">Hämta rapport →</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Annons 4 -->
+          <div class="news-ad">
+            <span class="ad-label">Annons</span>
+            <a class="news-ad-card" href="https://www.fido2.com" target="_blank" rel="noopener">
+              <div class="ad-img-placeholder">🔐</div>
+              <div class="ad-body">
+                <span class="ad-source">FIDO Alliance</span>
+                <p class="ad-text">Implementera lösenordsfri autentisering med FIDO2/WebAuthn — certifiering och teknisk vägledning för utvecklare.</p>
+                <span class="ad-cta">Certifiera dig →</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Prenumerations-CTA -->
+          <div class="news-subscribe">
+            <h4>AestimAi Pro</h4>
+            <p>Få signerade marknadsrapporter och tillgång till UCI-data via API.</p>
+            <button class="btn-primary" style="width:100%;justify-content:center;" data-module="pro">Aktivera Pro →</button>
+          </div>
+
+        </aside>
+
+      </div><!-- /news-layout -->
+    </section>
+
+  </main>
+
+  <!-- ===== HÖGER PANEL ===== -->
+  <aside class="right-panel" id="rightPanel">
+    <div class="panel-header">
+      <h3>Kontext</h3>
+      <button class="btn-close-panel" id="btnClosePanel">×</button>
+    </div>
+
+    <div class="panel-uci-ticker" id="panelTicker">
+      <span class="ticker-label">UCI-index idag</span>
+      <span class="ticker-value" id="panelTickerValue">1 UCI = 62.40 SEK</span>
+      <span class="ticker-sub" id="panelTickerSub">≈ €5.52 / $5.98</span>
+      <div class="ticker-onchain hidden" id="tickerOnchain">
+        <span class="ticker-chain-dot">⬡</span>
+        <span class="ticker-chain-label" id="tickerChainLabel">On-chain</span>
+      </div>
+    </div>
+
+    <div class="panel-help" id="panelHelp">
+      <h4>Om UCI-värdering</h4>
+      <p>UCI (Universal Commerce Index) är ett valuta-oberoende värderingsindex som mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata.</p>
+      <p>Värderingen är gratis och kräver ingen inloggning.</p>
+    </div>
+
+    <div class="panel-ad" id="panelAd">
+      <div class="ad-placeholder">
+        <span>Annonsplats</span>
+        <small>Relevanta erbjudanden baserade på din sökning</small>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Toggle-knapp för höger panel -->
+  <button class="btn-toggle-panel" id="btnTogglePanel" title="Öppna kontextpanel">›</button>
+
+  <!-- Modal: Föreslå byte -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal" id="modalPropose">
+      <div class="modal-header">
+        <h2>Föreslå byte</h2>
+        <button class="btn-close-modal" id="btnCloseModal">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Du föreslår byte av <strong id="proposedItem">—</strong></p>
+        <div class="form-group">
+          <label>Välj ditt objekt att byta mot</label>
+          <select id="myItemSelect">
+            <option value="">— Välj ett av dina objekt —</option>
+          </select>
+        </div>
+        <div class="uci-match-check" id="uciMatchCheck"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btnCancelPropose">Avbryt</button>
+        <button class="btn-primary" id="btnConfirmPropose">Föreslå byte</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script type="module" src="wallet-ui.js"></script>
+</body>
+</html>

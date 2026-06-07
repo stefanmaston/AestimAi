@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /Users/stefanlarsson-mastonstrale/discovery-valuation-mvp/)",
+      "Bash(docker compose *)",
+      "Bash(npm install *)",
+      "Bash(ls /Users/stefanlarsson-mastonstrale/Documents/Sunthetics/Websida/Valoverus/ *)",
+      "Bash(lsof -ti:5173)",
+      "Bash(xargs kill -9)",
+      "Bash(lsof -ti:4000)",
+      "Bash(lsof -ti:5000)",
+      "Bash(npm run *)",
+      "Bash(echo \"Frontend PID: $!\")",
+      "Bash(echo \"API PID: $!\")",
+      "Bash(python3 app.py)",
+      "Bash(echo \"NetMon PID: $!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:4000/health)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5000)",
+      "Bash(mv /Users/stefanlarsson-mastonstrale/Documents/Sunthetics/Websida/Valoverus /Users/stefanlarsson-mastonstrale/Documents/Sunthetics/Websida/AestimAi)"
+    ]
+  }
+}
