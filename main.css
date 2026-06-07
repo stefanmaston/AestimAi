@@ -1299,9 +1299,20 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   display: flex; flex-direction: column; gap: 0.2rem;
 }
 .dash-stat-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-500); }
+.dash-stat-sublabel { font-size: 0.6rem; color: var(--gray-400); margin-top: -0.1rem; }
 .dash-stat-val { font-size: 1.15rem; font-weight: 700; color: var(--text); font-family: monospace; }
 .dash-stat-val.pos { color: var(--green); }
 .dash-stat-val.neg { color: var(--amber); }
+.dash-stat-sub { font-size: 0.7rem; color: var(--gray-500); margin-top: 0.1rem; }
+
+/* Cap-kort — framhävda med accentfärg */
+.dash-stat-card--cap {
+  border-color: var(--green);
+  background: linear-gradient(135deg, #f0f7f3 0%, #fff 100%);
+  grid-column: span 2;
+}
+.dash-stat-card--cap .dash-stat-label { color: var(--green); }
+.dash-stat-card--cap .dash-stat-val   { font-size: 1.4rem; color: var(--gray-900); }
 
 .dash-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 @media (max-width: 900px) { .dash-bottom { grid-template-columns: 1fr; } }

@@ -49,7 +49,7 @@ function navigateTo(moduleId) {
 
 function updatePanelHelp(moduleId) {
   const helpTexts = {
-    uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Commerce Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
+    uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Coin Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
     market: '<h4>Om Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
     pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med AE ID barter or pay DS-certifikat.</p><p>€75/mån — kräver AE ID barter or pay-kort.</p>',
     eaas: '<h4>Om EaaS-kalkylatorn</h4><p>Simulera energiproduktion från solceller och CHP2X-elverk. Beräknar UCI-värdet på din energiproduktion och EaaS-avtalskostnaden.</p>',
@@ -843,6 +843,17 @@ function renderDashboard({ history, stats }, days) {
   setEl('dsVolumeToday',  stats.volumeToday + ' st');
   setEl('dsVolumeTotal',  stats.volumeTotal + ' st');
   setEl('dsSurveys',    stats.activeSurveys + ' aktiva');
+
+  // Search Cap & Verified Cap
+  const capFmt = n => n >= 1_000_000
+    ? (n / 1_000_000).toFixed(2) + ' Mkr'
+    : n >= 1_000 ? (n / 1_000).toFixed(1) + ' tkr'
+    : n + ' SEK';
+  setEl('dsSearchCapSEK',    capFmt(stats.searchCap || 0));
+  setEl('dsSearchCapCount',  (stats.totalSearches || 0).toLocaleString('sv-SE') + ' värderingar');
+  setEl('dsVerifiedCapSEK',  capFmt(stats.verifiedCap || 0));
+  setEl('dsVerifiedCapCount',(stats.totalVerified  || 0).toLocaleString('sv-SE') + ' transaktioner');
+
   setEl('dashLastUpdate', 'Uppdaterad: ' + new Date().toLocaleString('sv-SE'));
 
   // Valutatabell

@@ -116,7 +116,7 @@ function buildPrompt(item, anchor) {
   const condLabels = { 1: 'Dåligt', 2: 'Slitet', 3: 'OK', 4: 'Bra', 5: 'Utmärkt' };
   const cond = condLabels[item.condition] || 'OK';
 
-  return `Du är AestimAi — ett AI-system för objektiv värdering med UCI (Universal Commerce Index).
+  return `Du är AestimAi — ett AI-system för objektiv värdering med UCI (Universal Coin Index).
 UCI är ett valutaoberoende bytesindex där 1 UCI ≈ 62 SEK ≈ 5.5 EUR ≈ 6 USD (juni 2026).
 
 Värdera följande objekt och returnera ENBART giltig JSON utan markdown eller förklaringstext utanför JSON-strukturen.
@@ -356,6 +356,11 @@ function generateHistoricalData() {
     }
 
     const r = Math.round(rateSEK * 100) / 100;
+    // Värderingar (searches) — vardagar fler, växer svagt över tid
+    const baseSearches = 42 + Math.floor(i * 0.8);
+    const searches = Math.round((isWeekend ? baseSearches * 0.4 : baseSearches) + rng() * (isWeekend ? 12 : 38));
+    // Genomförda byten/transaktioner — ca 18 % av värderingar leder till byte
+    const verified = Math.round(searches * (0.14 + rng() * 0.08));
     const volume = Math.round((isWeekend ? 2 : 7) + rng() * (isWeekend ? 4 : 14));
 
     history.push({
@@ -369,6 +374,8 @@ function generateHistoricalData() {
       rateCHF: Math.round(r / FX.CHF * 100) / 100,
       rateJPY: Math.round(r / FX.JPY * 10) / 10,
       volume,
+      searches,
+      verified,
     });
   }
   return history;
@@ -382,10 +389,17 @@ function calcStats(history) {
   const m3   = history[Math.max(0, history.length - 91)];
   const ytd  = history[0];
 
-  const allSEK    = history.map(h => h.rateSEK);
-  const high52w   = Math.max(...allSEK);
-  const low52w    = Math.min(...allSEK);
-  const volTotal  = history.reduce((s, h) => s + h.volume, 0);
+  const allSEK       = history.map(h => h.rateSEK);
+  const high52w      = Math.max(...allSEK);
+  const low52w       = Math.min(...allSEK);
+  const volTotal     = history.reduce((s, h) => s + h.volume, 0);
+  // Search Cap = totalt antal värderingar × aktuell UCI-kurs i SEK
+  const totalSearches  = history.reduce((s, h) => s + (h.searches || 0), 0);
+  const searchCap      = Math.round(totalSearches * cur.rateSEK);
+  // Verified Cap = totalt antal genomförda byten × genomsnittspris per byte (8 UCI/byte ≈ typiskt bytevärde)
+  const totalVerified  = history.reduce((s, h) => s + (h.verified || 0), 0);
+  const AVG_UCI_PER_TRADE = 8;
+  const verifiedCap    = Math.round(totalVerified * AVG_UCI_PER_TRADE * cur.rateSEK);
 
   // Annualiserad volatilitet (30d)
   const slice30   = history.slice(-31);
@@ -413,6 +427,10 @@ function calcStats(history) {
     volatility30d: vol30d,
     activeSurveys: surveys.size,
     launchDate: '2026-01-01',
+    totalSearches,
+    searchCap,
+    totalVerified,
+    verifiedCap,
   };
 }
 
