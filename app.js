@@ -20,6 +20,39 @@ const state = {
 const IS_LOCAL   = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const UCI_SERVER = IS_LOCAL ? 'http://localhost:3004' : '';
 
+// ── Supabase (samma databas som mobilappen) ────────
+// Varje webbläsare får en anonym session (sparas i localStorage), så att
+// alla webbvärderingar hamnar i databasen – ingen inloggning krävs.
+const SUPABASE_URL = 'https://vaxtylcqnscnflsucyiv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_EJWkHcLuQmbEnwAGkaEANg_6rue2HsZ';
+const sb = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
+async function ensureWebUser() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) return user.id;
+  const { data, error } = await sb.auth.signInAnonymously();
+  if (error) throw error;
+  return data.user.id;
+}
+
+/** Sparar en webbvärdering i databasen (tyst – stör aldrig värderingsflödet). */
+async function saveWebValuation(objectData, result) {
+  if (!sb) return;
+  try {
+    const userId = await ensureWebUser();
+    await sb.from('aestimai_valuations').insert({
+      user_id:     userId,
+      object_data: objectData,
+      result,
+      source:      'manual',
+    });
+  } catch (e) {
+    console.warn('[Spara] kunde inte spara värdering:', e.message);
+  }
+}
+
 // (Gamla lokala UCI-tabeller är ersatta av Claude API)
 
 // ── Navigation ─────────────────────────────────────
@@ -84,6 +117,9 @@ async function runUciValuation() {
     if (!res.ok) throw new Error(data.error || 'API-fel');
 
     renderUciResult(data);
+
+    // Spara värderingen i databasen (samma som mobilappen)
+    saveWebValuation({ description: input, category, condition: cond }, data);
 
   } catch (err) {
     setUciLoading(false);

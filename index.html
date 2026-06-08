@@ -12,6 +12,8 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5179380778835238" crossorigin="anonymous"></script>
 </head>
 <body>
+<!-- Google Translate initieras här (dold) — cookie-baserad översättning kräver denna div -->
+<div id="gt_hidden" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden"></div>
 
   <!-- ===== SIDEBAR ===== -->
   <aside class="sidebar" id="sidebar">
@@ -1221,34 +1223,44 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script type="module" src="wallet-ui.js"></script>
-  <!-- Språkväljare via Google Translate cookie -->
+  <!-- Google Translate — initieras i dold div, styrs via custom dropdown -->
   <script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'sv',
+        includedLanguages: 'en,fr,de,es,it,pt,nl,pl,ru,ar,zh-CN,ja,ko,fi,no',
+      }, 'gt_hidden');
+    }
+
     function toggleLangMenu(e) {
       e.stopPropagation();
       document.getElementById('langMenu').classList.toggle('lang-menu--open');
     }
+
     function setLang(code, flag, label) {
-      // Sätt Google Translate-cookie och ladda om
-      document.cookie = 'googtrans=/sv/' + code + '; path=/; domain=' + location.hostname;
-      document.cookie = 'googtrans=/sv/' + code + '; path=/';
       document.getElementById('btnLangFlag').textContent  = flag;
       document.getElementById('btnLangLabel').textContent = label;
       document.getElementById('langMenu').classList.remove('lang-menu--open');
+
+      // Sätt GT-cookie och ladda om — GT läser cookien vid init och översätter
       if (code === 'sv') {
-        // Återställ — ta bort cookie och ladda om
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
+      } else {
+        document.cookie = 'googtrans=/sv/' + code + '; path=/';
+        document.cookie = 'googtrans=/sv/' + code + '; path=/; domain=' + location.hostname;
       }
       location.reload();
     }
+
     document.addEventListener('click', () => {
       document.getElementById('langMenu')?.classList.remove('lang-menu--open');
     });
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
-  <script>function googleTranslateElementInit(){}</script>
 
   <!-- Aktivera AdSense-annonser -->
   <script>
