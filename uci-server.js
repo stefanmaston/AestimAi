@@ -28,6 +28,35 @@ app.use(express.json({ limit: '10mb' })); // Bilder som base64 kan vara flera MB
 // { [itemId]: { priorMean, priorWeight, votes: [number], createdAt } }
 const surveys = new Map();
 
+// ── Supabase-aggregering ───────────────────────────────────
+// Hämtar verklig värderingsstatistik (alla användares värderingar från
+// appen) via en security-definer-RPC. Cachas 60s för att inte belasta DB.
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '';
+let _pfCache = { data: null, ts: 0 };
+
+async function fetchPortfolioStats() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return null;
+  if (_pfCache.data && Date.now() - _pfCache.ts < 60_000) return _pfCache.data;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/aestimai_portfolio_stats`, {
+      method:  'POST',
+      headers: {
+        apikey:          SUPABASE_KEY,
+        Authorization:   `Bearer ${SUPABASE_KEY}`,
+        'Content-Type':  'application/json',
+      },
+      body: '{}',
+    });
+    if (!r.ok) throw new Error('rpc ' + r.status);
+    _pfCache = { data: await r.json(), ts: Date.now() };
+    return _pfCache.data;
+  } catch (e) {
+    console.warn('[Portfolio] kunde inte hämta Supabase-stats:', e.message);
+    return _pfCache.data; // ev. tidigare cachad data
+  }
+}
+
 // ── Hjälpfunktioner ────────────────────────────────────────
 
 /** Beräknar Bayesian posterior givet prior och röster */
@@ -438,10 +467,32 @@ function calcStats(history) {
 }
 
 // ── GET /api/uci/history ───────────────────────────────────
-app.get('/api/uci/history', (req, res) => {
+app.get('/api/uci/history', async (req, res) => {
   const history = generateHistoricalData();
   const stats   = calcStats(history);
+
+  // Slå in VERKLIG värderingsstatistik från Supabase (appens värderingar)
+  const pf = await fetchPortfolioStats();
+  if (pf) {
+    stats.volumeTotal   = pf.total_valuations;
+    stats.volumeToday   = pf.valuations_today;
+    stats.totalSearches = pf.total_valuations;
+    stats.searchCap     = Math.round(pf.total_sek || 0); // total portföljvärde i SEK
+    stats.portfolioUci  = pf.total_uci;
+    stats.portfolioSek  = pf.total_sek;
+    stats.cameraCount   = pf.camera_count;
+    stats.manualCount   = pf.manual_count;
+  }
+
   res.json({ history, stats });
+});
+
+// ── GET /api/uci/portfolio-stats ───────────────────────────
+// Ren aggregerad värderingsdata (totalt antal, idag, totalt UCI/SEK).
+app.get('/api/uci/portfolio-stats', async (req, res) => {
+  const pf = await fetchPortfolioStats();
+  if (!pf) return res.status(503).json({ error: 'portfolio-stats ej tillgänglig (saknar Supabase-konfiguration)' });
+  res.json(pf);
 });
 
 // ── POST /api/uci/camera-analyze ──────────────────────────
