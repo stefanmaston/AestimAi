@@ -590,6 +590,13 @@ app.get('/api/uci/commentary', async (req, res) => {
 // Generera om automatiskt varje dag kl 06:00 (server-tid)
 cron.schedule('0 6 * * *', () => { generateCommentary().catch(() => {}); });
 
+// ── POST /api/uci/clientlog (TILLFÄLLIG klient-felloggning) ─
+// Webbsidan skickar hit JS-fel så de syns i Railway-loggen vid felsökning.
+app.post('/api/uci/clientlog', (req, res) => {
+  try { console.log('[CLIENTLOG]', JSON.stringify(req.body)); } catch {}
+  res.status(204).end();
+});
+
 // ── POST /api/uci/camera-analyze ──────────────────────────
 //
 // Flöde:
