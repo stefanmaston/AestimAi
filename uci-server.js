@@ -488,11 +488,22 @@ app.get('/api/uci/history', async (req, res) => {
 });
 
 // ── GET /api/uci/portfolio-stats ───────────────────────────
-// Ren aggregerad värderingsdata (totalt antal, idag, totalt UCI/SEK).
+// Ren aggregerad värderingsdata + totalt portföljvärde i flera valutor.
 app.get('/api/uci/portfolio-stats', async (req, res) => {
   const pf = await fetchPortfolioStats();
   if (!pf) return res.status(503).json({ error: 'portfolio-stats ej tillgänglig (saknar Supabase-konfiguration)' });
-  res.json(pf);
+
+  // Räkna om totalt UCI till valutor med aktuella kurser (kurs = valuta per 1 UCI)
+  const rate = calcStats(generateHistoricalData()).current;
+  const uci  = pf.total_uci || 0;
+  res.json({
+    ...pf,
+    value_uci: uci,
+    value_sek: Math.round(uci * rate.SEK),
+    value_eur: Math.round(uci * rate.EUR),
+    value_usd: Math.round(uci * rate.USD),
+    rates: rate,
+  });
 });
 
 // ── POST /api/uci/camera-analyze ──────────────────────────
