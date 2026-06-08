@@ -590,14 +590,6 @@ app.get('/api/uci/commentary', async (req, res) => {
 // Generera om automatiskt varje dag kl 06:00 (server-tid)
 cron.schedule('0 6 * * *', () => { generateCommentary().catch(() => {}); });
 
-// ── Klient-felloggning (TILLFÄLLIG) – lagras i minnet, läses via dump ─
-const _clientlogs = [];
-app.post('/api/uci/clientlog', (req, res) => {
-  try { _clientlogs.push({ ts: new Date().toISOString(), ...req.body }); while (_clientlogs.length > 120) _clientlogs.shift(); } catch {}
-  res.status(204).end();
-});
-app.get('/api/uci/clientlog/dump', (req, res) => res.json(_clientlogs));
-
 // ── POST /api/uci/camera-analyze ──────────────────────────
 //
 // Flöde:

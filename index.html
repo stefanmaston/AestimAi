@@ -34,19 +34,6 @@
     };
   })();
   </script>
-  <!-- TILLFÄLLIG felfångare (tas bort efteråt) -->
-  <script>
-  (function () {
-    function send(p) { try { fetch('/api/uci/clientlog', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p), keepalive: true }).catch(function(){}); } catch (e) {} }
-    window.addEventListener('error', function (e) {
-      var msg = e.message, src = e.filename || '', line = e.lineno || 0, stack = (e.error && e.error.stack) || '';
-      // Fånga GT-relaterade fel (removeChild m.fl.) även om de är cross-origin-maskerade
-      send({ t: 'error', msg: msg, src: src, line: line, col: e.colno || 0, stack: String(stack).slice(0, 500), gt: !!document.cookie.match(/googtrans/), mod: (window.state && state.currentModule) || '?' });
-    });
-    window.addEventListener('unhandledrejection', function (e) { send({ t: 'reject', msg: String(e.reason), stack: (e.reason && e.reason.stack ? String(e.reason.stack).slice(0,500) : ''), gt: !!document.cookie.match(/googtrans/) }); });
-    send({ t: 'load', url: location.href, gt: !!document.cookie.match(/googtrans/), cookie: document.cookie.slice(0, 120) });
-  })();
-  </script>
   <title>AestimAi — Värdering & Bytesmarknad</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
