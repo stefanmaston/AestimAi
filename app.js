@@ -802,6 +802,31 @@ async function loadMarketDashboard() {
   } catch (e) {
     console.warn('[Dashboard] Kunde inte ladda historik:', e.message);
   }
+  loadCommentary();
+}
+
+// ── Daglig UCI-kommentar (8 teman) ───────────────────
+async function loadCommentary() {
+  const grid = document.getElementById('commentaryGrid');
+  if (!grid) return;
+  try {
+    const res  = await fetch(`${UCI_SERVER}/api/uci/commentary`);
+    const data = await res.json();
+    if (!res.ok || !data.items) throw new Error(data.error || 'inga kommentarer');
+
+    const dateEl = document.getElementById('commentaryDate');
+    if (dateEl && data.date) dateEl.textContent = data.date;
+
+    grid.innerHTML = data.items.map(item => `
+      <div class="commentary-card">
+        <h4 class="commentary-title">${escHtml(item.title)}</h4>
+        <p class="commentary-text">${escHtml(item.text)}</p>
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = '<div class="commentary-loading">Kommentarer ej tillgängliga just nu.</div>';
+    console.warn('[Commentary] Kunde inte ladda:', e.message);
+  }
 }
 
 // Valuta-konfiguration

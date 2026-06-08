@@ -15,6 +15,7 @@ require('dotenv').config();
 
 const express   = require('express');
 const cors      = require('cors');
+const cron      = require('node-cron');
 const Anthropic = require('@anthropic-ai/sdk');
 
 const app    = express();
@@ -505,6 +506,71 @@ app.get('/api/uci/portfolio-stats', async (req, res) => {
     rates: rate,
   });
 });
+
+// ── Daglig UCI-kommentar (8 teman) ─────────────────────────
+const COMMENTARY_THEMES = [
+  'Inflation & köpkraft',
+  'Centralbankspolitik',
+  'Valuta & FX',
+  'Råvaror & reala tillgångar',
+  'Krypto & tokenisering',
+  'Cirkulär ekonomi',
+  'Kooperativ & ägande',
+  'Beteende & folkvärdering',
+];
+
+let _commentary = { date: null, items: [] };
+
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+async function generateCommentary() {
+  const today = todayStr();
+  const themeList = COMMENTARY_THEMES.map((t, i) => `${i + 1}. ${t}`).join('\n');
+  const prompt =
+`Du är finansredaktör för AestimAi och UCI (Universal Coin Index) – ett valutaoberoende, nyttobaserat bytesvärdesindex som ägs av en ekonomisk förening där användarna är delägare.
+
+Skriv åtta korta dagliga kommentarer (2–3 meningar var) för datumet ${today}, en för varje tema nedan. Varje kommentar ska:
+- knyta temat till UCI:s perspektiv (realt bytevärde, valutaoberoende, folkvaliderat, kooperativt ägt),
+- kännas aktuell och engagerande, på svenska,
+- INTE ge finansiell rådgivning.
+
+Teman (behåll exakt denna ordning och dessa rubriker):
+${themeList}
+
+Svara ENBART med giltig JSON, en array med åtta objekt i samma ordning, inga kodblock:
+[{"title":"<rubrik>","text":"<kommentar>"}]`;
+
+  const message = await client.messages.create({
+    model:      'claude-haiku-4-5',
+    max_tokens: 1600,
+    messages:   [{ role: 'user', content: prompt }],
+  });
+  const raw  = message.content[0].text.trim();
+  const json = raw.match(/\[[\s\S]*\]/);
+  if (!json) throw new Error('Claude returnerade inte giltig JSON');
+  const items = JSON.parse(json[0]);
+  _commentary = { date: today, items };
+  console.log(`[Commentary] genererade ${items.length} kommentarer för ${today}`);
+  return _commentary;
+}
+
+async function getCommentary() {
+  if (_commentary.date !== todayStr() || !_commentary.items.length) {
+    try { await generateCommentary(); }
+    catch (e) { console.warn('[Commentary] generering misslyckades:', e.message); }
+  }
+  return _commentary;
+}
+
+// ── GET /api/uci/commentary ────────────────────────────────
+app.get('/api/uci/commentary', async (req, res) => {
+  const c = await getCommentary();
+  if (!c.items.length) return res.status(503).json({ error: 'kommentarer ej tillgängliga än' });
+  res.json(c);
+});
+
+// Generera om automatiskt varje dag kl 06:00 (server-tid)
+cron.schedule('0 6 * * *', () => { generateCommentary().catch(() => {}); });
 
 // ── POST /api/uci/camera-analyze ──────────────────────────
 //
