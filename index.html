@@ -3,15 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- TILLFÄLLIG klient-felloggning (felsökning – tas bort efteråt) -->
+  <!-- TILLFÄLLIG klient-felloggning v2 (felsökning – tas bort efteråt) -->
   <script>
   (function () {
-    function send(p) { try { fetch('/api/uci/clientlog', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p), keepalive: true }).catch(function(){}); } catch (e) {} }
-    window.addEventListener('error', function (e) { send({ t: 'error', msg: e.message, src: e.filename, line: e.lineno, col: e.colno, stack: e.error && e.error.stack, ua: navigator.userAgent, url: location.href }); });
-    window.addEventListener('unhandledrejection', function (e) { send({ t: 'reject', msg: String(e.reason), stack: e.reason && e.reason.stack, ua: navigator.userAgent }); });
-    document.addEventListener('visibilitychange', function () { send({ t: 'visibility', state: document.visibilityState }); });
-    window.addEventListener('pagehide', function () { send({ t: 'pagehide' }); });
-    send({ t: 'load', ua: navigator.userAgent, url: location.href, ref: document.referrer });
+    var t0 = Date.now();
+    function send(p) { p.dt = Date.now() - t0; try { fetch('/api/uci/clientlog', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p), keepalive: true }).catch(function(){}); } catch (e) {} }
+    window.addEventListener('error', function (e) { send({ t: 'error', msg: e.message, src: e.filename, line: e.lineno, col: e.colno }); });
+    window.addEventListener('unhandledrejection', function (e) { send({ t: 'reject', msg: String(e.reason) }); });
+    window.addEventListener('pagehide', function () { send({ t: 'pagehide', url: location.href }); });
+    window.addEventListener('beforeunload', function () { send({ t: 'beforeunload', url: location.href }); });
+    document.addEventListener('visibilitychange', function () { send({ t: 'vis', state: document.visibilityState }); });
+    send({ t: 'load', ua: navigator.userAgent, url: location.href });
+    var n = 0;
+    var iv = setInterval(function () {
+      n++;
+      var b = document.body;
+      send({ t: 'beat', n: n, bodyKids: b ? b.children.length : -1, vis: document.visibilityState, url: location.href });
+      if (n >= 12) clearInterval(iv);
+    }, 500);
   })();
   </script>
   <title>AestimAi — Värdering & Bytesmarknad</title>
