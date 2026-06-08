@@ -523,19 +523,37 @@ let _commentary = { date: null, items: [] };
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 
+// Hämtar dagens finansnyhetsrubriker från news-tjänsten (best-effort).
+async function fetchNewsHeadlines() {
+  try {
+    const url = process.env.NEWS_URL || 'https://news-production-370c.up.railway.app/api/news?cat=all';
+    const r = await fetch(url);
+    if (!r.ok) return [];
+    const d = await r.json();
+    return (d.articles || []).map(a => a.title).filter(Boolean).slice(0, 12);
+  } catch { return []; }
+}
+
 async function generateCommentary() {
   const today = todayStr();
   const themeList = COMMENTARY_THEMES.map((t, i) => `${i + 1}. ${t}`).join('\n');
+
+  const headlines = await fetchNewsHeadlines();
+  const newsBlock = headlines.length
+    ? `\n\nDAGENS FINANSNYHETER (förankra kommentarerna i dessa där det passar temat – tvinga inte in en rubrik som inte hör hemma):\n${headlines.map(h => '- ' + h).join('\n')}`
+    : '';
+
   const prompt =
 `Du är finansredaktör för AestimAi och UCI (Universal Coin Index) – ett valutaoberoende, nyttobaserat bytesvärdesindex som ägs av en ekonomisk förening där användarna är delägare.
 
 Skriv åtta korta dagliga kommentarer (2–3 meningar var) för datumet ${today}, en för varje tema nedan. Varje kommentar ska:
+- förankras i dagens nyheter nedan där det är relevant för temat,
 - knyta temat till UCI:s perspektiv (realt bytevärde, valutaoberoende, folkvaliderat, kooperativt ägt),
 - kännas aktuell och engagerande, på svenska,
 - INTE ge finansiell rådgivning.
 
 Teman (behåll exakt denna ordning och dessa rubriker):
-${themeList}
+${themeList}${newsBlock}
 
 Svara ENBART med giltig JSON, en array med åtta objekt i samma ordning, inga kodblock:
 [{"title":"<rubrik>","text":"<kommentar>"}]`;
