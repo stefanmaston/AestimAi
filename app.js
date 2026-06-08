@@ -21,35 +21,45 @@ const IS_LOCAL   = window.location.hostname === 'localhost' || window.location.h
 const UCI_SERVER = IS_LOCAL ? 'http://localhost:3004' : '';
 
 // ── Supabase (samma databas som mobilappen) ────────
-// Varje webbläsare får en anonym session (sparas i localStorage), så att
-// alla webbvärderingar hamnar i databasen – ingen inloggning krävs.
+// Laddas LAZY – först när en värdering faktiskt ska sparas, aldrig vid
+// sidladdning. Då kan det inte påverka att sidan öppnas.
 const SUPABASE_URL = 'https://vaxtylcqnscnflsucyiv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_EJWkHcLuQmbEnwAGkaEANg_6rue2HsZ';
-const sb = (window.supabase && window.supabase.createClient)
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-  : null;
+let _sb = null;
 
-async function ensureWebUser() {
-  const { data: { user } } = await sb.auth.getUser();
-  if (user) return user.id;
-  const { data, error } = await sb.auth.signInAnonymously();
-  if (error) throw error;
-  return data.user.id;
+async function getSb() {
+  if (_sb) return _sb;
+  if (!(window.supabase && window.supabase.createClient)) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return _sb;
 }
 
 /** Sparar en webbvärdering i databasen (tyst – stör aldrig värderingsflödet). */
 async function saveWebValuation(objectData, result) {
-  if (!sb) return;
   try {
-    const userId = await ensureWebUser();
+    const sb = await getSb();
+    let { data: { user } } = await sb.auth.getUser();
+    if (!user) {
+      const { data, error } = await sb.auth.signInAnonymously();
+      if (error) throw error;
+      user = data.user;
+    }
     await sb.from('aestimai_valuations').insert({
-      user_id:     userId,
+      user_id:     user.id,
       object_data: objectData,
       result,
       source:      'manual',
     });
   } catch (e) {
-    console.warn('[Spara] kunde inte spara värdering:', e.message);
+    console.warn('[Spara] kunde inte spara värdering:', e && e.message);
   }
 }
 
