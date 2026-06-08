@@ -1468,9 +1468,8 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 
 /* ===== SPRÅKVÄLJARE ===== */
 
-/* Dölj Googles topbar utan att blockera GT:s interna iframe */
-.goog-te-banner-frame { display: none !important; }
-.skiptranslate { visibility: hidden !important; height: 0 !important; overflow: hidden !important; }
+/* Dölj Googles topbar om den dyker upp */
+.goog-te-banner-frame, .skiptranslate { display: none !important; }
 body { top: 0 !important; }
 
 .lang-wrap { position: relative; }
@@ -1531,21 +1530,3 @@ body { top: 0 !important; }
 .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
 .lang-opt--reset { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
 .lang-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 0.2rem 0; }
-
-/* ── Daglig UCI-kommentar (8 teman, 4×2) ── */
-.dash-commentary { margin-top: 1.75rem; }
-.dash-commentary-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.9rem; }
-.dash-commentary-date { font-size: 0.8rem; color: var(--gray-500); }
-.commentary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
-.commentary-card {
-  background: var(--white);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-lg);
-  padding: 1.1rem 1.15rem;
-  display: flex; flex-direction: column;
-}
-.commentary-title { font-size: 0.92rem; font-weight: 700; color: var(--green); margin: 0 0 0.45rem; }
-.commentary-text  { font-size: 0.85rem; line-height: 1.5; color: var(--gray-700); margin: 0; }
-.commentary-loading { grid-column: 1 / -1; text-align: center; color: var(--gray-500); padding: 1.25rem; font-size: 0.85rem; }
-@media (max-width: 1000px) { .commentary-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px)  { .commentary-grid { grid-template-columns: 1fr; } }

@@ -20,49 +20,6 @@ const state = {
 const IS_LOCAL   = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const UCI_SERVER = IS_LOCAL ? 'http://localhost:3004' : '';
 
-// ── Supabase (samma databas som mobilappen) ────────
-// Laddas LAZY – först när en värdering faktiskt ska sparas, aldrig vid
-// sidladdning. Då kan det inte påverka att sidan öppnas.
-const SUPABASE_URL = 'https://vaxtylcqnscnflsucyiv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_EJWkHcLuQmbEnwAGkaEANg_6rue2HsZ';
-let _sb = null;
-
-async function getSb() {
-  if (_sb) return _sb;
-  if (!(window.supabase && window.supabase.createClient)) {
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-      s.onload = resolve;
-      s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
-  _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  return _sb;
-}
-
-/** Sparar en webbvärdering i databasen (tyst – stör aldrig värderingsflödet). */
-async function saveWebValuation(objectData, result) {
-  try {
-    const sb = await getSb();
-    let { data: { user } } = await sb.auth.getUser();
-    if (!user) {
-      const { data, error } = await sb.auth.signInAnonymously();
-      if (error) throw error;
-      user = data.user;
-    }
-    await sb.from('aestimai_valuations').insert({
-      user_id:     user.id,
-      object_data: objectData,
-      result,
-      source:      'manual',
-    });
-  } catch (e) {
-    console.warn('[Spara] kunde inte spara värdering:', e && e.message);
-  }
-}
-
 // (Gamla lokala UCI-tabeller är ersatta av Claude API)
 
 // ── Navigation ─────────────────────────────────────
@@ -127,9 +84,6 @@ async function runUciValuation() {
     if (!res.ok) throw new Error(data.error || 'API-fel');
 
     renderUciResult(data);
-
-    // Spara värderingen i databasen (samma som mobilappen)
-    saveWebValuation({ description: input, category, condition: cond }, data);
 
   } catch (err) {
     setUciLoading(false);
@@ -811,31 +765,6 @@ async function loadMarketDashboard() {
     renderDashboard(dashData, 30);
   } catch (e) {
     console.warn('[Dashboard] Kunde inte ladda historik:', e.message);
-  }
-  loadCommentary();
-}
-
-// ── Daglig UCI-kommentar (8 teman) ───────────────────
-async function loadCommentary() {
-  const grid = document.getElementById('commentaryGrid');
-  if (!grid) return;
-  try {
-    const res  = await fetch(`${UCI_SERVER}/api/uci/commentary`);
-    const data = await res.json();
-    if (!res.ok || !data.items) throw new Error(data.error || 'inga kommentarer');
-
-    const dateEl = document.getElementById('commentaryDate');
-    if (dateEl && data.date) dateEl.textContent = data.date;
-
-    grid.innerHTML = data.items.map(item => `
-      <div class="commentary-card">
-        <h4 class="commentary-title">${escHtml(item.title)}</h4>
-        <p class="commentary-text">${escHtml(item.text)}</p>
-      </div>
-    `).join('');
-  } catch (e) {
-    grid.innerHTML = '<div class="commentary-loading">Kommentarer ej tillgängliga just nu.</div>';
-    console.warn('[Commentary] Kunde inte ladda:', e.message);
   }
 }
 
