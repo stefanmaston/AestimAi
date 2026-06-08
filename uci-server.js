@@ -1,12 +1,14 @@
 /**
  * AestimAi — UCI Värderingsserver
- * Port 3003
+ * Port 3004
  *
  * Endpoints:
  *   POST /api/uci/value          → Claude-värdering
  *   POST /api/uci/vote           → Respondentröst
  *   GET  /api/uci/result/:id     → Aggregerat resultat (Bayesian)
+ *   GET  /api/uci/history        → Historisk kursdata
  *   GET  /api/uci/health         → Hälsokoll
+ *   POST /api/uci/camera-analyze → AI-kameraanalys (Vision → identifiering + kontrollfrågor)
  */
 
 require('dotenv').config();
@@ -20,7 +22,7 @@ const PORT   = process.env.PORT || process.env.API_PORT || 3004;
 const client = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 app.use(cors({ origin: true })); // Tillåt alla localhost-portar
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Bilder som base64 kan vara flera MB
 
 // ── In-memory survey store ─────────────────────────────────
 // { [itemId]: { priorMean, priorWeight, votes: [number], createdAt } }
@@ -442,6 +444,113 @@ app.get('/api/uci/history', (req, res) => {
   res.json({ history, stats });
 });
 
+// ── POST /api/uci/camera-analyze ──────────────────────────
+//
+// Flöde:
+//   Runda 1 — appen skickar { image, mediaType }
+//             AI identifierar objektet och returnerar antingen:
+//             a) kontrollfrågor om den är osäker  → { status: 'questions', questions: [...] }
+//             b) identifierat objekt om säker      → { status: 'ready', valuationData: {...} }
+//
+//   Runda 2 — appen skickar { image, mediaType, answers: [{question, answer}, ...] }
+//             AI bekräftar med svaren och returnerar alltid { status: 'ready', valuationData: {...} }
+//
+// valuationData matchar fälten i buildPrompt: { description, category, condition }
+//
+app.post('/api/uci/camera-analyze', async (req, res) => {
+  const { image, mediaType, answers } = req.body;
+
+  if (!image) return res.status(400).json({ error: 'image (base64) krävs' });
+
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  const imgType = validTypes.includes(mediaType) ? mediaType : 'image/jpeg';
+
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key || key === 'din_claude_nyckel_här') {
+    return res.status(503).json({ error: 'Anthropic API-nyckel saknas i .env' });
+  }
+
+  try {
+    // Bygg meddelandelistan — vid runda 2 läggs svaren in i kontexten
+    const userContent = [];
+
+    userContent.push({
+      type: 'image',
+      source: { type: 'base64', media_type: imgType, data: image },
+    });
+
+    if (answers && answers.length > 0) {
+      const answersText = answers
+        .map(a => `Fråga: ${a.question}\nSvar: ${a.answer}`)
+        .join('\n\n');
+      userContent.push({
+        type: 'text',
+        text: `Jag har svarat på dina kontrollfrågor:\n\n${answersText}\n\nGe nu en slutgiltig identifiering. Svara ENBART med giltig JSON (inga kodblockar):\n{\n  "status": "ready",\n  "confidence": <80-100>,\n  "valuationData": {\n    "description": "<detaljerad beskrivning inkl. märke, modell, skick, ålder>",\n    "category": "<en av: Elektronik|Möbler|Fordon|Kläder & accessoarer|Konst & samlarvärde|Verktyg & maskiner|Sport & fritid|Vitvaror|Musik & instrument|Övrigt>",\n    "condition": <1-5>,\n    "condition_reasoning": "<varför detta skick-betyg>"\n  }\n}`,
+      });
+    } else {
+      userContent.push({
+        type: 'text',
+        text: `Analysera bilden och identifiera objektet för värdering i AestimAi (UCI-systemet).
+
+Om du är tillräckligt säker på vad objektet är (>80% säker), svara med status "ready".
+Om du behöver mer information, ställ max 3 kortfattade kontrollfrågor och svara med status "questions".
+
+Svara ENBART med giltig JSON i ett av dessa två format:
+
+FORMAT A — osäker, behöver svar:
+{
+  "status": "questions",
+  "identified_as": "<vad du tror det är, eller tom sträng>",
+  "confidence": <0-79>,
+  "questions": [
+    "<konkret kontrollfråga 1>",
+    "<konkret kontrollfråga 2>"
+  ]
+}
+
+FORMAT B — säker, redo för värdering:
+{
+  "status": "ready",
+  "confidence": <80-100>,
+  "valuationData": {
+    "description": "<detaljerad beskrivning av objektet inkl. märke, modell, skick, ålder om synligt>",
+    "category": "<en av: Elektronik|Möbler|Fordon|Kläder & accessoarer|Konst & samlarvärde|Verktyg & maskiner|Sport & fritid|Vitvaror|Musik & instrument|Övrigt>",
+    "condition": <1-5>,
+    "condition_reasoning": "<varför detta skick-betyg>"
+  }
+}`,
+      });
+    }
+
+    const msg = await client.messages.create({
+      model:      'claude-haiku-4-5',
+      max_tokens: 600,
+      messages:   [{ role: 'user', content: userContent }],
+    });
+
+    const raw       = msg.content[0].text.trim();
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AI returnerade inte giltig JSON');
+
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Validera att obligatoriska fält finns
+    if (!parsed.status) throw new Error('Saknar status-fält i AI-svar');
+    if (parsed.status === 'questions' && (!parsed.questions || parsed.questions.length === 0)) {
+      throw new Error('status=questions men inga frågor returnerades');
+    }
+    if (parsed.status === 'ready' && !parsed.valuationData) {
+      throw new Error('status=ready men valuationData saknas');
+    }
+
+    res.json(parsed);
+
+  } catch (err) {
+    console.error('[uci-server] camera-analyze-fel:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── GET /api/uci/health ────────────────────────────────────
 app.get('/api/uci/health', (req, res) => {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -449,6 +558,14 @@ app.get('/api/uci/health', (req, res) => {
     status:         'ok',
     keyConfigured:  !!(key && key !== 'din_claude_nyckel_här'),
     activeSurveys:  surveys.size,
+    endpoints: [
+      'POST /api/uci/value',
+      'POST /api/uci/vote',
+      'GET  /api/uci/result/:id',
+      'GET  /api/uci/history',
+      'POST /api/uci/check',
+      'POST /api/uci/camera-analyze',
+    ],
   });
 });
 
