@@ -3,6 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ── DOM-säkerhet: gör removeChild/insertBefore tåliga ─────────────
+       Sidöversättare (webbläsarens inbyggda, tillägg m.fl.) sveper in
+       textnoder i wrapper-element och städar sedan upp dem. När appen
+       samtidigt skriver om DOM:en kan det kasta
+       "Failed to execute 'removeChild' on 'Node'" → vit skärm.
+       Patchen gör operationerna till en säker no-op. Kör FÖRST.
+       Rensar även en gammal googtrans-cookie från den borttagna
+       Google Translate-widgeten så återvändande besökare börjar rent. -->
+  <script>
+  (function () {
+    try {
+      if (/(^|;\s*)googtrans=/.test(document.cookie)) {
+        var exp = '; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+        document.cookie = 'googtrans=' + exp;
+        document.cookie = 'googtrans=' + exp + '; domain=' + location.hostname;
+        document.cookie = 'googtrans=' + exp + '; domain=.' + location.hostname;
+      }
+    } catch (e) {}
+    if (typeof Node !== 'function' || !Node.prototype) return;
+    var realRemove = Node.prototype.removeChild;
+    Node.prototype.removeChild = function (child) {
+      if (child && child.parentNode !== this) return child;
+      return realRemove.apply(this, arguments);
+    };
+    var realInsert = Node.prototype.insertBefore;
+    Node.prototype.insertBefore = function (newNode, refNode) {
+      if (refNode && refNode.parentNode !== this) { this.appendChild(newNode); return newNode; }
+      return realInsert.apply(this, arguments);
+    };
+  })();
+  </script>
   <!-- TILLFÄLLIG felfångare (tas bort efteråt) -->
   <script>
   (function () {
@@ -25,9 +56,6 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5179380778835238" crossorigin="anonymous"></script>
 </head>
 <body>
-<!-- Google Translate initieras här (dold) — cookie-baserad översättning kräver denna div -->
-<div id="gt_hidden" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden"></div>
-
   <!-- ===== SIDEBAR ===== -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
@@ -72,34 +100,6 @@
         <span class="status-text" id="statusText">Ej inloggad</span>
       </div>
       <button class="btn-login" id="btnLogin">Logga in med AE ID</button>
-
-      <!-- Språkväljare -->
-      <div class="lang-wrap">
-        <button class="btn-lang" id="btnLang" onclick="toggleLangMenu(event)" title="Välj språk">
-          <span id="btnLangFlag">🌐</span>
-          <span id="btnLangLabel">Välj språk</span>
-          <span class="lang-arrow">▾</span>
-        </button>
-        <div class="lang-menu" id="langMenu">
-          <button class="lang-opt" onclick="setLang('en','🇬🇧','English')">🇬🇧 English</button>
-          <button class="lang-opt" onclick="setLang('no','🇳🇴','Norsk')">🇳🇴 Norsk</button>
-          <button class="lang-opt" onclick="setLang('da','🇩🇰','Dansk')">🇩🇰 Dansk</button>
-          <button class="lang-opt" onclick="setLang('fi','🇫🇮','Suomi')">🇫🇮 Suomi</button>
-          <button class="lang-opt" onclick="setLang('de','🇩🇪','Deutsch')">🇩🇪 Deutsch</button>
-          <button class="lang-opt" onclick="setLang('fr','🇫🇷','Français')">🇫🇷 Français</button>
-          <button class="lang-opt" onclick="setLang('es','🇪🇸','Español')">🇪🇸 Español</button>
-          <button class="lang-opt" onclick="setLang('it','🇮🇹','Italiano')">🇮🇹 Italiano</button>
-          <button class="lang-opt" onclick="setLang('nl','🇳🇱','Nederlands')">🇳🇱 Nederlands</button>
-          <button class="lang-opt" onclick="setLang('pl','🇵🇱','Polski')">🇵🇱 Polski</button>
-          <button class="lang-opt" onclick="setLang('ar','🇸🇦','العربية')">🇸🇦 العربية</button>
-          <button class="lang-opt" onclick="setLang('zh-CN','🇨🇳','中文')">🇨🇳 中文</button>
-          <button class="lang-opt" onclick="setLang('ja','🇯🇵','日本語')">🇯🇵 日本語</button>
-          <button class="lang-opt" onclick="setLang('ko','🇰🇷','한국어')">🇰🇷 한국어</button>
-          <button class="lang-opt" onclick="setLang('ru','🇷🇺','Русский')">🇷🇺 Русский</button>
-          <hr class="lang-divider">
-          <button class="lang-opt lang-opt--reset" onclick="setLang('sv','🌐','Välj språk')">↩ Svenska (original)</button>
-        </div>
-      </div>
 
       <!-- Wallet-widget -->
       <div class="wallet-widget" id="walletWidget">
@@ -1249,41 +1249,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
   <script type="module" src="wallet-ui.js"></script>
-  <!-- Google Translate — initieras i dold div, styrs via custom dropdown -->
-  <script>
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'sv',
-        includedLanguages: 'en,fr,de,es,it,pt,nl,pl,ru,ar,zh-CN,ja,ko,fi,no',
-      }, 'gt_hidden');
-    }
-
-    function toggleLangMenu(e) {
-      e.stopPropagation();
-      document.getElementById('langMenu').classList.toggle('lang-menu--open');
-    }
-
-    function setLang(code, flag, label) {
-      document.getElementById('btnLangFlag').textContent  = flag;
-      document.getElementById('btnLangLabel').textContent = label;
-      document.getElementById('langMenu').classList.remove('lang-menu--open');
-
-      // Sätt GT-cookie och ladda om — GT läser cookien vid init och översätter
-      if (code === 'sv') {
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
-      } else {
-        document.cookie = 'googtrans=/sv/' + code + '; path=/';
-        document.cookie = 'googtrans=/sv/' + code + '; path=/; domain=' + location.hostname;
-      }
-      location.reload();
-    }
-
-    document.addEventListener('click', () => {
-      document.getElementById('langMenu')?.classList.remove('lang-menu--open');
-    });
-  </script>
-  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 
   <!-- Aktivera AdSense-annonser -->
   <script>
