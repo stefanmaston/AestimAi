@@ -1779,6 +1779,7 @@ function renderLabProducts() {
     const specs    = (p.specs || []).map(s => `<li>${s}</li>`).join('');
     return `
       <div class="lab-product-row" data-cat="${p.category}">
+        <div class="lab-product-thumb">${p.icon || '📦'}</div>
         <div class="lab-product-info">
           <span class="lab-badge ${badgeCls}">${p.categoryLabel}</span>
           <h3>${p.name}</h3>

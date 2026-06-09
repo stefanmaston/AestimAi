@@ -1760,6 +1760,19 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 .lab-product-row:only-child  { border-radius: 14px; border-bottom: 1px solid var(--border, #e2e8f0); }
 .lab-product-row:hover { background: #f8fafc; }
 
+/* Product thumbnail */
+.lab-product-thumb {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
 .lab-product-info { flex: 1; min-width: 0; }
 .lab-product-info h3 {
   font-size: 1.05rem;
