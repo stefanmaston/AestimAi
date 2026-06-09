@@ -1203,7 +1203,7 @@ function renderAssetChart(labels, series) {
   datasets.push({
     label:            '⊙ UCI (referens)',
     data:             labels.map(() => 100),
-    borderColor:      'rgba(255,255,255,0.55)',
+    borderColor:      'rgba(0,0,0,0.35)',
     borderWidth:      2,
     borderDash:       [7, 4],
     pointRadius:      0,
