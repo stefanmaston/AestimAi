@@ -70,9 +70,10 @@
         <span class="nav-label">AestimAi Pro</span>
         <span class="nav-badge pro">Pro</span>
       </button>
-      <button class="nav-item" data-module="idcoop">
-        <span class="nav-icon">⊙</span>
-        <span class="nav-label">AE ID barter or pay</span>
+      <button class="nav-item" data-module="ucilab">
+        <span class="nav-icon">⚗</span>
+        <span class="nav-label">UCI Lab</span>
+        <span class="nav-badge free">Shop</span>
       </button>
       <button class="nav-item" data-module="news">
         <span class="nav-icon">◉</span>
@@ -737,120 +738,233 @@
 
 
     <!-- Modul 5: AE ID barter or pay -->
-    <section class="module hidden" id="module-idcoop">
+    <section class="module hidden" id="module-ucilab">
       <div class="module-header">
-        <h1>AE ID barter or pay</h1>
-        <p class="module-desc">Korthantering, koopandel och identitet</p>
+        <h1>⚗ UCI Lab</h1>
+        <p class="module-desc">Hårdvara för mätning, handel och spårning av verkligt värde</p>
       </div>
 
-      <div class="idcoop-layout">
-        <!-- Ej inloggad -->
-        <div class="idcoop-unauth" id="idcoopUnauth">
-          <div class="card-visual">
-            <div class="id-card-mock">
-              <div class="card-logo">Æ ID barter or pay</div>
-              <div class="card-chip">▪▪▪</div>
-              <div class="card-nfc">))))</div>
-              <div class="card-number">•••• •••• •••• ••••</div>
-              <div class="card-name">DITT NAMN</div>
-            </div>
-          </div>
-          <div class="idcoop-intro">
-            <h2>Ditt AE ID-kort</h2>
-            <p>AE ID-kortet är din identitet, din signatur och din nyckel till bytesmarknaden. Det är fysiskt, kryptografiskt och kooperativt ägt.</p>
-            <ul class="idcoop-benefits">
-              <li>✓ WebAuthn-autentisering — ingen lösenord</li>
-              <li>✓ Kryptografisk signering av alla byten</li>
-              <li>✓ Offline-kapacitet med OTP-matris</li>
-              <li>✓ Koopandel och rösträtt</li>
-              <li>✓ Engångskostnad €15–25</li>
+      <div class="lab-hero">
+        <div class="lab-hero-text">
+          <h2>Mät värdet — inte priset</h2>
+          <p>UCI Lab erbjuder noggrant utvalda verktyg för energimätning, NFC-handel, IoT-spårning och mer. All hårdvara är testad för integration med UCI-plattformen och passar dig som vill ta kontroll över vad saker verkligen är värda.</p>
+        </div>
+        <div class="lab-hero-badge">
+          <span class="lab-uci-symbol">⊙</span>
+          <span>UCI-kompatibel hårdvara</span>
+        </div>
+      </div>
+
+      <div class="lab-categories">
+        <button class="lab-cat-btn active" data-cat="all" onclick="filterLabProducts('all')">Alla</button>
+        <button class="lab-cat-btn" data-cat="energy" onclick="filterLabProducts('energy')">Energi</button>
+        <button class="lab-cat-btn" data-cat="nfc" onclick="filterLabProducts('nfc')">NFC &amp; Handel</button>
+        <button class="lab-cat-btn" data-cat="iot" onclick="filterLabProducts('iot')">IoT &amp; Sensorer</button>
+        <button class="lab-cat-btn" data-cat="compute" onclick="filterLabProducts('compute')">Datorkraft</button>
+        <button class="lab-cat-btn" data-cat="security" onclick="filterLabProducts('security')">Säkerhet</button>
+      </div>
+
+      <div class="lab-grid" id="labGrid">
+
+        <div class="lab-card" data-cat="energy">
+          <div class="lab-card-img">⚡</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-energy">Energi</span>
+            <h3>Shelly Pro 3EM</h3>
+            <p>Trefas energimätare med WiFi och lokal API. Mät exakt förbrukning och exportera till UCI-plattformen för realtidsvärdering.</p>
+            <ul class="lab-specs">
+              <li>3-fas mätning upp till 120A</li>
+              <li>REST + MQTT API</li>
+              <li>DIN-skena montering</li>
             </ul>
-            <div class="idcoop-actions">
-              <button class="btn-primary" id="btnOrderCard">Beställ AE ID-kort</button>
-              <button class="btn-secondary" id="btnActivateCard">Aktivera befintligt kort</button>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">1 890 kr</span>
+                <span class="lab-price-uci">≈ 18,9 ⊙</span>
+              </div>
+              <button class="btn-buy" onclick="labCheckout('shelly-pro-3em')">Köp</button>
             </div>
           </div>
         </div>
 
-        <!-- Inloggad (dold som standard) -->
-        <div class="idcoop-auth hidden" id="idcoopAuth">
-          <div class="idcoop-grid">
-            <div class="idcoop-card-status">
-              <h2>Kortstatus</h2>
-              <div class="card-status-row">
-                <span class="status-dot active"></span>
-                <span>Aktivt kort — WebAuthn registrerat</span>
+        <div class="lab-card" data-cat="energy">
+          <div class="lab-card-img">☀️</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-energy">Energi</span>
+            <h3>Victron SmartShunt 500A</h3>
+            <p>Batteriövervakare med Bluetooth och VE.Direct. Spåra energiflöden och beräkna UCI-värde på egenproducerad energi i solcellssystem.</p>
+            <ul class="lab-specs">
+              <li>500A kontinuerlig mätning</li>
+              <li>Bluetooth + VE.Direct</li>
+              <li>Victron Connect app</li>
+            </ul>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">1 290 kr</span>
+                <span class="lab-price-uci">≈ 12,9 ⊙</span>
               </div>
-              <div class="card-info-table">
-                <div class="info-row"><span>Koopandel</span><span id="coopShare">—</span></div>
-                <div class="info-row"><span>Rösträtt</span><span id="votingPower">—</span></div>
-                <div class="info-row"><span>Korttyp</span><span>AE ID Standard</span></div>
+              <button class="btn-buy" onclick="labCheckout('victron-smartshunt')">Köp</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lab-card" data-cat="nfc">
+          <div class="lab-card-img">📡</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-nfc">NFC</span>
+            <h3>ACR122U NFC-läsare</h3>
+            <p>USB NFC-läsare/skrivare för ISO 14443 A/B och Mifare. Skriv UCI-transaktioner till NFC-taggar för offline-handel på bytesmarknaden.</p>
+            <ul class="lab-specs">
+              <li>ISO 14443 A/B, Mifare</li>
+              <li>USB-A, drivrutinsfri</li>
+              <li>SDK medföljer</li>
+            </ul>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">590 kr</span>
+                <span class="lab-price-uci">≈ 5,9 ⊙</span>
               </div>
+              <button class="btn-buy" onclick="labCheckout('acr122u-nfc')">Köp</button>
             </div>
-            <div class="idcoop-web-of-trust">
-              <h2>Web-of-Trust</h2>
-              <p>Introducera en ny medlem i kooperativet.</p>
-              <button class="btn-secondary">Generera signeringslänk</button>
-            </div>
-            <div class="idcoop-otp">
-              <h2>OTP-matris</h2>
-              <p>Engångskoder för offline-autentisering finns på kortbaksidan.</p>
-              <button class="btn-secondary">Hantera OTP-koder</button>
-            </div>
-            <div class="idcoop-history">
-              <h2>Kontohistorik</h2>
-              <div class="history-list" id="historyList">
-                <div class="history-empty">Ingen historik ännu</div>
+          </div>
+        </div>
+
+        <div class="lab-card" data-cat="nfc">
+          <div class="lab-card-img">🏷️</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-nfc">NFC</span>
+            <h3>NTAG215 NFC-taggar (50-pack)</h3>
+            <p>Högkapacitets NFC-taggar kompatibla med alla smartphones. Märk varor på bytesmarknaden med UCI-värde och ursprung.</p>
+            <ul class="lab-specs">
+              <li>504 bytes EEPROM</li>
+              <li>ISO/IEC 14443-3 Type A</li>
+              <li>30mm runda etiketter</li>
+            </ul>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">290 kr</span>
+                <span class="lab-price-uci">≈ 2,9 ⊙</span>
               </div>
+              <button class="btn-buy" onclick="labCheckout('ntag215-50pack')">Köp</button>
             </div>
+          </div>
+        </div>
+
+        <div class="lab-card" data-cat="compute">
+          <div class="lab-card-img">🖥️</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-compute">Datorkraft</span>
+            <h3>Raspberry Pi 5 Starter Kit</h3>
+            <p>Komplett kit med Pi 5 (4GB), nätaggregat, kylare och 64GB SD. Kör din egna UCI-nod, lokal värderingsserver eller bytesmarknads-gateway.</p>
+            <ul class="lab-specs">
+              <li>Raspberry Pi 5, 4GB RAM</li>
+              <li>64GB SD med Raspberry Pi OS</li>
+              <li>Officiellt nätaggregat 27W</li>
+            </ul>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">1 490 kr</span>
+                <span class="lab-price-uci">≈ 14,9 ⊙</span>
+              </div>
+              <button class="btn-buy" onclick="labCheckout('rpi5-starter')">Köp</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lab-card" data-cat="iot">
+          <div class="lab-card-img">📊</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-iot">IoT</span>
+            <h3>Ruuvi Tag Pro (4-pack)</h3>
+            <p>Öppen källkod Bluetooth-sensorer för temperatur, luftfuktighet, lufttryck och rörelse. Spåra miljövärden för UCI-prissättning av råvaror.</p>
+            <ul class="lab-specs">
+              <li>Temp, fuktig, tryck, rörelse</li>
+              <li>Bluetooth 5, 2+ år batteri</li>
+              <li>IP67 vattentät</li>
+            </ul>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">990 kr</span>
+                <span class="lab-price-uci">≈ 9,9 ⊙</span>
+              </div>
+              <button class="btn-buy" onclick="labCheckout('ruuvitag-4pack')">Köp</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lab-card" data-cat="security">
+          <div class="lab-card-img">🔐</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-security">Säkerhet</span>
+            <h3>Ledger Nano X</h3>
+            <p>Hårdvaruplånbok med Bluetooth för säker signering av UCI-transaktioner och förvaring av kryptografiska nycklar för bytesmarknaden.</p>
+            <ul class="lab-specs">
+              <li>Bluetooth + USB-C</li>
+              <li>CC EAL5+ certifierad chip</li>
+              <li>Stöd för 5500+ appar</li>
+            </ul>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">1 290 kr</span>
+                <span class="lab-price-uci">≈ 12,9 ⊙</span>
+              </div>
+              <button class="btn-buy" onclick="labCheckout('ledger-nano-x')">Köp</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lab-card" data-cat="iot">
+          <div class="lab-card-img">🌿</div>
+          <div class="lab-card-body">
+            <span class="lab-badge lab-badge-iot">IoT</span>
+            <h3>Aranet4 CO₂-mätare</h3>
+            <p>Portabel CO₂/luftkvalitetsmätare med e-ink display och Bluetooth. Rapportera miljödata direkt till UCI:s ESG-kategori.</p>
+            <ul class="lab-specs">
+              <li>CO₂, temp, fuktighet, alarm</li>
+              <li>E-ink display, 4 år batteri</li>
+              <li>Bluetooth + öppen API</li>
+            </ul>
+            <div class="lab-price-row">
+              <div class="lab-price">
+                <span class="lab-price-sek">2 190 kr</span>
+                <span class="lab-price-uci">≈ 21,9 ⊙</span>
+              </div>
+              <button class="btn-buy" onclick="labCheckout('aranet4-co2')">Köp</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lab-info-strip">
+        <div class="lab-info-item">
+          <span class="lab-info-icon">🚚</span>
+          <span>Fri frakt över 500 kr</span>
+        </div>
+        <div class="lab-info-item">
+          <span class="lab-info-icon">↩️</span>
+          <span>30 dagars öppet köp</span>
+        </div>
+        <div class="lab-info-item">
+          <span class="lab-info-icon">⊙</span>
+          <span>Pris i SEK och UCI</span>
+        </div>
+        <div class="lab-info-item">
+          <span class="lab-info-icon">🔒</span>
+          <span>Säker betalning via Stripe</span>
+        </div>
+      </div>
+
+      <!-- Checkout overlay -->
+      <div class="lab-checkout-overlay hidden" id="labCheckoutOverlay">
+        <div class="lab-checkout-modal">
+          <button class="lab-close-btn" onclick="closeLabCheckout()">✕</button>
+          <div class="lab-checkout-content" id="labCheckoutContent">
+            <div class="lab-checkout-spinner">Laddar kassan…</div>
           </div>
         </div>
       </div>
 
-      <!-- On-chain UCI-panel (syns alltid) -->
-      <div class="onchain-panel" id="onchainPanel">
-        <div class="onchain-header">
-          <span class="onchain-icon">⬡</span>
-          <div>
-            <h3>UCI-index on-chain</h3>
-            <p class="onchain-sub">Base Sepolia testnet</p>
-          </div>
-          <button class="btn-secondary btn-sm" id="btnRefreshChain">↻ Uppdatera</button>
-        </div>
-
-        <div class="onchain-no-wallet" id="onchainNoWallet">
-          <p>Anslut MetaMask i sidebaren för att se on-chain UCI-data.</p>
-        </div>
-
-        <div class="onchain-no-contract hidden" id="onchainNoContract">
-          <p>Kontraktet är inte deployd ännu. Kör <code>forge script Deploy.s.sol --broadcast</code> och ladda om.</p>
-        </div>
-
-        <div class="onchain-data hidden" id="onchainData">
-          <div class="onchain-grid">
-            <div class="onchain-tile">
-              <span class="onchain-label">UCI/SEK</span>
-              <span class="onchain-value" id="chainSEK">—</span>
-            </div>
-            <div class="onchain-tile">
-              <span class="onchain-label">UCI/EUR</span>
-              <span class="onchain-value" id="chainEUR">—</span>
-            </div>
-            <div class="onchain-tile">
-              <span class="onchain-label">UCI/USD</span>
-              <span class="onchain-value" id="chainUSD">—</span>
-            </div>
-            <div class="onchain-tile">
-              <span class="onchain-label">Uppdateringar</span>
-              <span class="onchain-value" id="chainUpdates">—</span>
-            </div>
-          </div>
-          <div class="onchain-meta">
-            <span id="chainTimestamp">—</span>
-            <a id="chainExplorerLink" href="#" target="_blank" rel="noopener" class="chain-link">Visa på Basescan →</a>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- Modul 6: Nyheter -->
