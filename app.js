@@ -1179,14 +1179,11 @@ function renderAssetChart(labels, series) {
     titleColor:      '#fff',
     bodyColor:       'rgba(255,255,255,0.85)',
     padding:         10,
-    callbacks: {
-      title: items => items[0].label,
-      label: item => {
-        if (item.dataset.label === '⊙ UCI (referens)') return null;
-        return ` ${item.dataset.label}: ${item.raw.toFixed(1)}`;
-      },
-    },
     filter: item => item.dataset.label !== '⊙ UCI (referens)',
+    callbacks: {
+      title: items => items.length ? items[0].label : '',
+      label: item => ` ${item.dataset.label}: ${Number(item.raw).toFixed(1)}`,
+    },
   };
   opts.scales.y.ticks.callback = v => v.toFixed(0);
 
@@ -1211,6 +1208,7 @@ function renderAssetChart(labels, series) {
     borderDash:       [7, 4],
     pointRadius:      0,
     pointHoverRadius: 0,
+    hoverBorderWidth: 0,
     fill:             false,
     tension:          0,
     order: 1,
