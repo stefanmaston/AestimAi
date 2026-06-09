@@ -99,6 +99,11 @@ function navigateTo(moduleId) {
     marketLoaded = true;
     searchMarket();
   }
+
+  // Ladda AestimAi Lab första gången
+  if (moduleId === 'ucilab' && !labProducts.length) {
+    loadLabProducts();
+  }
 }
 
 function updatePanelHelp(moduleId) {
@@ -1728,3 +1733,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Exponera globalt (används av inline oninput)
 window.updateSliderPreview = updateSliderPreview;
+
+// ─── AestimAi Lab ─────────────────────────────────────────────────────────────
+
+const BADGE_CLASS = {
+  energy:   'lab-badge-energy',
+  nfc:      'lab-badge-nfc',
+  compute:  'lab-badge-compute',
+  iot:      'lab-badge-iot',
+  security: 'lab-badge-security',
+};
+
+let labProducts   = [];
+let labActiveCat  = 'all';
+
+async function loadLabProducts() {
+  const area = document.getElementById('labShopArea');
+  if (!area) return;
+
+  try {
+    const res  = await fetch('/api/shop/products');
+    const data = await res.json();
+    labProducts = data.products || [];
+    renderLabProducts();
+  } catch (err) {
+    area.innerHTML = '<div class="lab-error">Kunde inte ladda produkter. Försök igen senare.</div>';
+  }
+}
+
+function renderLabProducts() {
+  const area = document.getElementById('labShopArea');
+  if (!area || !labProducts.length) return;
+
+  const visible = labActiveCat === 'all'
+    ? labProducts
+    : labProducts.filter(p => p.category === labActiveCat);
+
+  if (!visible.length) {
+    area.innerHTML = '<div class="lab-empty">Inga produkter i den här kategorin.</div>';
+    return;
+  }
+
+  area.innerHTML = visible.map(p => {
+    const badgeCls = BADGE_CLASS[p.category] || '';
+    const specs    = (p.specs || []).map(s => `<li>${s}</li>`).join('');
+    return `
+      <div class="lab-product-row" data-cat="${p.category}">
+        <div class="lab-product-info">
+          <span class="lab-badge ${badgeCls}">${p.categoryLabel}</span>
+          <h3>${p.name}</h3>
+          <p>${p.description}</p>
+          <ul class="lab-specs">${specs}</ul>
+        </div>
+        <div class="lab-buy-area">
+          <div class="lab-price-block">
+            <span class="lab-price-sek">${p.priceSEK} kr</span>
+            <span class="lab-price-uci">≈ ${p.priceUCI} ⊙</span>
+          </div>
+          <a class="btn-buy-amazon"
+             href="${p.buyUrl}"
+             target="_blank"
+             rel="noopener sponsored"
+             title="Köp ${p.name} på Amazon">
+            Köp på Amazon →
+          </a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterLab(cat) {
+  labActiveCat = cat;
+  document.querySelectorAll('.lab-cat-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.cat === cat)
+  );
+  renderLabProducts();
+}
+
+window.filterLab = filterLab;

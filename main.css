@@ -1697,8 +1697,8 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .lab-header-left p  { margin: 0; color: rgba(255,255,255,.7); font-size: .9rem; }
 .lab-header-right   { display: flex; flex-direction: column; gap: .5rem; align-items: flex-end; }
-.lab-secure-badge,
-.lab-uci-badge {
+.lab-uci-badge,
+.lab-amazon-badge {
   background: rgba(255,255,255,.1);
   border: 1px solid rgba(255,255,255,.2);
   border-radius: 20px;
@@ -1708,7 +1708,36 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   white-space: nowrap;
 }
 
-/* Product rows — info left, Stripe buy-button right */
+/* Category filter */
+.lab-categories {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.lab-cat-btn {
+  padding: .4rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: #fff;
+  color: var(--gray-700, #374151);
+  font-size: .85rem;
+  cursor: pointer;
+  transition: all .15s;
+}
+.lab-cat-btn:hover  { border-color: var(--primary,#6366f1); color: var(--primary,#6366f1); }
+.lab-cat-btn.active { background: var(--primary,#6366f1); border-color: var(--primary,#6366f1); color: #fff; }
+
+/* Loading / error */
+.lab-loading, .lab-error, .lab-empty {
+  padding: 3rem;
+  text-align: center;
+  color: var(--gray-500, #6b7280);
+  font-size: .95rem;
+}
+.lab-error { color: #b91c1c; }
+
+/* Product rows — info left, buy area right */
 .lab-shop-area {
   display: flex;
   flex-direction: column;
@@ -1745,24 +1774,33 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   margin: 0 0 .6rem;
 }
 
-/* Buy button area */
+/* Price block */
 .lab-buy-area {
   flex-shrink: 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .6rem;
 }
+.lab-price-block { text-align: right; }
+.lab-price-sek   { display: block; font-size: 1.15rem; font-weight: 700; color: var(--gray-900,#111); }
+.lab-price-uci   { display: block; font-size: .78rem; color: var(--gray-500,#6b7280); }
 
-.btn-coming-soon {
+/* Amazon buy button */
+.btn-buy-amazon {
+  display: inline-block;
   padding: .5rem 1.1rem;
-  border: 1px solid var(--border, #e2e8f0);
+  background: #FF9900;
+  color: #111;
   border-radius: 8px;
-  background: #f8fafc;
-  color: var(--gray-400, #9ca3af);
   font-size: .85rem;
-  font-weight: 500;
-  cursor: default;
+  font-weight: 700;
+  text-decoration: none;
   white-space: nowrap;
+  transition: background .15s, transform .1s;
 }
+.btn-buy-amazon:hover  { background: #e68a00; transform: scale(1.03); }
+.btn-buy-amazon:active { transform: scale(.98); }
 
 /* Specs */
 .lab-specs {
@@ -1818,5 +1856,6 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   .lab-header { flex-direction: column; align-items: flex-start; }
   .lab-header-right { flex-direction: row; align-items: flex-start; }
   .lab-product-row { flex-direction: column; align-items: flex-start; }
-  .lab-buy-area { width: 100%; }
+  .lab-buy-area { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+  .lab-price-block { text-align: left; }
 }

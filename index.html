@@ -747,93 +747,24 @@
           <p>Hårdvara för mätning, handel och spårning av verkligt värde</p>
         </div>
         <div class="lab-header-right">
-          <span class="lab-secure-badge">🔒 Betalning via Stripe</span>
           <span class="lab-uci-badge">⊙ UCI-kompatibel</span>
+          <span class="lab-amazon-badge">Köp via Amazon</span>
         </div>
       </div>
 
+      <!-- Kategorifilter -->
+      <div class="lab-categories" id="labCatFilter">
+        <button class="lab-cat-btn active" data-cat="all" onclick="filterLab('all')">Alla</button>
+        <button class="lab-cat-btn" data-cat="energy" onclick="filterLab('energy')">Energi</button>
+        <button class="lab-cat-btn" data-cat="nfc" onclick="filterLab('nfc')">NFC &amp; Handel</button>
+        <button class="lab-cat-btn" data-cat="iot" onclick="filterLab('iot')">IoT &amp; Sensorer</button>
+        <button class="lab-cat-btn" data-cat="compute" onclick="filterLab('compute')">Datorkraft</button>
+        <button class="lab-cat-btn" data-cat="security" onclick="filterLab('security')">Säkerhet</button>
+      </div>
+
+      <!-- Produktlista — fylls av loadLabProducts() i app.js -->
       <div class="lab-shop-area" id="labShopArea">
-
-        <div class="lab-product-row" data-cat="energy">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-energy">⚡ Energi</span>
-            <h3>Shelly Pro 3EM</h3>
-            <p>Trefas energimätare med WiFi och lokal API. Mät exakt förbrukning i realtid och exportera data till UCI-plattformen.</p>
-            <ul class="lab-specs"><li>3-fas upp till 120A</li><li>REST + MQTT API</li><li>DIN-skena</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
-        <div class="lab-product-row" data-cat="energy">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-energy">☀️ Energi</span>
-            <h3>Victron SmartShunt 500A</h3>
-            <p>Batteriövervakare med Bluetooth för solcellssystem. Spåra energiflöden och beräkna UCI-värde på egenproducerad energi.</p>
-            <ul class="lab-specs"><li>500A kontinuerlig mätning</li><li>Bluetooth + VE.Direct</li><li>Victron Connect app</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
-        <div class="lab-product-row" data-cat="nfc">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-nfc">📡 NFC &amp; Handel</span>
-            <h3>ACR122U NFC-läsare</h3>
-            <p>USB NFC-läsare/skrivare. Skriv UCI-transaktioner till NFC-taggar för offline-handel på bytesmarknaden.</p>
-            <ul class="lab-specs"><li>ISO 14443 A/B, Mifare</li><li>USB-A, drivrutinsfri</li><li>SDK medföljer</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
-        <div class="lab-product-row" data-cat="nfc">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-nfc">🏷️ NFC &amp; Handel</span>
-            <h3>NTAG215 NFC-taggar (50-pack)</h3>
-            <p>Högkapacitets NFC-taggar. Märk varor på bytesmarknaden med UCI-värde och ursprung.</p>
-            <ul class="lab-specs"><li>504 bytes EEPROM</li><li>ISO/IEC 14443-3 Type A</li><li>30mm runda etiketter</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
-        <div class="lab-product-row" data-cat="compute">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-compute">🖥️ Datorkraft</span>
-            <h3>Raspberry Pi 5 Starter Kit</h3>
-            <p>Komplett kit med Pi 5 (4GB), nätaggregat, kylare och 64GB SD. Kör din egna UCI-nod eller bytesmarknads-gateway.</p>
-            <ul class="lab-specs"><li>Raspberry Pi 5, 4GB RAM</li><li>64GB SD med Raspberry Pi OS</li><li>Officiellt nätaggregat 27W</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
-        <div class="lab-product-row" data-cat="iot">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-iot">📊 IoT &amp; Sensorer</span>
-            <h3>Ruuvi Tag Pro (4-pack)</h3>
-            <p>Öppen källkod Bluetooth-sensorer för temperatur, luftfuktighet och rörelse. Spåra miljövärden för UCI-prissättning av råvaror.</p>
-            <ul class="lab-specs"><li>Temp, fuktig, tryck, rörelse</li><li>Bluetooth 5, 2+ år batteri</li><li>IP67 vattentät</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
-        <div class="lab-product-row" data-cat="security">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-security">🔐 Säkerhet</span>
-            <h3>Ledger Nano X</h3>
-            <p>Hårdvaruplånbok med Bluetooth för säker signering av UCI-transaktioner och förvaring av kryptografiska nycklar.</p>
-            <ul class="lab-specs"><li>Bluetooth + USB-C</li><li>CC EAL5+ certifierad chip</li><li>Stöd för 5500+ appar</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
-        <div class="lab-product-row" data-cat="iot">
-          <div class="lab-product-info">
-            <span class="lab-badge lab-badge-iot">🌿 IoT &amp; Sensorer</span>
-            <h3>Aranet4 CO₂-mätare</h3>
-            <p>Portabel CO₂/luftkvalitetsmätare med e-ink display och Bluetooth. Rapportera miljödata till UCI:s ESG-kategori.</p>
-            <ul class="lab-specs"><li>CO₂, temp, fuktighet, alarm</li><li>E-ink display, 4 år batteri</li><li>Bluetooth + öppen API</li></ul>
-          </div>
-          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
-        </div>
-
+        <div class="lab-loading">Laddar produkter…</div>
       </div>
 
       <!-- AestimAi Lab — sidfot (vår design) -->
