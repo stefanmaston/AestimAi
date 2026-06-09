@@ -7,6 +7,14 @@
     {
       "source": "/api/news/:path*",
       "destination": "https://news-production-370c.up.railway.app/api/news/:path*"
+    },
+    {
+      "source": "/m/:id",
+      "destination": "/api/m/:id"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
     }
   ],
   "headers": [

@@ -697,6 +697,159 @@ FORMAT B — säker, redo för värdering:
   }
 });
 
+// ── Asset-kategorier för multi-serie diagram ───────────────
+// Alla serier indexeras till 100 vid periodens start.
+// trend = daglig drift (positiv = stigande vs UCI), vol = daglig volatilitet.
+const ASSET_CATEGORIES = {
+  currencies: {
+    label: 'Valutor',
+    series: [
+      { id: 'eur', label: 'EUR', color: '#60a5fa', trend:  0.0001, vol: 0.0040 },
+      { id: 'usd', label: 'USD', color: '#f472b6', trend:  0.0003, vol: 0.0055 },
+      { id: 'gbp', label: 'GBP', color: '#fb923c', trend: -0.0002, vol: 0.0060 },
+      { id: 'nok', label: 'NOK', color: '#a78bfa', trend:  0.0002, vol: 0.0045 },
+      { id: 'dkk', label: 'DKK', color: '#34d399', trend:  0.0001, vol: 0.0030 },
+      { id: 'chf', label: 'CHF', color: '#fbbf24', trend: -0.0003, vol: 0.0035 },
+      { id: 'jpy', label: 'JPY', color: '#f87171', trend:  0.0004, vol: 0.0070 },
+    ],
+  },
+  commodities: {
+    label: 'Råvaror',
+    series: [
+      { id: 'gold',   label: 'Guld (XAU)',   color: '#fbbf24', trend:  0.0008, vol: 0.0100 },
+      { id: 'silver', label: 'Silver (XAG)', color: '#94a3b8', trend:  0.0004, vol: 0.0180 },
+      { id: 'oil',    label: 'Olja (Brent)', color: '#fb923c', trend: -0.0005, vol: 0.0220 },
+      { id: 'copper', label: 'Koppar',       color: '#f97316', trend:  0.0006, vol: 0.0130 },
+      { id: 'wheat',  label: 'Vete',         color: '#eab308', trend:  0.0010, vol: 0.0160 },
+      { id: 'coffee', label: 'Kaffe',        color: '#92400e', trend:  0.0014, vol: 0.0200 },
+    ],
+  },
+  energy: {
+    label: 'Energi',
+    series: [
+      { id: 'electricity', label: 'El (nät SE)',  color: '#60a5fa', trend:  0.0005, vol: 0.0150 },
+      { id: 'solar',       label: 'Sol (LCoE)',   color: '#fbbf24', trend: -0.0010, vol: 0.0060 },
+      { id: 'wind',        label: 'Vind (LCoE)',  color: '#34d399', trend: -0.0005, vol: 0.0050 },
+      { id: 'nuclear',     label: 'Kärnkraft',   color: '#a78bfa', trend:  0.0002, vol: 0.0025 },
+      { id: 'natgas',      label: 'Naturgas',    color: '#fb923c', trend: -0.0003, vol: 0.0250 },
+      { id: 'hydrogen',    label: 'Väte (grön)', color: '#4ade80', trend: -0.0015, vol: 0.0100 },
+    ],
+  },
+  services: {
+    label: 'Tjänster',
+    series: [
+      { id: 'plumber',     label: 'Rörmokare/h',        color: '#60a5fa', trend: 0.0008, vol: 0.0035 },
+      { id: 'electrician', label: 'Elektriker/h',        color: '#fbbf24', trend: 0.0007, vol: 0.0035 },
+      { id: 'developer',   label: 'Mjukvaruutvecklare/h',color: '#4ade80', trend: 0.0012, vol: 0.0060 },
+      { id: 'teacher',     label: 'Lärare/h',            color: '#a78bfa', trend: 0.0005, vol: 0.0025 },
+      { id: 'doctor',      label: 'Läkare/h',            color: '#f472b6', trend: 0.0006, vol: 0.0025 },
+      { id: 'truck',       label: 'Lastbilschaufför/h',  color: '#fb923c', trend: 0.0008, vol: 0.0045 },
+    ],
+  },
+  realestate: {
+    label: 'Fastigheter',
+    series: [
+      { id: 'land_rural', label: 'Mark (landsbygd)',  color: '#86efac', trend: 0.0003, vol: 0.0045 },
+      { id: 'land_urban', label: 'Mark (urban)',      color: '#4ade80', trend: 0.0014, vol: 0.0075 },
+      { id: 'house',      label: 'Småhus',            color: '#60a5fa', trend: 0.0010, vol: 0.0065 },
+      { id: 'apt_city',   label: 'Bostadsrätt (stad)',color: '#f472b6', trend: 0.0013, vol: 0.0085 },
+      { id: 'apt_suburb', label: 'Bostadsrätt (förort)',color: '#a78bfa',trend: 0.0008, vol: 0.0070 },
+    ],
+  },
+  financial: {
+    label: 'Finansiella',
+    series: [
+      { id: 'global_idx', label: 'Global indexfond',    color: '#4ade80', trend: 0.0010, vol: 0.0120 },
+      { id: 'se_stocks',  label: 'SE aktieindex',       color: '#60a5fa', trend: 0.0008, vol: 0.0140 },
+      { id: 'gov_bond',   label: 'Statsobligation',     color: '#94a3b8', trend: 0.0002, vol: 0.0025 },
+      { id: 'corp_bond',  label: 'Företagsobligation',  color: '#a78bfa', trend: 0.0005, vol: 0.0050 },
+      { id: 'warrants',   label: 'Warranter',           color: '#fb923c', trend: 0.0015, vol: 0.0350 },
+      { id: 'crypto_idx', label: 'Kryptoindex',         color: '#fbbf24', trend: 0.0014, vol: 0.0450 },
+    ],
+  },
+  esg: {
+    label: 'Miljö / ESG',
+    series: [
+      { id: 'co2',      label: 'CO₂-kredit (EUA)',      color: '#4ade80', trend: 0.0011, vol: 0.0180 },
+      { id: 'biodiv',   label: 'Biodiversitetsenhet',   color: '#86efac', trend: 0.0005, vol: 0.0080 },
+      { id: 'water',    label: 'Vattenrätt',            color: '#60a5fa', trend: 0.0008, vol: 0.0100 },
+      { id: 'recycled', label: 'Återvunnet material',   color: '#a78bfa', trend: 0.0003, vol: 0.0110 },
+      { id: 'greenbond',label: 'Grön obligation',       color: '#34d399', trend: 0.0005, vol: 0.0035 },
+    ],
+  },
+};
+
+function generateAssetHistory(cat, startDateStr, numDays) {
+  const category = ASSET_CATEGORIES[cat];
+  if (!category) return null;
+
+  const start = new Date(startDateStr);
+  const labels = [];
+  for (let i = 0; i < numDays; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    labels.push(d.toISOString().split('T')[0]);
+  }
+
+  const series = category.series.map(s => {
+    // Unikt seed per serie + startdatum → repeterbar men distinkt kurva
+    const seedNum = s.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+                  + parseInt(startDateStr.replace(/-/g, ''), 10) % 100000;
+    const rng = seededRng(seedNum);
+
+    let val = 100;
+    const data = [100];
+    for (let i = 1; i < numDays; i++) {
+      val = val * (1 + s.trend + (rng() - 0.5) * s.vol);
+      data.push(Math.round(val * 100) / 100);
+    }
+    return { id: s.id, label: s.label, color: s.color, data };
+  });
+
+  return { labels, series, categoryLabel: category.label };
+}
+
+// ── GET /api/uci/assets?cat=currencies&range=1Y ────────────
+app.get('/api/uci/assets', (req, res) => {
+  const cat   = req.query.cat   || 'currencies';
+  const range = req.query.range || '1Y';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let startDate, numDays;
+  if (range === '30d') {
+    numDays = 30;
+    const s = new Date(today); s.setDate(today.getDate() - 29);
+    startDate = s.toISOString().split('T')[0];
+  } else if (range === '90d') {
+    numDays = 90;
+    const s = new Date(today); s.setDate(today.getDate() - 89);
+    startDate = s.toISOString().split('T')[0];
+  } else if (range === 'YTD') {
+    const s = new Date(today.getFullYear() + '-01-01');
+    numDays   = Math.max(1, Math.floor((today - s) / 86400000) + 1);
+    startDate = s.toISOString().split('T')[0];
+  } else if (range === '2Y') {
+    numDays = 730;
+    const s = new Date(today); s.setFullYear(today.getFullYear() - 2);
+    startDate = s.toISOString().split('T')[0];
+  } else if (range === '5Y') {
+    numDays = 1825;
+    const s = new Date(today); s.setFullYear(today.getFullYear() - 5);
+    startDate = s.toISOString().split('T')[0];
+  } else {
+    // 1Y default
+    numDays = 365;
+    const s = new Date(today); s.setFullYear(today.getFullYear() - 1);
+    startDate = s.toISOString().split('T')[0];
+  }
+
+  const data = generateAssetHistory(cat, startDate, numDays);
+  if (!data) return res.status(400).json({ error: 'Okänd kategori: ' + cat });
+  res.json(data);
+});
+
 // ── GET /api/uci/health ────────────────────────────────────
 app.get('/api/uci/health', (req, res) => {
   const key = process.env.ANTHROPIC_API_KEY;

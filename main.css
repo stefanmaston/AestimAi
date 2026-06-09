@@ -1483,3 +1483,141 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 .commentary-loading { grid-column: 1 / -1; text-align: center; color: var(--gray-500); padding: 1.25rem; font-size: 0.85rem; }
 @media (max-width: 1000px) { .commentary-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px)  { .commentary-grid { grid-template-columns: 1fr; } }
+
+/* ═══ UCI Bytesmarknad ═══════════════════════════════ */
+.market-loading,
+.market-empty,
+.market-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem 1.25rem;
+  color: var(--gray-500);
+  font-size: 0.9rem;
+}
+.market-error { color: #b84040; }
+.market-count { margin-left: auto; font-size: 0.8rem; color: var(--gray-500); }
+
+#marketKindFilter { min-width: 180px; }
+
+/* Kort-typmärke (erbjuds / efterlyses) */
+.card-kind {
+  display: inline-block;
+  font-size: 0.62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0.15rem 0.5rem; border-radius: 999px; margin-bottom: 0.4rem;
+}
+.card-kind.kind-offer  { background: var(--green-light); color: var(--green); }
+.card-kind.kind-wanted { background: #fff3e0; color: #b8742a; }
+
+.card-image-link { display: block; }
+.market-card .card-image {
+  background-size: cover; background-position: center;
+}
+.market-card h3 a { color: inherit; text-decoration: none; }
+.market-card h3 a:hover { color: var(--green); }
+
+/* Auth-modal */
+.auth-intro { font-size: 0.88rem; color: var(--gray-500); margin: 0 0 1rem; }
+.auth-error {
+  font-size: 0.82rem; color: #b84040; background: #fbeaea;
+  border-radius: 8px; padding: 0.5rem 0.75rem; margin: 0.5rem 0 0;
+}
+.auth-footer { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+.auth-footer .btn-primary { width: 100%; }
+.auth-footer .btn-text { text-align: center; }
+
+/* Honeypot – ska aldrig synas */
+.hp-field {
+  position: absolute !important; left: -9999px !important;
+  width: 1px; height: 1px; opacity: 0; pointer-events: none;
+}
+
+/* Publicera-toggle i registreringsformuläret */
+.publish-toggle {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.85rem; color: var(--gray-700);
+  margin: 1rem 0 0.5rem; cursor: pointer;
+}
+.publish-toggle input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+
+/* Mina objekt */
+.my-items-header { margin-bottom: 1.25rem; }
+.my-items-header h2 { margin: 0 0 0.25rem; }
+.my-items-header p  { font-size: 0.85rem; color: var(--gray-500); margin: 0; }
+.my-items-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.my-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap;
+  border: 1px solid var(--gray-200, #e6e5e0); border-radius: 12px;
+  padding: 0.9rem 1.1rem; background: var(--white);
+}
+.my-item-info h3 { margin: 0 0 0.2rem; font-size: 0.98rem; }
+.my-item-info .card-cat { margin: 0 0 0.4rem; font-size: 0.82rem; color: var(--gray-500); }
+.my-item-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.my-item-actions .mi-kind { padding: 0.4rem 0.5rem; border-radius: 8px; border: 1px solid var(--gray-200, #e6e5e0); }
+
+.status-pill {
+  display: inline-block; font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 0.15rem 0.55rem; border-radius: 999px;
+}
+.pill-public  { background: var(--green-light); color: var(--green); }
+.pill-private { background: #f0efea; color: var(--gray-500); }
+
+@media (max-width: 560px) {
+  .my-item { flex-direction: column; align-items: stretch; }
+  .my-item-actions { justify-content: space-between; }
+}
+
+/* ── UCI Marknadsdata — kategoritabbar ─────────────────────── */
+.dash-chart-controls { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; }
+
+.dash-cat-tabs {
+  display: flex; flex-wrap: wrap; gap: 0.3rem;
+  justify-content: flex-end;
+}
+.cat-tab {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--gray-500);
+  border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.72rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.cat-tab:hover { border-color: rgba(255,255,255,0.28); color: var(--gray-200, #e0e0e0); }
+.cat-tab.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+/* range-tabs (samma stil som cat-tab men ljusare) */
+.dash-range-tabs { display: flex; gap: 0.25rem; }
+.range-tab {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--gray-500);
+  border-radius: 999px;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.70rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.range-tab:hover { border-color: rgba(255,255,255,0.22); color: var(--gray-200, #e0e0e0); }
+.range-tab.active { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.25); color: #fff; }
+
+/* ── Chartlegend under diagrammet ──────────────────────────── */
+.chart-legend {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+  padding: 0.6rem 0.5rem 0.1rem;
+  font-size: 0.73rem;
+}
+.legend-item { display: flex; align-items: center; gap: 0.35rem; color: rgba(255,255,255,0.65); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-dash {
+  width: 16px; height: 2px;
+  background: repeating-linear-gradient(90deg,rgba(255,255,255,0.4) 0,rgba(255,255,255,0.4) 5px,transparent 5px,transparent 9px);
+  flex-shrink: 0;
+}
+.legend-ref { color: rgba(255,255,255,0.35); }

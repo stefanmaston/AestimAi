@@ -13,7 +13,12 @@ const state = {
   currentItemId:     null,   // aktiv survey-session
   currentUciPrior:   null,   // Claude-estimat (prior)
   hasVoted:          false,
+  user:              null,   // Supabase-användare (när inloggad)
+  listingFiles:      [],     // valda bildfiler i registrera-formuläret
+  listingValuation:  null,   // senaste AI-värdering i registrera-formuläret
 };
+
+let marketLoaded = false;    // har Bytesmarknaden laddats första gången?
 
 // I produktion (Vercel) används relativa sökvägar — Vercel proxar till backend.
 // Lokalt pekar vi direkt på Node-servrarna.
@@ -87,6 +92,12 @@ function navigateTo(moduleId) {
   // Ladda dashboard första gången
   if (moduleId === 'dashboard' && !dashLoaded) {
     loadMarketDashboard();
+  }
+
+  // Ladda Bytesmarknaden första gången
+  if (moduleId === 'market' && !marketLoaded) {
+    marketLoaded = true;
+    searchMarket();
   }
 }
 
@@ -380,8 +391,14 @@ function setupMarketTabs() {
       if (target) target.classList.remove('hidden');
 
       if (btn.dataset.tab === 'register') {
-        document.getElementById('registerGate').classList.toggle('hidden', state.isLoggedIn);
-        document.getElementById('registerForm').classList.toggle('hidden', !state.isLoggedIn);
+        refreshAuth().then(() => {
+          document.getElementById('registerGate').classList.toggle('hidden', state.isLoggedIn);
+          document.getElementById('registerForm').classList.toggle('hidden', !state.isLoggedIn);
+        });
+      } else if (btn.dataset.tab === 'search') {
+        searchMarket();
+      } else if (btn.dataset.tab === 'my-items') {
+        loadMyItems();
       }
     });
   });
@@ -417,55 +434,163 @@ function setupPanel() {
   });
 }
 
-// ── Bytesmodal ──────────────────────────────────────
-function setupMarketModal() {
-  document.addEventListener('click', e => {
-    if (e.target.classList.contains('btn-propose')) {
-      const card = e.target.closest('.market-card');
-      const title = card ? card.querySelector('h3').textContent : '?';
-      document.getElementById('proposedItem').textContent = title;
-      document.getElementById('modalOverlay').classList.remove('hidden');
-    }
-  });
+// ── Inloggning (riktig Supabase-auth, e-post/lösenord) ──────────
+let authMode = 'login';            // 'login' | 'signup'
+let authResolve = null;            // promise-resolver när inloggning krävs i ett flöde
 
-  document.getElementById('btnCloseModal').addEventListener('click', closeModal);
-  document.getElementById('btnCancelPropose').addEventListener('click', closeModal);
-  document.getElementById('modalOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('modalOverlay')) closeModal();
-  });
-
-  document.getElementById('btnConfirmPropose').addEventListener('click', () => {
-    if (!state.isLoggedIn) {
-      closeModal();
-      navigateTo('idcoop');
-      return;
-    }
-    closeModal();
-    showToast('Bytesförslag skickat!');
-  });
+function isRealUser(user) {
+  return !!(user && user.is_anonymous !== true);
 }
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.add('hidden');
-}
-
-// ── Inloggning / AE ID barter or pay ─────────────────────────────
 function setupAuth() {
-  document.getElementById('btnLogin').addEventListener('click', simulateLogin);
-  document.getElementById('btnActivateCard')?.addEventListener('click', simulateLogin);
+  // Sidopanelens login-knapp får sitt beteende i updateAuthUI() (onclick).
+  document.getElementById('btnActivateCard')?.addEventListener('click', () => openAuthModal());
   document.getElementById('btnOrderCard')?.addEventListener('click', () => {
-    showToast('Kortbeställning öppnas — WebAuthn-enrolment via AE ID barter or pay');
+    showToast('Kortbeställning öppnas snart.');
   });
+  document.getElementById('btnRegisterLogin')?.addEventListener('click', () =>
+    openAuthModal({ intro: 'Skapa konto eller logga in för att registrera objekt.' }));
+  document.getElementById('btnMyItemsLogin')?.addEventListener('click', () =>
+    openAuthModal({ intro: 'Logga in för att se och publicera dina objekt.' }));
+
+  // Auth-modalens kontroller
+  document.getElementById('btnCloseAuth').addEventListener('click', closeAuthModal);
+  document.getElementById('btnAuthToggle').addEventListener('click', () => {
+    authMode = authMode === 'login' ? 'signup' : 'login';
+    applyAuthMode();
+  });
+  document.getElementById('btnAuthSubmit').addEventListener('click', submitAuth);
+  document.getElementById('authModalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('authModalOverlay')) closeAuthModal();
+  });
+  document.getElementById('authPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitAuth();
+  });
+
+  updateAuthUI();   // sätter sidopanelens onclick
+  peekSession();    // optimistisk status utan att ladda SDK vid sidladdning
 }
 
-function simulateLogin() {
-  // Simulerad WebAuthn-inloggning
-  showToast('Håll AE ID barter or pay-kortet mot NFC-läsaren…');
-  setTimeout(() => {
-    state.isLoggedIn = true;
+/** Snabb koll av befintlig session i localStorage – laddar inte supabase-js. */
+function peekSession() {
+  try {
+    const raw = localStorage.getItem('sb-vaxtylcqnscnflsucyiv-auth-token');
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    const u = obj?.user || obj?.currentSession?.user || obj?.[0];
+    if (u && u.is_anonymous !== true) {
+      state.user = u;
+      state.isLoggedIn = true;
+      updateAuthUI();
+    }
+  } catch (_) {}
+}
+
+function openAuthModal(opts = {}) {
+  authMode = opts.mode || 'login';
+  if (opts.intro) document.getElementById('authIntro').textContent = opts.intro;
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPassword').value = '';
+  document.getElementById('authError').classList.add('hidden');
+  applyAuthMode();
+  document.getElementById('authModalOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('authEmail').focus(), 50);
+  return new Promise(resolve => { authResolve = resolve; });
+}
+
+function closeAuthModal() {
+  document.getElementById('authModalOverlay').classList.add('hidden');
+  if (authResolve) { authResolve(false); authResolve = null; }
+}
+
+function applyAuthMode() {
+  const isLogin = authMode === 'login';
+  document.getElementById('authTitle').textContent     = isLogin ? 'Logga in' : 'Skapa konto';
+  document.getElementById('btnAuthSubmit').textContent = isLogin ? 'Logga in' : 'Skapa konto';
+  document.getElementById('btnAuthToggle').textContent = isLogin ? 'Inget konto? Skapa ett' : 'Har du redan konto? Logga in';
+  document.getElementById('authPassword').setAttribute('autocomplete', isLogin ? 'current-password' : 'new-password');
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+async function submitAuth() {
+  const email    = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if (!email || !password) { showAuthError('Fyll i e-post och lösenord.'); return; }
+  if (password.length < 6)  { showAuthError('Lösenordet måste vara minst 6 tecken.'); return; }
+
+  const btn = document.getElementById('btnAuthSubmit');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const sb = await getSb();
+    const { data: { user: existing } } = await sb.auth.getUser();
+
+    if (authMode === 'signup') {
+      if (existing && existing.is_anonymous) {
+        // Uppgradera anonym session → behåll historiken (som mobilappen)
+        const { error } = await sb.auth.updateUser({ email, password });
+        if (error) throw error;
+      } else {
+        const { error } = await sb.auth.signUp({ email, password });
+        if (error) throw error;
+      }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    }
+
+    await refreshAuth();
+    closeAuthModal();
+    showToast(authMode === 'signup' ? 'Konto skapat — välkommen!' : 'Inloggad!');
+    if (authResolve) { authResolve(isRealUser(state.user)); authResolve = null; }
+    afterAuthChange();
+  } catch (e) {
+    showAuthError(e?.message || 'Något gick fel. Försök igen.');
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+async function refreshAuth() {
+  try {
+    const sb = await getSb();
+    const { data: { user } } = await sb.auth.getUser();
+    state.user = user || null;
+    state.isLoggedIn = isRealUser(user);
     updateAuthUI();
-    showToast('Inloggad! Välkommen till AestimAi.');
-  }, 1800);
+  } catch (_) {}
+}
+
+async function signOut() {
+  try { const sb = await getSb(); await sb.auth.signOut(); } catch (_) {}
+  state.user = null;
+  state.isLoggedIn = false;
+  updateAuthUI();
+  afterAuthChange();
+  showToast('Utloggad.');
+}
+
+/** Säkerställer en riktig (icke-anonym) session. Öppnar annars auth-modalen. */
+async function requireRealUser(intro) {
+  await refreshAuth();
+  if (isRealUser(state.user)) return state.user;
+  const ok = await openAuthModal({ intro: intro || 'Logga in för att fortsätta.' });
+  return ok ? state.user : null;
+}
+
+function afterAuthChange() {
+  const reg = document.getElementById('tab-register');
+  if (reg && !reg.classList.contains('hidden')) {
+    document.getElementById('registerGate').classList.toggle('hidden', state.isLoggedIn);
+    document.getElementById('registerForm').classList.toggle('hidden', !state.isLoggedIn);
+  }
+  const mi = document.getElementById('tab-my-items');
+  if (mi && !mi.classList.contains('hidden')) loadMyItems();
 }
 
 function updateAuthUI() {
@@ -475,9 +600,9 @@ function updateAuthUI() {
 
   if (state.isLoggedIn) {
     dot.classList.add('active');
-    text.textContent = 'Inloggad';
+    text.textContent = state.user?.email || 'Inloggad';
     btn.textContent  = 'Logga ut';
-    btn.onclick      = () => { state.isLoggedIn = false; updateAuthUI(); };
+    btn.onclick      = signOut;
 
     document.getElementById('idcoopUnauth')?.classList.add('hidden');
     document.getElementById('idcoopAuth')?.classList.remove('hidden');
@@ -486,11 +611,13 @@ function updateAuthUI() {
   } else {
     dot.classList.remove('active');
     text.textContent = 'Ej inloggad';
-    btn.textContent  = 'Logga in med AE ID barter or pay';
-    btn.onclick      = simulateLogin;
+    btn.textContent  = 'Logga in';
+    btn.onclick      = () => openAuthModal();
 
     document.getElementById('idcoopUnauth')?.classList.remove('hidden');
     document.getElementById('idcoopAuth')?.classList.add('hidden');
+    document.getElementById('proGate')?.classList.remove('hidden');
+    document.getElementById('proContent')?.classList.add('hidden');
   }
 }
 
@@ -502,9 +629,10 @@ function setupPhotoUpload() {
 
   addBtn?.addEventListener('click', () => photoInput.click());
   photoInput?.addEventListener('change', e => {
-    const files = Array.from(e.target.files).slice(0, 8);
+    const files = Array.from(e.target.files);
     files.forEach(file => {
-      if (grid.querySelectorAll('.photo-slot:not(.add-photo)').length >= 8) return;
+      if (state.listingFiles.length >= 8) return;
+      state.listingFiles.push(file);
       const reader = new FileReader();
       reader.onload = ev => {
         const slot = document.createElement('div');
@@ -516,7 +644,15 @@ function setupPhotoUpload() {
       };
       reader.readAsDataURL(file);
     });
+    photoInput.value = '';
   });
+}
+
+/** Tömmer fotouppladdningen (efter att ett objekt sparats). */
+function resetPhotoGrid() {
+  state.listingFiles = [];
+  const grid = document.getElementById('photoGrid');
+  grid?.querySelectorAll('.photo-slot:not(.add-photo)').forEach(s => s.remove());
 }
 
 // ── UCI-justering ────────────────────────────────────
@@ -799,20 +935,58 @@ function filterNewsStatic(cat) {
 // ── UCI DASHBOARD ────────────────────────────────────
 
 let dashData   = null;
-let uciChart   = null;
-let dashLoaded = false;
+let uciChart    = null;
+let dashLoaded  = false;
+let activeRange = '1Y';
+let activeCat   = 'currencies';   // default: Valutor
 
 async function loadMarketDashboard() {
   if (dashLoaded) return;
   try {
-    const res  = await fetch(`${UCI_SERVER}/api/uci/history`);
-    dashData   = await res.json();
+    const res = await fetch(`${UCI_SERVER}/api/uci/history`);
+    dashData  = await res.json();
     dashLoaded = true;
-    renderDashboard(dashData, 30);
+    renderDashboard(dashData, 365);   // stats-korten
   } catch (e) {
     console.warn('[Dashboard] Kunde inte ladda historik:', e.message);
   }
   loadCommentary();
+
+  // Kategori-dropdown
+  document.getElementById('dashCatSelect')?.addEventListener('change', onDashCatChange);
+
+  // Tidsintervall-knappar
+  document.querySelector('.dash-range-tabs')?.addEventListener('click', e => {
+    const btn = e.target.closest('.range-tab');
+    if (!btn) return;
+    document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeRange = btn.dataset.range;
+    loadChartForCat();
+  });
+
+  // Starta med default (Valutor, 1Å)
+  loadChartForCat();
+}
+
+function onDashCatChange() {
+  const sel = document.getElementById('dashCatSelect');
+  if (sel) activeCat = sel.value;
+  loadChartForCat();
+}
+
+async function loadChartForCat() {
+  const wrap = document.querySelector('.dash-chart-wrap');
+  if (wrap) wrap.style.opacity = '0.4';
+  try {
+    const r    = await fetch(`${UCI_SERVER}/api/uci/assets?cat=${activeCat}&range=${activeRange}`);
+    const data = await r.json();
+    renderAssetChart(data.labels, data.series);
+    renderChartLegend(data.series);
+  } catch (e) {
+    console.warn('[Assets] Kunde inte ladda:', e.message);
+  }
+  if (wrap) wrap.style.opacity = '1';
 }
 
 // ── Daglig UCI-kommentar (8 teman) ───────────────────
@@ -855,19 +1029,10 @@ const CURRENCIES = {
 // FX mot SEK (för omräkning av cap-värden). UCI = 1 (basenhet — allt annat omräknas via SEK-kursen)
 const FX_TO_SEK = { UCI: null, SEK:1, EUR:11.28, USD:10.44, GBP:13.20, NOK:5.89, DKK:1.51, CHF:12.15, JPY:0.069 };
 
-let activeCurrency = 'EUR';
-
-function onDashCurrencyChange() {
-  const sel = document.getElementById('dashCurrencySelect');
-  if (!sel || !dashData) return;
-  activeCurrency = sel.value;
-  const activeDaysBtn = document.querySelector('.range-tab.active');
-  const days = activeDaysBtn ? parseInt(activeDaysBtn.dataset.days) : 30;
-  renderDashboard(dashData, days);
-}
+let activeCurrency = 'SEK'; // Stats-sektionen visas alltid i SEK
 
 function renderDashboard({ history, stats }, days) {
-  // Filtrera historik baserat på valt intervall
+  // Stats-korten använder alltid SEK
   const slice = days === -1 ? history
               : days === 0  ? history.filter(h => h.date >= `${new Date().getFullYear()}-01-01`)
               : history.slice(-days);
@@ -963,8 +1128,6 @@ function renderDashboard({ history, stats }, days) {
       </tr>`).join('');
   }
 
-  // Ritning av graf i vald valuta
-  renderChart(slice, cur);
 }
 
 function setEl(id, text, colorClass) {
@@ -974,75 +1137,551 @@ function setEl(id, text, colorClass) {
   if (colorClass) el.className = el.className.replace(/\bpos\b|\bneg\b/g, '') + ' ' + colorClass;
 }
 
-function renderChart(slice, cur) {
-  cur = cur || CURRENCIES[activeCurrency] || CURRENCIES.SEK;
+// ── Gemensamma Chart.js-inställningar ─────────────────
+function chartBaseOptions(labels) {
+  return {
+    responsive:          true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false } },
+    scales: {
+      x: {
+        grid:  { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+        ticks: {
+          color: '#888780', maxTicksLimit: 8, maxRotation: 0,
+          callback: (_, i, arr) => {
+            if (i === 0 || i === arr.length - 1 || i % Math.ceil(arr.length / 6) === 0)
+              return labels[i];
+          },
+        },
+        border: { display: false },
+      },
+      y: {
+        position: 'right',
+        grid:     { color: 'rgba(255,255,255,0.05)' },
+        border:   { display: false },
+        ticks:    { color: '#888780' },
+      },
+    },
+  };
+}
+
+// Multi-serie asset-diagram (indexerat till 100) — UCI-linjen alltid platt vid 100
+function renderAssetChart(labels, series) {
   const ctx = document.getElementById('uciChart');
   if (!ctx) return;
-
-  const labels = slice.map(h => h.date);
-  const values = slice.map(h => h[cur.rateKey] || h.rateSEK);
-  const first  = values[0];
-  const isUp   = values[values.length - 1] >= first;
-  const color  = isUp ? '#1D6B4E' : '#BA7517';
-
   if (uciChart) uciChart.destroy();
+
+  const opts = chartBaseOptions(labels);
+  opts.plugins.tooltip = {
+    backgroundColor: '#111210', titleColor: '#fff',
+    bodyColor: 'rgba(255,255,255,0.7)',
+    callbacks: {
+      title: items => items[0].label,
+      label: item => item.dataset.label === '⊙ UCI (referens)'
+        ? ` ⊙ UCI: 100 (referens)`
+        : ` ${item.dataset.label}: ${item.raw.toFixed(1)}`,
+    },
+  };
+  opts.scales.y.ticks.callback = v => v.toFixed(0);
+
+  const datasets = series.map(s => ({
+    label:            s.label,
+    data:             s.data,
+    borderColor:      s.color,
+    borderWidth:      1.8,
+    pointRadius:      0,
+    pointHoverRadius: 4,
+    fill:             false,
+    tension:          0.25,
+    order: 2,
+  }));
+
+  // UCI = konstant referenslinje vid 100. Det är "metern" — rör sig aldrig.
+  datasets.push({
+    label:            '⊙ UCI (referens)',
+    data:             labels.map(() => 100),
+    borderColor:      'rgba(255,255,255,0.55)',
+    borderWidth:      2,
+    borderDash:       [7, 4],
+    pointRadius:      0,
+    pointHoverRadius: 0,
+    fill:             false,
+    tension:          0,
+    order: 1,
+  });
 
   uciChart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        data:            values,
-        borderColor:     color,
-        borderWidth:     2,
-        pointRadius:     0,
-        pointHoverRadius: 4,
-        fill:            true,
-        backgroundColor: ctx2d => {
-          const g = ctx2d.chart.ctx.createLinearGradient(0, 0, 0, 300);
-          g.addColorStop(0, isUp ? 'rgba(29,107,78,0.18)' : 'rgba(186,117,23,0.18)');
-          g.addColorStop(1, 'rgba(255,255,255,0)');
-          return g;
-        },
-        tension: 0.3,
-      }],
-    },
-    options: {
-      responsive:          true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#111210',
-          titleColor:      '#fff',
-          bodyColor:       'rgba(255,255,255,0.7)',
-          callbacks: {
-            title: items => items[0].label,
-            label: item => ` ${item.raw.toFixed(cur.decimals)} ${cur.label}`,
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid:  { color: 'rgba(0,0,0,0.05)', drawTicks: false },
-          ticks: {
-            color: '#888780', maxTicksLimit: 8, maxRotation: 0,
-            callback: (_, i, arr) => {
-              if (i === 0 || i === arr.length - 1 || i % Math.ceil(arr.length / 6) === 0)
-                return labels[i];
-            },
-          },
-          border: { display: false },
-        },
-        y: {
-          position: 'right',
-          grid:  { color: 'rgba(0,0,0,0.05)' },
-          ticks: { color: '#888780', callback: v => v.toFixed(cur.decimals) + ' ' + cur.label },
-          border: { display: false },
-        },
-      },
-    },
+    data: { labels, datasets },
+    options: opts,
+  });
+}
+
+// Förklaring (legend) under diagrammet
+function renderChartLegend(series) {
+  let el = document.getElementById('chartLegend');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'chartLegend';
+    el.className = 'chart-legend';
+    document.querySelector('.dash-chart-wrap')?.after(el);
+  }
+  if (!series || series.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = series.map(s =>
+    `<span class="legend-item">
+       <span class="legend-dot" style="background:${s.color}"></span>
+       <span class="legend-label">${s.label}</span>
+     </span>`
+  ).join('') +
+  `<span class="legend-item legend-ref">
+     <span class="legend-dash"></span>
+     <span class="legend-label">⊙ UCI (referens = 100)</span>
+   </span>`;
+}
+
+// ════════════════════════════════════════════════════
+//  UCI BYTESMARKNAD
+// ════════════════════════════════════════════════════
+
+// Kategorifilter (sök) → synonymer i de fritextkategorier som sparas på objekt.
+const CAT_SYNONYMS = {
+  vardagssaker: ['vardagssaker', 'vardag'],
+  verktyg:      ['verktyg'],
+  elektronik:   ['elektronik'],
+  'kläder':     ['kläder', 'klader'],
+  'möbler':     ['möbler', 'mobler'],
+  fordon:       ['fordon'],
+  fastigheter:  ['fastighet', 'nyttjanderätt'],
+  metaller:     ['metall'],
+  juveler:      ['juvel'],
+  energi:       ['energi'],
+  ip:           ['immateriell', 'rättighet'],
+  'tjänster':   ['tjänst', 'tid'],
+  tokeniserade: ['token'],
+};
+
+const COND_LABELS = { 1: '1 — Dåligt', 2: '2 — Slitet', 3: '3 — OK', 4: '4 — Bra', 5: '5 — Utmärkt' };
+
+function categoryMatches(rowCat, filterVal) {
+  if (!filterVal) return true;
+  const c = String(rowCat || '').toLowerCase();
+  const syns = CAT_SYNONYMS[filterVal] || [filterVal];
+  return syns.some(s => c.includes(s));
+}
+
+/** Normaliserar en databasrad till de fält marknadsvyn behöver. */
+function listingView(row) {
+  const od = row.object_data || {};
+  const r  = row.result || {};
+  const mk = row.marketplace || {};
+  const uciRaw = r.uci_value;
+  const uci = (uciRaw === null || uciRaw === undefined || uciRaw === '') ? null : Number(uciRaw);
+  const condRaw = od.condition;
+  return {
+    id:        row.id,
+    kind:      row.kind || 'offer',
+    title:     mk.title || od.title || (od.description ? String(od.description).slice(0, 60) : 'Objekt'),
+    category:  od.category || '',
+    location:  mk.location || '',
+    uci:       (uci !== null && !isNaN(uci)) ? uci : null,
+    condition: condRaw != null ? (COND_LABELS[condRaw] || condRaw) : '',
+    image:     (Array.isArray(mk.images) && mk.images[0]) || row.image_url || '',
+    verified:  !!mk.is_verified,
+    desc:      od.description || '',
+  };
+}
+
+// ── Sök / bläddra ───────────────────────────────────
+async function searchMarket() {
+  const grid = document.getElementById('marketGrid');
+  const countEl = document.getElementById('marketCount');
+  if (!grid) return;
+  grid.innerHTML = '<div class="market-loading">Laddar Bytesmarknaden…</div>';
+
+  const text     = document.getElementById('marketSearch')?.value.trim() || '';
+  const cat      = document.getElementById('marketCatFilter')?.value || '';
+  const kind     = document.getElementById('marketKindFilter')?.value || '';
+  const uciMin   = parseFloat(document.getElementById('uciMin')?.value);
+  const uciMax   = parseFloat(document.getElementById('uciMax')?.value);
+  const verified = document.getElementById('filterVerified')?.checked;
+
+  try {
+    const sb = await getSb();
+    let q = sb.from('aestimai_valuations')
+      .select('id,object_data,result,marketplace,kind,image_url,created_at,published_at')
+      .eq('is_public', true)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(200);
+    if (kind) q = q.eq('kind', kind);
+    if (text) q = q.textSearch('search', text, { type: 'websearch', config: 'swedish' });
+
+    const { data, error } = await q;
+    if (error) throw error;
+
+    let rows = (data || []).map(listingView);
+    if (cat)               rows = rows.filter(v => categoryMatches(v.category, cat));
+    if (!isNaN(uciMin))    rows = rows.filter(v => v.uci != null && v.uci >= uciMin);
+    if (!isNaN(uciMax))    rows = rows.filter(v => v.uci != null && v.uci <= uciMax);
+    if (verified)          rows = rows.filter(v => v.verified);
+
+    if (countEl) countEl.textContent = `${rows.length} ${rows.length === 1 ? 'objekt' : 'objekt'}`;
+
+    if (!rows.length) {
+      grid.innerHTML = '<div class="market-empty">Inga publika objekt matchar. Var först — registrera och publicera ditt objekt!</div>';
+      return;
+    }
+    grid.innerHTML = rows.map(marketCardHTML).join('');
+  } catch (e) {
+    console.warn('[market] sök misslyckades:', e?.message);
+    grid.innerHTML = `<div class="market-error">Kunde inte ladda Bytesmarknaden: ${escHtml(e?.message || 'okänt fel')}</div>`;
+  }
+}
+
+function marketCardHTML(v) {
+  const img = v.image
+    ? `<div class="card-image" style="background-image:url('${escHtml(v.image)}')"></div>`
+    : '<div class="card-image placeholder-img">📷</div>';
+  const kindLabel = v.kind === 'wanted' ? 'Efterlyses' : 'Erbjuds';
+  return `<div class="market-card" data-id="${escHtml(v.id)}">
+    <a class="card-image-link" href="/m/${escHtml(v.id)}">${img}</a>
+    <div class="card-body">
+      <span class="card-kind kind-${escHtml(v.kind)}">${kindLabel}</span>
+      <h3><a href="/m/${escHtml(v.id)}">${escHtml(v.title)}</a></h3>
+      <p class="card-cat">${escHtml(v.category)}${v.location ? ' · ' + escHtml(v.location) : ''}</p>
+      <div class="card-uci">
+        <span class="uci-badge">${v.uci != null ? v.uci.toLocaleString('sv-SE') + ' UCI' : '— UCI'}</span>
+        ${v.verified ? '<span class="card-verified">✓ AE ID</span>' : ''}
+      </div>
+      ${v.condition ? `<p class="card-condition">Skick: ${escHtml(v.condition)}</p>` : ''}
+      <button class="btn-secondary btn-contact" data-id="${escHtml(v.id)}" data-title="${escHtml(v.title)}">Kontakta</button>
+    </div>
+  </div>`;
+}
+
+// ── Registrera objekt ───────────────────────────────
+async function fetchValuation(input) {
+  try {
+    const res = await fetch(`${UCI_SERVER}/api/uci/value`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'API-fel');
+    return data;
+  } catch (e) {
+    console.warn('[market] värdering:', e?.message);
+    return null;
+  }
+}
+
+async function valueListing() {
+  const desc      = document.getElementById('itemDesc').value.trim();
+  const category  = document.getElementById('itemCategory').value;
+  const condition = parseInt(document.getElementById('itemCondition').value) || 3;
+  if (!desc) { showToast('Skriv en beskrivning först.'); return; }
+
+  const btn = document.getElementById('btnValueListing');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Värderar…';
+  const data = await fetchValuation({ description: desc, category, condition });
+  btn.disabled = false; btn.textContent = orig;
+
+  if (data && data.uci_value != null) {
+    state.listingValuation = data;
+    document.getElementById('uciAutoValue').textContent = Number(data.uci_value).toLocaleString('sv-SE');
+  } else {
+    showToast('AI-värdering misslyckades — du kan ange ett UCI-värde manuellt.');
+  }
+}
+
+async function uploadListingImages(userId) {
+  const files = state.listingFiles || [];
+  if (!files.length) return [];
+  const sb = await getSb();
+  const urls = [];
+  for (const file of files) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await sb.storage.from('listing-images')
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (error) { console.warn('[market] bilduppladdning:', error.message); continue; }
+    const { data } = sb.storage.from('listing-images').getPublicUrl(path);
+    if (data?.publicUrl) urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
+async function submitListing() {
+  const user = await requireRealUser('Logga in för att registrera och spara objekt.');
+  if (!isRealUser(user)) return;
+
+  const kind      = document.getElementById('itemKind').value || 'offer';
+  const title     = document.getElementById('itemTitle').value.trim();
+  const desc      = document.getElementById('itemDesc').value.trim();
+  const category  = document.getElementById('itemCategory').value;
+  const condition = parseInt(document.getElementById('itemCondition').value) || 3;
+  const location  = document.getElementById('itemLocation').value.trim();
+  const manualUci = parseFloat(document.getElementById('itemUciPrice').value);
+  const publishNow = document.getElementById('publishNow').checked;
+
+  if (!title) { showToast('Ange en titel.'); document.getElementById('itemTitle').focus(); return; }
+  if (!desc)  { showToast('Beskriv objektet eller tjänsten.'); document.getElementById('itemDesc').focus(); return; }
+
+  const btn = document.getElementById('btnPublishListing');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Sparar…';
+
+  try {
+    // Värdering: använd cachad AI-värdering, hämta ny, eller manuellt värde.
+    let result = state.listingValuation;
+    if (!result) result = await fetchValuation({ description: desc, category, condition });
+    if (!result) result = {};
+    if (!isNaN(manualUci)) result = { ...result, uci_value: manualUci };
+
+    let images = [];
+    try { images = await uploadListingImages(user.id); }
+    catch (e) { console.warn('[market] bilder:', e?.message); }
+
+    const object_data = { description: desc, category, condition, title };
+    const marketplace = { title };
+    if (location)      marketplace.location = location;
+    if (images.length) marketplace.images = images;
+
+    const row = {
+      user_id:      user.id,
+      object_data,
+      result,
+      source:       'manual',
+      kind,
+      marketplace,
+      is_public:    publishNow,
+      published_at: publishNow ? new Date().toISOString() : null,
+      image_url:    images[0] || null,
+    };
+
+    const sb = await getSb();
+    const { error } = await sb.from('aestimai_valuations').insert(row);
+    if (error) throw error;
+
+    showToast(publishNow ? 'Publicerat i Bytesmarknad!' : 'Sparat under Mina objekt.');
+    resetRegisterForm();
+    switchMarketTab('my-items');
+  } catch (e) {
+    showToast('Kunde inte spara: ' + (e?.message || 'okänt fel'));
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+function resetRegisterForm() {
+  ['itemTitle', 'itemDesc', 'itemLocation', 'itemUciPrice'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('uciAutoValue').textContent = '—';
+  state.listingValuation = null;
+  resetPhotoGrid();
+}
+
+/** Aktiverar en marknadstabb programmatiskt (klickar på dess knapp). */
+function switchMarketTab(tab) {
+  const btn = document.querySelector(`.market-tabs .tab-btn[data-tab="${tab}"]`);
+  if (btn) btn.click();
+}
+
+// ── Mina objekt ─────────────────────────────────────
+async function loadMyItems() {
+  const container = document.getElementById('myItemsContent');
+  if (!container) return;
+  container.innerHTML = '<div class="market-loading">Laddar dina objekt…</div>';
+
+  await refreshAuth();
+  if (!isRealUser(state.user)) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⇄</div>
+        <h2>Logga in för att se dina objekt</h2>
+        <p>Här samlas allt du har värderat — välj med en knapp vilka som ska visas i Bytesmarknaden.</p>
+        <button class="btn-primary" id="btnMyItemsLogin2">Logga in / Skapa konto</button>
+      </div>`;
+    document.getElementById('btnMyItemsLogin2')?.addEventListener('click', async () => {
+      const ok = await openAuthModal({ intro: 'Logga in för att se och publicera dina objekt.' });
+      if (ok) loadMyItems();
+    });
+    return;
+  }
+
+  try {
+    const sb = await getSb();
+    const { data, error } = await sb.from('aestimai_valuations')
+      .select('id,object_data,result,marketplace,kind,is_public,image_url,created_at,published_at')
+      .eq('user_id', state.user.id)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+
+    if (!data.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⇄</div>
+          <h2>Inga objekt än</h2>
+          <p>Registrera ditt första objekt eller gör en värdering — det dyker upp här.</p>
+          <button class="btn-primary" id="btnGoRegister">Registrera objekt</button>
+        </div>`;
+      document.getElementById('btnGoRegister')?.addEventListener('click', () => switchMarketTab('register'));
+      return;
+    }
+
+    const header = `<div class="my-items-header"><h2>Mina objekt</h2>
+      <p>Tryck <strong>Visa i Bytesmarknad</strong> för att göra ett objekt publikt och sökbart.</p></div>`;
+    container.innerHTML = header + '<div class="my-items-list">' + data.map(myItemRowHTML).join('') + '</div>';
+  } catch (e) {
+    container.innerHTML = `<div class="market-error">Kunde inte hämta dina objekt: ${escHtml(e?.message || 'okänt fel')}</div>`;
+  }
+}
+
+function myItemRowHTML(row) {
+  const v = listingView(row);
+  const pub = !!row.is_public;
+  return `<div class="my-item" data-id="${escHtml(row.id)}">
+    <div class="my-item-info">
+      <h3>${escHtml(v.title)}</h3>
+      <p class="card-cat">${escHtml(v.category)}${v.uci != null ? ' · ' + v.uci.toLocaleString('sv-SE') + ' UCI' : ''}</p>
+      <span class="status-pill ${pub ? 'pill-public' : 'pill-private'}">${pub ? 'Publik i Bytesmarknad' : 'Ej publik'}</span>
+    </div>
+    <div class="my-item-actions">
+      <select class="mi-kind" data-id="${escHtml(row.id)}">
+        <option value="offer"${v.kind === 'offer' ? ' selected' : ''}>Erbjuds</option>
+        <option value="wanted"${v.kind === 'wanted' ? ' selected' : ''}>Efterlyses</option>
+      </select>
+      <button class="btn-primary mi-toggle" data-id="${escHtml(row.id)}" data-public="${pub ? '1' : '0'}">${pub ? 'Dölj' : 'Visa i Bytesmarknad'}</button>
+      ${pub ? `<a class="btn-text" href="/m/${escHtml(row.id)}" target="_blank" rel="noopener">Visa sida</a>` : ''}
+      <button class="btn-text mi-delete" data-id="${escHtml(row.id)}">Radera</button>
+    </div>
+  </div>`;
+}
+
+async function toggleMyItem(id, makePublic) {
+  const kindSel = document.querySelector(`.mi-kind[data-id="${id}"]`);
+  const kind = kindSel ? kindSel.value : 'offer';
+  const patch = { is_public: makePublic, kind };
+  if (makePublic) patch.published_at = new Date().toISOString();
+  try {
+    const sb = await getSb();
+    const { error } = await sb.from('aestimai_valuations').update(patch).eq('id', id);
+    if (error) throw error;
+    showToast(makePublic ? 'Publicerat i Bytesmarknad!' : 'Dolt från Bytesmarknad.');
+    marketLoaded = false; // tvinga ny laddning av söklistan nästa gång
+    loadMyItems();
+  } catch (e) {
+    showToast('Gick inte att uppdatera: ' + (e?.message || 'okänt fel'));
+  }
+}
+
+async function deleteMyItem(id) {
+  if (!window.confirm('Radera detta objekt permanent?')) return;
+  try {
+    const sb = await getSb();
+    const { error } = await sb.from('aestimai_valuations').delete().eq('id', id);
+    if (error) throw error;
+    showToast('Objektet raderat.');
+    loadMyItems();
+  } catch (e) {
+    showToast('Gick inte att radera: ' + (e?.message || 'okänt fel'));
+  }
+}
+
+// ── Kontaktformulär ─────────────────────────────────
+let contactCtx = null;
+
+function openContactModal(id, title) {
+  contactCtx = { id, title };
+  document.getElementById('contactItem').textContent = title || 'objektet';
+  ['contactName', 'contactEmail', 'contactMessage', 'contactCompany'].forEach(i => {
+    const el = document.getElementById(i); if (el) el.value = '';
+  });
+  document.getElementById('contactError').classList.add('hidden');
+  document.getElementById('contactModalOverlay').classList.remove('hidden');
+}
+
+function closeContactModal() {
+  document.getElementById('contactModalOverlay').classList.add('hidden');
+}
+
+async function sendContact() {
+  const name    = document.getElementById('contactName').value.trim();
+  const email   = document.getElementById('contactEmail').value.trim();
+  const message = document.getElementById('contactMessage').value.trim();
+  const hp      = document.getElementById('contactCompany').value;   // honeypot
+  const errEl   = document.getElementById('contactError');
+
+  if (!email || !message) {
+    errEl.textContent = 'Fyll i din e-post och ett meddelande.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const btn = document.getElementById('btnSendContact');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Skickar…';
+  try {
+    const res = await fetch('/api/market/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listingId: contactCtx?.id, fromEmail: email, name, message, hp }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Kunde inte skicka meddelandet.');
+    closeContactModal();
+    showToast('Meddelandet skickat till annonsören!');
+  } catch (e) {
+    errEl.textContent = e?.message || 'Något gick fel.';
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+// ── Marknadens evenemang ────────────────────────────
+function setupMarketplace() {
+  document.getElementById('btnMarketSearch')?.addEventListener('click', searchMarket);
+  document.getElementById('marketSearch')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchMarket();
+  });
+  ['marketCatFilter', 'marketKindFilter', 'filterVerified'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', searchMarket);
+  });
+
+  document.getElementById('btnValueListing')?.addEventListener('click', valueListing);
+  document.getElementById('btnPublishListing')?.addEventListener('click', submitListing);
+
+  // Kontakt via kort (delegering)
+  document.getElementById('marketGrid')?.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-contact');
+    if (btn) {
+      e.preventDefault();
+      openContactModal(btn.dataset.id, btn.dataset.title);
+    }
+  });
+
+  // Mina objekt-åtgärder (delegering)
+  document.getElementById('myItemsContent')?.addEventListener('click', e => {
+    const toggle = e.target.closest('.mi-toggle');
+    if (toggle) { toggleMyItem(toggle.dataset.id, toggle.dataset.public !== '1'); return; }
+    const del = e.target.closest('.mi-delete');
+    if (del) { deleteMyItem(del.dataset.id); return; }
+  });
+
+  // Kontaktmodal
+  document.getElementById('btnCloseContact')?.addEventListener('click', closeContactModal);
+  document.getElementById('btnCancelContact')?.addEventListener('click', closeContactModal);
+  document.getElementById('btnSendContact')?.addEventListener('click', sendContact);
+  document.getElementById('contactModalOverlay')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('contactModalOverlay')) closeContactModal();
   });
 }
 
@@ -1063,7 +1702,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMarketTabs();
   setupProTabs();
   setupPanel();
-  setupMarketModal();
+  setupMarketplace();
   setupAuth();
   setupPhotoUpload();
   setupUciAdjust();
@@ -1074,14 +1713,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Survey vote-knapp
   document.getElementById('btnSubmitVote')?.addEventListener('click', submitVote);
 
-  // Dashboard range-tabs
-  document.querySelectorAll('.dash-range-tabs .range-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.dash-range-tabs .range-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      if (dashData) renderDashboard(dashData, parseInt(btn.dataset.days));
-    });
-  });
+  // Dashboard range-tabs hanteras nu av delegering i loadMarketDashboard()
 
   // Initial hjälptext
   updatePanelHelp('uci');

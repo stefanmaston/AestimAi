@@ -321,24 +321,24 @@
             <span class="dash-price-change" id="dashPriceChange">—</span>
           </div>
           <div class="dash-chart-controls">
-            <select id="dashCurrencySelect" class="dash-currency-select" onchange="onDashCurrencyChange()">
-              <option value="UCI">⊙ UCI</option>
-              <option value="SEK">🇸🇪 SEK</option>
-              <option value="EUR" selected>🇪🇺 EUR</option>
-              <option value="USD">🇺🇸 USD</option>
-              <option value="GBP">🇬🇧 GBP</option>
-              <option value="NOK">🇳🇴 NOK</option>
-              <option value="DKK">🇩🇰 DKK</option>
-              <option value="CHF">🇨🇭 CHF</option>
-              <option value="JPY">🇯🇵 JPY</option>
+            <!-- Kategori-väljare (dropdown) -->
+            <select id="dashCatSelect" class="dash-currency-select" onchange="onDashCatChange()">
+              <option value="currencies" selected>Valutor</option>
+              <option value="commodities">Råvaror</option>
+              <option value="energy">Energi</option>
+              <option value="services">Tjänster</option>
+              <option value="realestate">Fastigheter</option>
+              <option value="financial">Finansiella instrument</option>
+              <option value="esg">Miljö / ESG</option>
             </select>
+            <!-- Tidsintervall -->
             <div class="dash-range-tabs">
-              <button class="range-tab active" data-days="7">1V</button>
-              <button class="range-tab" data-days="30">1M</button>
-              <button class="range-tab" data-days="90">3M</button>
-              <button class="range-tab" data-days="180">6M</button>
-              <button class="range-tab" data-days="0">ÅTD</button>
-              <button class="range-tab" data-days="-1">ALLT</button>
+              <button class="range-tab" data-range="30d">1M</button>
+              <button class="range-tab" data-range="90d">3M</button>
+              <button class="range-tab active" data-range="1Y">1Å</button>
+              <button class="range-tab" data-range="2Y">2Å</button>
+              <button class="range-tab" data-range="YTD">ÅTD</button>
+              <button class="range-tab" data-range="5Y">5Å</button>
             </div>
           </div>
         </div>
@@ -487,6 +487,11 @@
             <option value="tjänster">Tjänster / Tid</option>
             <option value="tokeniserade">Tokeniserade tillgångar</option>
           </select>
+          <select id="marketKindFilter">
+            <option value="">Byten och efterlysningar</option>
+            <option value="offer">Endast byteserbjudanden</option>
+            <option value="wanted">Endast efterlysningar</option>
+          </select>
           <div class="uci-range-filter">
             <label>UCI-värde:</label>
             <input type="number" id="uciMin" placeholder="Min">
@@ -497,51 +502,13 @@
         </div>
         <div class="filter-row">
           <label class="toggle-label">
-            <input type="checkbox" id="filterVerified" checked>
+            <input type="checkbox" id="filterVerified">
             Visa bara AE ID-verifierade
           </label>
+          <span class="market-count" id="marketCount"></span>
         </div>
         <div class="market-grid" id="marketGrid">
-          <!-- Demo-objekt -->
-          <div class="market-card">
-            <div class="card-image placeholder-img">📷</div>
-            <div class="card-body">
-              <h3>Vintage cykel, 1970-tal</h3>
-              <p class="card-cat">Fordon</p>
-              <div class="card-uci">
-                <span class="uci-badge">420 UCI</span>
-                <span class="card-verified">✓ AE ID</span>
-              </div>
-              <p class="card-condition">Skick: 4 — Bra</p>
-              <button class="btn-secondary btn-propose">Föreslå byte</button>
-            </div>
-          </div>
-          <div class="market-card">
-            <div class="card-image placeholder-img">📷</div>
-            <div class="card-body">
-              <h3>Professionell kamera, Canon EOS R5</h3>
-              <p class="card-cat">Elektronik</p>
-              <div class="card-uci">
-                <span class="uci-badge">1 850 UCI</span>
-                <span class="card-verified">✓ AE ID</span>
-              </div>
-              <p class="card-condition">Skick: 5 — Utmärkt</p>
-              <button class="btn-secondary btn-propose">Föreslå byte</button>
-            </div>
-          </div>
-          <div class="market-card">
-            <div class="card-image placeholder-img">📷</div>
-            <div class="card-body">
-              <h3>Timmar webbutveckling (10h)</h3>
-              <p class="card-cat">Tjänster / Tid</p>
-              <div class="card-uci">
-                <span class="uci-badge">600 UCI</span>
-                <span class="card-verified">✓ AE ID</span>
-              </div>
-              <p class="card-condition">Skick: 5 — Utmärkt</p>
-              <button class="btn-secondary btn-propose">Föreslå byte</button>
-            </div>
-          </div>
+          <div class="market-loading">Laddar Bytesmarknaden…</div>
         </div>
       </div>
 
@@ -549,19 +516,30 @@
       <div class="tab-content hidden" id="tab-register">
         <div class="register-gate" id="registerGate">
           <div class="gate-icon">⊙</div>
-          <h2>AE ID-kort krävs</h2>
-          <p>För att registrera objekt på bytesmarknaden behöver du ett AE ID-kort (engångskostnad €15–25). Kortet är din identitet och din signatur.</p>
-          <button class="btn-primary" data-module="idcoop">Beställ AE ID-kort</button>
+          <h2>Logga in för att registrera</h2>
+          <p>För att registrera och publicera objekt eller tjänster i Bytesmarknaden behöver du ett konto. Det är gratis, och din värderingshistorik följer med.</p>
+          <button class="btn-primary" id="btnRegisterLogin">Logga in / Skapa konto</button>
         </div>
         <form class="register-form hidden" id="registerForm">
-          <h2>Registrera nytt objekt</h2>
+          <h2>Registrera objekt eller tjänst</h2>
+          <div class="form-group">
+            <label>Typ av annons</label>
+            <select id="itemKind">
+              <option value="offer">Byteserbjudande — jag erbjuder detta</option>
+              <option value="wanted">Efterlysning — jag söker detta</option>
+            </select>
+          </div>
           <div class="form-group">
             <label>Titel</label>
-            <input type="text" placeholder="Vad vill du byta?" id="itemTitle">
+            <input type="text" placeholder="Vad erbjuder eller söker du?" id="itemTitle">
           </div>
           <div class="form-group">
             <label>Beskrivning</label>
-            <textarea placeholder="Beskriv objektet noggrant…" id="itemDesc" rows="4"></textarea>
+            <textarea placeholder="Beskriv objektet/tjänsten noggrant…" id="itemDesc" rows="4"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Plats (valfritt)</label>
+            <input type="text" placeholder="T.ex. Stockholm" id="itemLocation">
           </div>
           <div class="form-row">
             <div class="form-group">
@@ -607,27 +585,33 @@
             <span class="uci-auto-label">AestimAi föreslår:</span>
             <span class="uci-auto-value" id="uciAutoValue">—</span>
             <span class="uci-auto-unit">UCI</span>
+            <button type="button" class="btn-text" id="btnValueListing">Värdera med AI</button>
             <button type="button" class="btn-text" id="btnAdjustUci">Justera</button>
           </div>
           <div class="form-group hidden" id="uciAdjustGroup">
             <label>Ditt UCI-pris</label>
             <input type="number" id="itemUciPrice" placeholder="UCI-värde">
           </div>
+          <label class="publish-toggle">
+            <input type="checkbox" id="publishNow" checked>
+            <span>Publicera direkt i Bytesmarknad (kan ändras senare under Mina objekt)</span>
+          </label>
           <div class="signing-box">
-            <h3>AE ID-signering</h3>
-            <p>Genom att signera bekräftar du kryptografiskt att objektet är lagligt och korrekt beskrivet.</p>
-            <button type="button" class="btn-primary" id="btnSign">Signera med AE ID-kort</button>
+            <p>Du intygar att objektet/tjänsten är lagligt och korrekt beskrivet. Själva affären görs upp direkt mellan dig och motparten — utanför AestimAi.</p>
+            <button type="button" class="btn-primary" id="btnPublishListing">Spara objekt</button>
           </div>
         </form>
       </div>
 
       <!-- Mina objekt -->
       <div class="tab-content hidden" id="tab-my-items">
-        <div class="empty-state">
-          <div class="empty-icon">⇄</div>
-          <h2>Inga registrerade objekt</h2>
-          <p>Logga in med ditt AE ID-kort och registrera ditt första objekt för byte.</p>
-          <button class="btn-primary" data-tab="register">Registrera objekt</button>
+        <div id="myItemsContent">
+          <div class="empty-state">
+            <div class="empty-icon">⇄</div>
+            <h2>Logga in för att se dina objekt</h2>
+            <p>Här samlas allt du har värderat — välj med en knapp vilka som ska visas och bli sökbara i Bytesmarknaden.</p>
+            <button class="btn-primary" id="btnMyItemsLogin">Logga in / Skapa konto</button>
+          </div>
         </div>
       </div>
     </section>
@@ -1229,6 +1213,64 @@
       <div class="modal-footer">
         <button class="btn-secondary" id="btnCancelPropose">Avbryt</button>
         <button class="btn-primary" id="btnConfirmPropose">Föreslå byte</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Inloggning / skapa konto -->
+  <div class="modal-overlay hidden" id="authModalOverlay">
+    <div class="modal" id="modalAuth">
+      <div class="modal-header">
+        <h2 id="authTitle">Logga in</h2>
+        <button class="btn-close-modal" id="btnCloseAuth">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="auth-intro" id="authIntro">Logga in för att registrera och publicera i Bytesmarknaden.</p>
+        <div class="form-group">
+          <label>E-post</label>
+          <input type="email" id="authEmail" autocomplete="email" placeholder="namn@exempel.se">
+        </div>
+        <div class="form-group">
+          <label>Lösenord</label>
+          <input type="password" id="authPassword" autocomplete="current-password" placeholder="Minst 6 tecken">
+        </div>
+        <p class="auth-error hidden" id="authError"></p>
+      </div>
+      <div class="modal-footer auth-footer">
+        <button class="btn-primary" id="btnAuthSubmit">Logga in</button>
+        <button class="btn-text" id="btnAuthToggle">Inget konto? Skapa ett</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Kontakta annonsör -->
+  <div class="modal-overlay hidden" id="contactModalOverlay">
+    <div class="modal" id="modalContact">
+      <div class="modal-header">
+        <h2>Kontakta annonsören</h2>
+        <button class="btn-close-modal" id="btnCloseContact">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Angående <strong id="contactItem">—</strong></p>
+        <div class="form-group">
+          <label>Ditt namn</label>
+          <input type="text" id="contactName" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label>Din e-post</label>
+          <input type="email" id="contactEmail" autocomplete="email" placeholder="Så att annonsören kan svara dig">
+        </div>
+        <div class="form-group">
+          <label>Meddelande</label>
+          <textarea id="contactMessage" rows="4" placeholder="Beskriv ditt intresse eller ditt byteserbjudande…"></textarea>
+        </div>
+        <!-- Honeypot mot spam: ska lämnas tom -->
+        <input type="text" id="contactCompany" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="auth-error hidden" id="contactError"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btnCancelContact">Avbryt</button>
+        <button class="btn-primary" id="btnSendContact">Skicka</button>
       </div>
     </div>
   </div>
