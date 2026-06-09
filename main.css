@@ -1745,11 +1745,23 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   margin: 0 0 .6rem;
 }
 
-/* Stripe buy-button area */
+/* Buy button area */
 .lab-buy-area {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+}
+
+.btn-coming-soon {
+  padding: .5rem 1.1rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--gray-400, #9ca3af);
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: default;
+  white-space: nowrap;
 }
 
 /* Specs */

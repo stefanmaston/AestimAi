@@ -752,16 +752,7 @@
         </div>
       </div>
 
-      <!-- Stripe Buy Button area — produkterna hämtas från Stripe -->
-      <!-- Lägg till din Stripe publishable key och buy-button-id nedan      -->
-      <!-- när du har skapat produkterna i Stripe Dashboard                  -->
       <div class="lab-shop-area" id="labShopArea">
-
-        <!-- ── Stripe Buy Buttons ────────────────────────────────────────
-             Ersätt PLACEHOLDER_KEY med din publishable key (pk_live_...)
-             och PLACEHOLDER_ID med respektive buy_btn_... ID från Stripe.
-             Skript laddas en gång (se slutet av body).
-        ──────────────────────────────────────────────────────────────── -->
 
         <div class="lab-product-row" data-cat="energy">
           <div class="lab-product-info">
@@ -770,13 +761,7 @@
             <p>Trefas energimätare med WiFi och lokal API. Mät exakt förbrukning i realtid och exportera data till UCI-plattformen.</p>
             <ul class="lab-specs"><li>3-fas upp till 120A</li><li>REST + MQTT API</li><li>DIN-skena</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <!-- stripe-buy-button web component -->
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_SHELLY"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
         <div class="lab-product-row" data-cat="energy">
@@ -786,12 +771,7 @@
             <p>Batteriövervakare med Bluetooth för solcellssystem. Spåra energiflöden och beräkna UCI-värde på egenproducerad energi.</p>
             <ul class="lab-specs"><li>500A kontinuerlig mätning</li><li>Bluetooth + VE.Direct</li><li>Victron Connect app</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_VICTRON"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
         <div class="lab-product-row" data-cat="nfc">
@@ -801,12 +781,7 @@
             <p>USB NFC-läsare/skrivare. Skriv UCI-transaktioner till NFC-taggar för offline-handel på bytesmarknaden.</p>
             <ul class="lab-specs"><li>ISO 14443 A/B, Mifare</li><li>USB-A, drivrutinsfri</li><li>SDK medföljer</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_ACR"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
         <div class="lab-product-row" data-cat="nfc">
@@ -816,12 +791,7 @@
             <p>Högkapacitets NFC-taggar. Märk varor på bytesmarknaden med UCI-värde och ursprung.</p>
             <ul class="lab-specs"><li>504 bytes EEPROM</li><li>ISO/IEC 14443-3 Type A</li><li>30mm runda etiketter</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_NFC"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
         <div class="lab-product-row" data-cat="compute">
@@ -831,12 +801,7 @@
             <p>Komplett kit med Pi 5 (4GB), nätaggregat, kylare och 64GB SD. Kör din egna UCI-nod eller bytesmarknads-gateway.</p>
             <ul class="lab-specs"><li>Raspberry Pi 5, 4GB RAM</li><li>64GB SD med Raspberry Pi OS</li><li>Officiellt nätaggregat 27W</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_RPI"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
         <div class="lab-product-row" data-cat="iot">
@@ -846,12 +811,7 @@
             <p>Öppen källkod Bluetooth-sensorer för temperatur, luftfuktighet och rörelse. Spåra miljövärden för UCI-prissättning av råvaror.</p>
             <ul class="lab-specs"><li>Temp, fuktig, tryck, rörelse</li><li>Bluetooth 5, 2+ år batteri</li><li>IP67 vattentät</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_RUUVI"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
         <div class="lab-product-row" data-cat="security">
@@ -861,12 +821,7 @@
             <p>Hårdvaruplånbok med Bluetooth för säker signering av UCI-transaktioner och förvaring av kryptografiska nycklar.</p>
             <ul class="lab-specs"><li>Bluetooth + USB-C</li><li>CC EAL5+ certifierad chip</li><li>Stöd för 5500+ appar</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_LEDGER"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
         <div class="lab-product-row" data-cat="iot">
@@ -876,15 +831,10 @@
             <p>Portabel CO₂/luftkvalitetsmätare med e-ink display och Bluetooth. Rapportera miljödata till UCI:s ESG-kategori.</p>
             <ul class="lab-specs"><li>CO₂, temp, fuktighet, alarm</li><li>E-ink display, 4 år batteri</li><li>Bluetooth + öppen API</li></ul>
           </div>
-          <div class="lab-buy-area">
-            <stripe-buy-button
-              buy-button-id="PLACEHOLDER_BTN_ARANET"
-              publishable-key="PLACEHOLDER_PK">
-            </stripe-buy-button>
-          </div>
+          <div class="lab-buy-area"><button class="btn-coming-soon" disabled>Öppnar snart</button></div>
         </div>
 
-      </div><!-- /lab-shop-area -->
+      </div>
 
       <!-- AestimAi Lab — sidfot (vår design) -->
       <div class="lab-footer">
@@ -1504,8 +1454,5 @@
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 
-  <!-- Stripe Buy Button — laddas bara när AestimAi Lab visas -->
-  <!-- Skriptet är lätt (~10 kB) och laddas asynkront, påverkar inte sidladdning -->
-  <script async src="https://js.stripe.com/v3/buy-button.js"></script>
 </body>
 </html>
