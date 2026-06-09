@@ -1142,8 +1142,8 @@ function chartBaseOptions(labels) {
   return {
     responsive:          true,
     maintainAspectRatio: false,
-    // nearest = bara den serie pekaren är närmast
-    interaction: { mode: 'nearest', intersect: false, axis: 'x' },
+    // nearest utan axis = Euclidean avstånd → bara närmaste serie visas
+    interaction: { mode: 'nearest', intersect: false },
     plugins: { legend: { display: false } },
     scales: {
       x: {

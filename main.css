@@ -1609,15 +1609,15 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 
 /* ── Chartlegend under diagrammet ──────────────────────────── */
 .chart-legend {
-  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
-  padding: 0.6rem 0.5rem 0.1rem;
-  font-size: 0.73rem;
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1rem;
+  padding: 0.75rem 0.25rem 0.25rem;
+  font-size: 0.72rem;
 }
-.legend-item { display: flex; align-items: center; gap: 0.35rem; color: rgba(255,255,255,0.65); }
-.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-item { display: flex; align-items: center; gap: 0.35rem; color: var(--gray-600, #6f6e68); }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 .legend-dash {
-  width: 16px; height: 2px;
-  background: repeating-linear-gradient(90deg,rgba(255,255,255,0.4) 0,rgba(255,255,255,0.4) 5px,transparent 5px,transparent 9px);
-  flex-shrink: 0;
+  width: 18px; height: 2px; flex-shrink: 0;
+  background: repeating-linear-gradient(90deg, #aaa 0, #aaa 5px, transparent 5px, transparent 9px);
 }
-.legend-ref { color: rgba(255,255,255,0.35); }
+.legend-ref { color: var(--gray-400, #aaa); }
+.legend-label { white-space: nowrap; }
