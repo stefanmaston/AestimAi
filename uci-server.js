@@ -590,6 +590,12 @@ app.get('/api/uci/commentary', async (req, res) => {
 // Generera om automatiskt varje dag kl 06:00 (server-tid)
 cron.schedule('0 6 * * *', () => { generateCommentary().catch(() => {}); });
 
+// Synka FX-data dagligen kl 18 (efter att europeiska marknader stängt)
+cron.schedule('0 18 * * *', () => {
+  console.log('[fx-cron] Daglig FX-sync');
+  ensureFxSync().catch(e => console.warn('[fx-cron] fel:', e.message));
+});
+
 // ── POST /api/uci/camera-analyze ──────────────────────────
 //
 // Flöde:
@@ -697,73 +703,153 @@ FORMAT B — säker, redo för värdering:
   }
 });
 
-// ── Riktig valutahistorik via ECB / frankfurter.app ────────
+// ── Valutahistorik: ECB-data lagrad i Supabase ─────────────
+// Strategi: hämta saknade datum från frankfurter.app och spara i DB.
+// Servera alltid från DB → konsistent historik som aldrig ändras bakåt.
+
 const FX_SERIES = [
-  { id: 'eur', label: 'EUR', color: '#60a5fa', key: 'EUR' },
-  { id: 'usd', label: 'USD', color: '#f472b6', key: 'USD' },
-  { id: 'gbp', label: 'GBP', color: '#fb923c', key: 'GBP' },
-  { id: 'nok', label: 'NOK', color: '#a78bfa', key: 'NOK' },
-  { id: 'dkk', label: 'DKK', color: '#34d399', key: 'DKK' },
-  { id: 'chf', label: 'CHF', color: '#fbbf24', key: 'CHF' },
-  { id: 'jpy', label: 'JPY', color: '#f87171', key: 'JPY' },
+  { id: 'eur', label: 'EUR', color: '#60a5fa', col: 'eur', key: 'EUR' },
+  { id: 'usd', label: 'USD', color: '#f472b6', col: 'usd', key: 'USD' },
+  { id: 'gbp', label: 'GBP', color: '#fb923c', col: 'gbp', key: 'GBP' },
+  { id: 'nok', label: 'NOK', color: '#a78bfa', col: 'nok', key: 'NOK' },
+  { id: 'dkk', label: 'DKK', color: '#34d399', col: 'dkk', key: 'DKK' },
+  { id: 'chf', label: 'CHF', color: '#fbbf24', col: 'chf', key: 'CHF' },
+  { id: 'jpy', label: 'JPY', color: '#f87171', col: 'jpy', key: 'JPY' },
 ];
 
-const fxCache = new Map(); // key → { data, ts }
+// In-memory cache: räckvidd → { labels, series, ts }
+const fxServeCache = new Map();
 
 function rangeToStartDate(range) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (range === '30d')  { const s = new Date(today); s.setDate(today.getDate() - 29);        return s.toISOString().split('T')[0]; }
-  if (range === '90d')  { const s = new Date(today); s.setDate(today.getDate() - 89);        return s.toISOString().split('T')[0]; }
-  if (range === 'YTD')  { return `${today.getFullYear()}-01-01`; }
-  if (range === '2Y')   { const s = new Date(today); s.setFullYear(today.getFullYear() - 2); return s.toISOString().split('T')[0]; }
-  if (range === '5Y')   { const s = new Date(today); s.setFullYear(today.getFullYear() - 5); return s.toISOString().split('T')[0]; }
-  /* 1Y default */        const s = new Date(today); s.setFullYear(today.getFullYear() - 1); return s.toISOString().split('T')[0];
+  const t = new Date(); t.setHours(0,0,0,0);
+  if (range === '30d') { const s = new Date(t); s.setDate(t.getDate()-29);         return s.toISOString().split('T')[0]; }
+  if (range === '90d') { const s = new Date(t); s.setDate(t.getDate()-89);         return s.toISOString().split('T')[0]; }
+  if (range === 'YTD') { return `${t.getFullYear()}-01-01`; }
+  if (range === '2Y')  { const s = new Date(t); s.setFullYear(t.getFullYear()-2);  return s.toISOString().split('T')[0]; }
+  if (range === '5Y')  { const s = new Date(t); s.setFullYear(t.getFullYear()-5);  return s.toISOString().split('T')[0]; }
+  /* 1Y */               const s = new Date(t); s.setFullYear(t.getFullYear()-1);  return s.toISOString().split('T')[0];
 }
 
+// Hämta rådata från frankfurter.app och spara i Supabase
+async function syncFxFromApi(fromDate, toDate) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase ej konfigurerad');
+  const keys = FX_SERIES.map(s => s.key).join(',');
+  const url  = `https://api.frankfurter.app/${fromDate}..${toDate}?from=SEK&to=${keys}`;
+  console.log(`[fx-sync] hämtar ${url}`);
+
+  const r    = await fetch(url);
+  if (!r.ok)  throw new Error(`Frankfurter ${r.status}`);
+  const json = await r.json();
+  const dates = Object.keys(json.rates).sort();
+  if (!dates.length) return 0;
+
+  // Bygg rader: SEK per valutaenhet = 1 / (valutaenhet per SEK)
+  const rows = dates.map(d => {
+    const row = { date: d };
+    for (const s of FX_SERIES) {
+      const rateVal = json.rates[d][s.key];
+      row[s.col] = rateVal ? Math.round((1 / rateVal) * 1e6) / 1e6 : null;
+    }
+    return row;
+  });
+
+  // Upsert till Supabase (ignorera om raden redan finns)
+  const resp = await fetch(
+    `${SUPABASE_URL}/rest/v1/uci_fx_rates`,
+    {
+      method:  'POST',
+      headers: {
+        apikey:        SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type':  'application/json',
+        'Prefer':        'resolution=ignore-duplicates',
+      },
+      body: JSON.stringify(rows),
+    }
+  );
+  if (!resp.ok) {
+    const msg = await resp.text();
+    throw new Error(`Supabase upsert: ${resp.status} ${msg}`);
+  }
+  console.log(`[fx-sync] sparade ${rows.length} rader (${fromDate} → ${toDate})`);
+  return rows.length;
+}
+
+// Synka saknade datum: kontrollera senaste datum i DB, hämta resten
+async function ensureFxSync() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return;
+  try {
+    // Senaste datum i DB
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/uci_fx_rates?select=date&order=date.desc&limit=1`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const rows = await r.json();
+    const today   = new Date(); today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().split('T')[0];
+
+    let fromDate;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      // Ingen data alls — hämta 5 år bakåt
+      const s = new Date(today); s.setFullYear(today.getFullYear() - 5);
+      fromDate = s.toISOString().split('T')[0];
+      console.log('[fx-sync] Ingen data i DB — hämtar 5 år');
+    } else {
+      const latest = new Date(rows[0].date);
+      latest.setDate(latest.getDate() + 1); // dagen efter senaste
+      fromDate = latest.toISOString().split('T')[0];
+      if (fromDate >= todayStr) {
+        console.log('[fx-sync] DB är aktuell, ingen sync behövs');
+        return;
+      }
+      console.log(`[fx-sync] Fyller på från ${fromDate} → ${todayStr}`);
+    }
+    await syncFxFromApi(fromDate, todayStr);
+    fxServeCache.clear(); // ogiltigförklara serve-cache
+  } catch (e) {
+    console.warn('[fx-sync] fel:', e.message);
+  }
+}
+
+// Läs från Supabase och indexera till 100 vid periodens start
 async function fetchFxHistory(range) {
   const cacheKey = `fx_${range}`;
-  const hit = fxCache.get(cacheKey);
-  if (hit && Date.now() - hit.ts < 60 * 60 * 1000) {
-    console.log(`[fx] cache HIT: ${cacheKey}`);
-    return hit.data;
-  }
+  const hit = fxServeCache.get(cacheKey);
+  if (hit && Date.now() - hit.ts < 60 * 60 * 1000) return hit.data;
 
-  const today   = new Date(); today.setHours(0,0,0,0);
-  const endDate = today.toISOString().split('T')[0];
+  const today     = new Date(); today.setHours(0,0,0,0);
   const startDate = rangeToStartDate(range);
-  const keys = FX_SERIES.map(s => s.key).join(',');
+  const endDate   = today.toISOString().split('T')[0];
+  const cols      = FX_SERIES.map(s => s.col).join(',');
 
-  // ECB-data via frankfurter.app: from=SEK → hur mycket valuta 1 SEK köper
-  // Vi inverterar → SEK per valutaenhet (= UCI-pris för valutan)
-  const url = `https://api.frankfurter.app/${startDate}..${endDate}?from=SEK&to=${keys}`;
-  console.log(`[fx] hämtar ${url}`);
-  const r    = await fetch(url);
-  if (!r.ok) throw new Error(`Frankfurter ${r.status}`);
-  const json = await r.json();
+  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase ej konfigurerad');
 
-  const dates = Object.keys(json.rates).sort();
-  if (dates.length < 2) throw new Error('För lite data från Frankfurter');
+  const r = await fetch(
+    `${SUPABASE_URL}/rest/v1/uci_fx_rates?select=date,${cols}&date=gte.${startDate}&date=lte.${endDate}&order=date.asc`,
+    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+  );
+  if (!r.ok) throw new Error(`Supabase read: ${r.status}`);
+  const rows = await r.json();
+  if (!rows.length) throw new Error('Ingen FX-data i DB för valt intervall');
 
-  // Indexera till 100 vid första tillgängliga datum
+  const labels = rows.map(row => row.date);
+
+  // Basvärdena (första raden) för indexering till 100
   const base = {};
-  for (const s of FX_SERIES) {
-    base[s.key] = 1 / json.rates[dates[0]][s.key]; // SEK per enhet
-  }
+  for (const s of FX_SERIES) base[s.col] = rows[0][s.col];
 
   const series = FX_SERIES.map(s => ({
     id:    s.id,
     label: s.label,
     color: s.color,
-    data:  dates.map(d => {
-      const sekPerUnit = 1 / json.rates[d][s.key];
-      return Math.round(sekPerUnit / base[s.key] * 10000) / 100; // index 100
+    data:  rows.map(row => {
+      const v = row[s.col];
+      return (v && base[s.col]) ? Math.round(v / base[s.col] * 10000) / 100 : null;
     }),
   }));
 
-  const data = { labels: dates, series, categoryLabel: 'Valutor', source: 'ECB via frankfurter.app' };
-  fxCache.set(cacheKey, { data, ts: Date.now() });
-  console.log(`[fx] cache SET: ${cacheKey} (${dates.length} dagar)`);
+  const data = { labels, series, categoryLabel: 'Valutor', source: 'ECB via frankfurter.app' };
+  fxServeCache.set(cacheKey, { data, ts: Date.now() });
   return data;
 }
 
@@ -955,4 +1041,6 @@ app.listen(PORT, '0.0.0.0', () => {
   if (!key || key === 'din_claude_nyckel_här') {
     console.warn('[uci-server] OBS: Ingen Anthropic API-nyckel konfigurerad i .env');
   }
+  // Synka FX-historik vid uppstart (hämtar saknade datum)
+  ensureFxSync().catch(e => console.warn('[startup-fx] fel:', e.message));
 });
