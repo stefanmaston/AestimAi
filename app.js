@@ -4,7 +4,7 @@
 
 // ── State ──────────────────────────────────────────
 const state = {
-  currentModule:     'uci',
+  currentModule:     'dashboard',
   isLoggedIn:        false,
   selectedCondition: 3,
   uciRateToSEK:      62.40,
@@ -1714,7 +1714,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Dashboard range-tabs hanteras nu av delegering i loadMarketDashboard()
 
   // Initial hjälptext
-  updatePanelHelp('uci');
+  updatePanelHelp('dashboard');
 
   // Navigering från URL-hash
   const hash = location.hash.replace('#', '');
