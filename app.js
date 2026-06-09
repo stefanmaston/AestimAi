@@ -104,6 +104,11 @@ function navigateTo(moduleId) {
   if (moduleId === 'ucilab' && !labProducts.length) {
     loadLabProducts();
   }
+
+  // Visa konto-info när Priser & Konto öppnas
+  if (moduleId === 'pricing') {
+    refreshAccountSection();
+  }
 }
 
 function updatePanelHelp(moduleId) {
@@ -1812,3 +1817,184 @@ function filterLab(cat) {
 }
 
 window.filterLab = filterLab;
+
+// ─── Auth & Pricing ───────────────────────────────────────────────────────────
+
+let currentUser = null;
+
+// Initiera auth-lyssnare vid sidladdning
+async function initAuth() {
+  try {
+    const sb = await getSb();
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) onSignIn(session.user);
+
+    sb.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) onSignIn(session.user);
+      else onSignOut();
+    });
+  } catch (e) { /* Supabase ej tillgänglig */ }
+}
+
+function onSignIn(user) {
+  currentUser = user;
+  document.getElementById('statusText').textContent = user.email || 'Inloggad';
+  document.getElementById('statusDot').className = 'status-dot active';
+  document.getElementById('btnLogin').textContent = 'Mitt konto';
+  document.getElementById('btnLogin').onclick = () => navigateTo('pricing');
+  // Uppdatera konto-sektionen om pricing-modulen är öppen
+  refreshAccountSection();
+}
+
+function onSignOut() {
+  currentUser = null;
+  document.getElementById('statusText').textContent = 'Ej inloggad';
+  document.getElementById('statusDot').className = 'status-dot';
+  document.getElementById('btnLogin').textContent = 'Logga in';
+  document.getElementById('btnLogin').onclick = () => openAuthModal('login');
+  const acc = document.getElementById('accountSection');
+  if (acc) acc.classList.add('hidden');
+}
+
+function refreshAccountSection() {
+  if (!currentUser) return;
+  const acc = document.getElementById('accountSection');
+  if (!acc) return;
+  acc.classList.remove('hidden');
+
+  const email = document.getElementById('acctEmail');
+  const since = document.getElementById('acctSince');
+  if (email) email.textContent = currentUser.email || '—';
+  if (since) {
+    const d = new Date(currentUser.created_at || Date.now());
+    since.textContent = d.toLocaleDateString('sv-SE');
+  }
+}
+
+// ── Auth modal ────────────────────────────────────────────────────────────────
+
+function openAuthModal(panel = 'login') {
+  document.getElementById('authOverlay').classList.remove('hidden');
+  switchPanel(panel);
+}
+
+function closeAuthModal(e, force = false) {
+  if (!force && e && e.target !== document.getElementById('authOverlay')) return;
+  document.getElementById('authOverlay').classList.add('hidden');
+}
+
+function switchPanel(name) {
+  ['login','register','forgot','confirm'].forEach(p => {
+    document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1))
+      ?.classList.add('hidden');
+  });
+  const target = document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (target) target.classList.remove('hidden');
+}
+
+function setAuthError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.toggle('hidden', !msg);
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  setAuthError('loginError', '');
+  if (!email || !pass) return setAuthError('loginError', 'Fyll i e-post och lösenord.');
+  try {
+    const sb = await getSb();
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) return setAuthError('loginError', error.message);
+    closeAuthModal(null, true);
+  } catch (e) { setAuthError('loginError', 'Något gick fel. Försök igen.'); }
+}
+
+async function doRegister() {
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPassword').value;
+  const pass2 = document.getElementById('regPassword2').value;
+  setAuthError('regError', '');
+  if (!email) return setAuthError('regError', 'Ange en e-postadress.');
+  if (pass.length < 8) return setAuthError('regError', 'Lösenordet måste vara minst 8 tecken.');
+  if (pass !== pass2) return setAuthError('regError', 'Lösenorden matchar inte.');
+  try {
+    const sb = await getSb();
+    const { error } = await sb.auth.signUp({ email, password: pass });
+    if (error) return setAuthError('regError', error.message);
+    document.getElementById('confirmMsg').textContent =
+      'Vi har skickat ett bekräftelsemail till ' + email + '. Klicka på länken för att aktivera ditt konto.';
+    switchPanel('confirm');
+  } catch (e) { setAuthError('regError', 'Något gick fel. Försök igen.'); }
+}
+
+async function doForgot() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  setAuthError('forgotError', '');
+  if (!email) return setAuthError('forgotError', 'Ange din e-postadress.');
+  try {
+    const sb = await getSb();
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: location.origin + '/?reset=1',
+    });
+    if (error) return setAuthError('forgotError', error.message);
+    document.getElementById('confirmMsg').textContent =
+      'Återställningslänk skickad till ' + email + '.';
+    switchPanel('confirm');
+  } catch (e) { setAuthError('forgotError', 'Något gick fel. Försök igen.'); }
+}
+
+async function signOut() {
+  try {
+    const sb = await getSb();
+    await sb.auth.signOut();
+  } catch (e) {}
+  onSignOut();
+}
+
+async function confirmDeleteAccount() {
+  if (!confirm('Är du säker? Ditt konto och all data tas bort permanent.')) return;
+  try {
+    const sb = await getSb();
+    await sb.auth.admin?.deleteUser(currentUser.id); // kräver service-role — annars via support
+    await sb.auth.signOut();
+    alert('Ditt konto har avslutats.');
+  } catch (e) {
+    alert('Kontakta support@aestimai.org för att avsluta kontot.');
+  }
+}
+
+// ── Plan-val ──────────────────────────────────────────────────────────────────
+
+function selectPlan(plan) {
+  if (plan === 'enterprise') {
+    window.location.href = 'mailto:kontakt@aestimai.org?subject=Enterprise-abonnemang';
+    return;
+  }
+  if (!currentUser) {
+    openAuthModal('register');
+    return;
+  }
+  if (plan === 'pro') {
+    alert('Stripe-betalning för Pro aktiveras snart. Du kontaktas när det är klart.');
+  }
+}
+
+// Visa konto-sektion när pricing-modulen öppnas
+const _origNavigateTo = navigateTo;
+// (konto-refresh sker via onSignIn/refreshAccountSection)
+
+// Initiera
+document.addEventListener('DOMContentLoaded', () => { initAuth(); });
+
+window.openAuthModal      = openAuthModal;
+window.closeAuthModal     = closeAuthModal;
+window.switchPanel        = switchPanel;
+window.doLogin            = doLogin;
+window.doRegister         = doRegister;
+window.doForgot           = doForgot;
+window.signOut            = signOut;
+window.confirmDeleteAccount = confirmDeleteAccount;
+window.selectPlan         = selectPlan;

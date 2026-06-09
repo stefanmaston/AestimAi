@@ -80,6 +80,10 @@
         <span class="nav-label">Nyheter</span>
         <span class="nav-badge free">Nytt</span>
       </button>
+      <button class="nav-item" data-module="pricing">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Priser &amp; Konto</span>
+      </button>
       <button class="nav-item" data-module="about">
         <span class="nav-icon">○</span>
         <span class="nav-label">Om AestimAi</span>
@@ -91,7 +95,7 @@
         <span class="status-dot" id="statusDot"></span>
         <span class="status-text" id="statusText">Ej inloggad</span>
       </div>
-      <button class="btn-login" id="btnLogin">Logga in med AE ID</button>
+      <button class="btn-login" id="btnLogin" onclick="openAuthModal('login')">Logga in</button>
 
       <!-- Wallet-widget -->
       <div class="wallet-widget" id="walletWidget">
@@ -1086,6 +1090,150 @@
       </div><!-- /news-layout -->
     </section>
 
+    <!-- ===== PRISER & KONTO ===== -->
+    <section class="module hidden" id="module-pricing">
+      <div class="module-header">
+        <h1>Priser &amp; Konto</h1>
+        <p class="module-desc">Välj den plan som passar dig — uppgradera eller nedgradera när som helst</p>
+      </div>
+
+      <!-- Pricing cards -->
+      <div class="pricing-grid">
+
+        <!-- Freemium -->
+        <div class="pricing-card" id="planFree">
+          <div class="pricing-card-top">
+            <div class="plan-name">Freemium</div>
+            <div class="plan-price"><span class="plan-amount">0</span><span class="plan-currency">kr/mån</span></div>
+            <div class="plan-tagline">Testa utan kreditkort</div>
+          </div>
+          <ul class="plan-features">
+            <li class="feat-yes">UCI Värdering — <strong>10/dag</strong></li>
+            <li class="feat-yes">UCI Marknadsdata — <strong>alla kategorier</strong></li>
+            <li class="feat-yes">Nyheter — <strong>full access</strong></li>
+            <li class="feat-yes">Bytesmarknad — bläddra fritt</li>
+            <li class="feat-yes">1 aktiv annons <span class="feat-note">(extra €1/st)</span></li>
+            <li class="feat-yes">AestimAi Lab</li>
+            <li class="feat-no">Värderingshistorik</li>
+            <li class="feat-no">API-access</li>
+            <li class="feat-no">CSV-export</li>
+          </ul>
+          <button class="btn-plan btn-plan-free" onclick="selectPlan('free')">Kom igång gratis</button>
+        </div>
+
+        <!-- Pro -->
+        <div class="pricing-card pricing-card-featured" id="planPro">
+          <div class="pricing-card-top">
+            <div class="plan-badge-top">Populärast</div>
+            <div class="plan-name">Pro</div>
+            <div class="plan-price"><span class="plan-amount">€25</span><span class="plan-currency">/mån</span></div>
+            <div class="plan-tagline">För privatpersoner och småföretag</div>
+          </div>
+          <ul class="plan-features">
+            <li class="feat-yes">UCI Värdering — <strong>50/dag</strong></li>
+            <li class="feat-yes">UCI Marknadsdata — <strong>alla kategorier + export</strong></li>
+            <li class="feat-yes">Nyheter — <strong>full access</strong></li>
+            <li class="feat-yes">Bytesmarknad — <strong>10 aktiva annonser</strong></li>
+            <li class="feat-yes">Prioriterad annonsvisning</li>
+            <li class="feat-yes">AestimAi Lab</li>
+            <li class="feat-yes">Värderingshistorik — <strong>12 månader</strong></li>
+            <li class="feat-yes">API-access — <strong>500 req/dag</strong></li>
+            <li class="feat-yes">CSV-export</li>
+          </ul>
+          <button class="btn-plan btn-plan-pro" onclick="selectPlan('pro')">Välj Pro</button>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="pricing-card" id="planEnterprise">
+          <div class="pricing-card-top">
+            <div class="plan-name">Enterprise</div>
+            <div class="plan-price"><span class="plan-amount">€75</span><span class="plan-currency">/mån</span></div>
+            <div class="plan-tagline">För organisationer och team</div>
+          </div>
+          <ul class="plan-features">
+            <li class="feat-yes">UCI Värdering — <strong>obegränsat</strong></li>
+            <li class="feat-yes">UCI Marknadsdata — <strong>realtid + webhooks</strong></li>
+            <li class="feat-yes">Nyheter — <strong>full access</strong></li>
+            <li class="feat-yes">Bytesmarknad — <strong>obegränsade annonser</strong></li>
+            <li class="feat-yes">Featured-placering</li>
+            <li class="feat-yes">AestimAi Lab</li>
+            <li class="feat-yes">Värderingshistorik — <strong>obegränsat</strong></li>
+            <li class="feat-yes">API-access — <strong>10 000 req/dag</strong></li>
+            <li class="feat-yes">5 teammedlemmar</li>
+            <li class="feat-yes">White-label möjlighet</li>
+            <li class="feat-yes">Dedikerad support + SLA 99,9%</li>
+          </ul>
+          <button class="btn-plan btn-plan-enterprise" onclick="selectPlan('enterprise')">Kontakta oss</button>
+        </div>
+
+      </div><!-- /pricing-grid -->
+
+      <!-- Jämförelsetabell -->
+      <div class="pricing-compare">
+        <h2>Detaljerad jämförelse</h2>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Funktion</th>
+              <th>Freemium</th>
+              <th class="col-featured">Pro</th>
+              <th>Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" class="compare-section">UCI Värdering</td></tr>
+            <tr><td>Värderingar per dag</td><td>10</td><td class="col-featured">50</td><td>Obegränsat</td></tr>
+            <tr><td>Värderingshistorik</td><td>—</td><td class="col-featured">12 månader</td><td>Obegränsat</td></tr>
+            <tr><td>CSV-export</td><td>—</td><td class="col-featured">✓</td><td>✓</td></tr>
+
+            <tr><td colspan="4" class="compare-section">Bytesmarknad</td></tr>
+            <tr><td>Bläddra annonser</td><td>✓</td><td class="col-featured">✓</td><td>✓</td></tr>
+            <tr><td>Aktiva annonser</td><td>1 <span class="feat-note">(+€1/extra)</span></td><td class="col-featured">10</td><td>Obegränsat</td></tr>
+            <tr><td>Prioriterad visning</td><td>—</td><td class="col-featured">✓</td><td>✓ Featured</td></tr>
+
+            <tr><td colspan="4" class="compare-section">UCI Marknadsdata</td></tr>
+            <tr><td>Kategorier</td><td>Alla</td><td class="col-featured">Alla</td><td>Alla + realtid</td></tr>
+            <tr><td>Tidsperioder</td><td>Alla</td><td class="col-featured">Alla</td><td>Alla + webhooks</td></tr>
+
+            <tr><td colspan="4" class="compare-section">API</td></tr>
+            <tr><td>API-access</td><td>—</td><td class="col-featured">500 req/dag</td><td>10 000 req/dag</td></tr>
+
+            <tr><td colspan="4" class="compare-section">Övrigt</td></tr>
+            <tr><td>Teammedlemmar</td><td>1</td><td class="col-featured">1</td><td>5</td></tr>
+            <tr><td>Support</td><td>Community</td><td class="col-featured">E-post</td><td>Dedikerad + SLA</td></tr>
+            <tr><td>White-label</td><td>—</td><td class="col-featured">—</td><td>✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Konto-sektion (visas när inloggad) -->
+      <div class="account-section hidden" id="accountSection">
+        <h2>Mitt konto</h2>
+        <div class="account-grid">
+          <div class="account-card">
+            <h3>Kontouppgifter</h3>
+            <div class="account-row"><span>E-post</span><span id="acctEmail">—</span></div>
+            <div class="account-row"><span>Plan</span><span id="acctPlan">Freemium</span></div>
+            <div class="account-row"><span>Medlem sedan</span><span id="acctSince">—</span></div>
+            <button class="btn-secondary btn-sm" onclick="openAuthModal('change-password')">Byt lösenord</button>
+          </div>
+          <div class="account-card">
+            <h3>Abonnemang</h3>
+            <div class="account-row"><span>Aktiv plan</span><span id="acctActivePlan">Freemium</span></div>
+            <div class="account-row"><span>Nästa faktura</span><span id="acctNextBill">—</span></div>
+            <button class="btn-plan btn-plan-pro" style="width:100%;margin-top:.8rem;" onclick="selectPlan('pro')">Uppgradera till Pro</button>
+          </div>
+          <div class="account-card account-card-danger">
+            <h3>Avsluta konto</h3>
+            <p>Ditt konto och all data tas bort permanent. Aktiva abonnemang avslutas omedelbart.</p>
+            <button class="btn-danger" onclick="confirmDeleteAccount()">Avsluta konto</button>
+          </div>
+        </div>
+        <button class="btn-secondary" style="margin-top:1rem;" onclick="signOut()">Logga ut</button>
+      </div>
+
+    </section>
+
     <!-- ===== OM AESTIMAI ===== -->
     <section class="module hidden" id="module-about">
       <div class="about-wrap">
@@ -1375,6 +1523,80 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <!-- Auth-modal -->
+  <div class="auth-overlay hidden" id="authOverlay" onclick="closeAuthModal(event)">
+    <div class="auth-modal" id="authModal">
+      <button class="auth-close" onclick="closeAuthModal(null, true)">✕</button>
+
+      <!-- Logga in -->
+      <div class="auth-panel" id="panelLogin">
+        <h2>Logga in</h2>
+        <p class="auth-sub">Välkommen tillbaka till AestimAi</p>
+        <div class="form-group">
+          <label>E-postadress</label>
+          <input type="email" id="loginEmail" placeholder="din@epost.se" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Lösenord</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <p class="auth-error hidden" id="loginError"></p>
+        <button class="btn-plan btn-plan-pro" style="width:100%" onclick="doLogin()">Logga in</button>
+        <div class="auth-links">
+          <button class="auth-link" onclick="switchPanel('forgot')">Glömt lösenord?</button>
+          <button class="auth-link" onclick="switchPanel('register')">Skapa konto →</button>
+        </div>
+      </div>
+
+      <!-- Registrera -->
+      <div class="auth-panel hidden" id="panelRegister">
+        <h2>Skapa konto</h2>
+        <p class="auth-sub">Kom igång gratis — inget kreditkort krävs</p>
+        <div class="form-group">
+          <label>E-postadress</label>
+          <input type="email" id="regEmail" placeholder="din@epost.se" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Lösenord <span class="auth-hint">(minst 8 tecken)</span></label>
+          <input type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Bekräfta lösenord</label>
+          <input type="password" id="regPassword2" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <p class="auth-error hidden" id="regError"></p>
+        <button class="btn-plan btn-plan-pro" style="width:100%" onclick="doRegister()">Skapa konto</button>
+        <div class="auth-links">
+          <button class="auth-link" onclick="switchPanel('login')">← Logga in istället</button>
+        </div>
+      </div>
+
+      <!-- Glömt lösenord -->
+      <div class="auth-panel hidden" id="panelForgot">
+        <h2>Återställ lösenord</h2>
+        <p class="auth-sub">Vi skickar en länk till din e-post</p>
+        <div class="form-group">
+          <label>E-postadress</label>
+          <input type="email" id="forgotEmail" placeholder="din@epost.se" autocomplete="email">
+        </div>
+        <p class="auth-error hidden" id="forgotError"></p>
+        <button class="btn-plan btn-plan-pro" style="width:100%" onclick="doForgot()">Skicka återställningslänk</button>
+        <div class="auth-links">
+          <button class="auth-link" onclick="switchPanel('login')">← Tillbaka</button>
+        </div>
+      </div>
+
+      <!-- Bekräftelse -->
+      <div class="auth-panel hidden" id="panelConfirm">
+        <div class="auth-success-icon">✉️</div>
+        <h2>Kolla din inkorg!</h2>
+        <p class="auth-sub" id="confirmMsg">Vi har skickat ett bekräftelsemail. Klicka på länken för att aktivera ditt konto.</p>
+        <button class="btn-secondary" style="width:100%;margin-top:1rem" onclick="closeAuthModal(null,true)">Stäng</button>
+      </div>
+
+    </div>
+  </div>
+
   <script src="app.js"></script>
   <script type="module" src="wallet-ui.js"></script>
 
