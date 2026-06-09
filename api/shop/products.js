@@ -2,7 +2,7 @@
 // GET /api/shop/products
 // Returnerar produktlista med affiliate-länk till amazon.se
 
-const AFFILIATE_TAG = process.env.AMAZON_AFFILIATE_TAG || '';
+const AFFILIATE_TAG = process.env.AMAZON_AFFILIATE_TAG || 'aestimai21-21';
 
 // Produktkatalog med Amazon-söktermer och ASIN (verifieras via amazon.se)
 const PRODUCTS = [
