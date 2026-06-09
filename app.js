@@ -1716,10 +1716,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial hjälptext
   updatePanelHelp('dashboard');
 
-  // Navigering från URL-hash
+  // Navigering från URL-hash, annars default = dashboard
   const hash = location.hash.replace('#', '');
   if (hash && document.getElementById('module-' + hash)) {
     navigateTo(hash);
+  } else {
+    navigateTo('dashboard');
   }
 });
 
