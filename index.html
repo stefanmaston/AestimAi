@@ -72,7 +72,7 @@
       </button>
       <button class="nav-item" data-module="ucilab">
         <span class="nav-icon">⚗</span>
-        <span class="nav-label">UCI Lab</span>
+        <span class="nav-label">AestimAi Lab</span>
         <span class="nav-badge free">Shop</span>
       </button>
       <button class="nav-item" data-module="news">
@@ -739,230 +739,159 @@
 
     <!-- Modul 5: AE ID barter or pay -->
     <section class="module hidden" id="module-ucilab">
-      <div class="module-header">
-        <h1>⚗ UCI Lab</h1>
-        <p class="module-desc">Hårdvara för mätning, handel och spårning av verkligt värde</p>
-      </div>
 
-      <div class="lab-hero">
-        <div class="lab-hero-text">
-          <h2>Mät värdet — inte priset</h2>
-          <p>UCI Lab erbjuder noggrant utvalda verktyg för energimätning, NFC-handel, IoT-spårning och mer. All hårdvara är testad för integration med UCI-plattformen och passar dig som vill ta kontroll över vad saker verkligen är värda.</p>
+      <!-- AestimAi Lab — rubrik (vår design) -->
+      <div class="lab-header">
+        <div class="lab-header-left">
+          <h1>⚗ AestimAi Lab</h1>
+          <p>Hårdvara för mätning, handel och spårning av verkligt värde</p>
         </div>
-        <div class="lab-hero-badge">
-          <span class="lab-uci-symbol">⊙</span>
-          <span>UCI-kompatibel hårdvara</span>
+        <div class="lab-header-right">
+          <span class="lab-secure-badge">🔒 Betalning via Stripe</span>
+          <span class="lab-uci-badge">⊙ UCI-kompatibel</span>
         </div>
       </div>
 
-      <div class="lab-categories">
-        <button class="lab-cat-btn active" data-cat="all" onclick="filterLabProducts('all')">Alla</button>
-        <button class="lab-cat-btn" data-cat="energy" onclick="filterLabProducts('energy')">Energi</button>
-        <button class="lab-cat-btn" data-cat="nfc" onclick="filterLabProducts('nfc')">NFC &amp; Handel</button>
-        <button class="lab-cat-btn" data-cat="iot" onclick="filterLabProducts('iot')">IoT &amp; Sensorer</button>
-        <button class="lab-cat-btn" data-cat="compute" onclick="filterLabProducts('compute')">Datorkraft</button>
-        <button class="lab-cat-btn" data-cat="security" onclick="filterLabProducts('security')">Säkerhet</button>
-      </div>
+      <!-- Stripe Buy Button area — produkterna hämtas från Stripe -->
+      <!-- Lägg till din Stripe publishable key och buy-button-id nedan      -->
+      <!-- när du har skapat produkterna i Stripe Dashboard                  -->
+      <div class="lab-shop-area" id="labShopArea">
 
-      <div class="lab-grid" id="labGrid">
+        <!-- ── Stripe Buy Buttons ────────────────────────────────────────
+             Ersätt PLACEHOLDER_KEY med din publishable key (pk_live_...)
+             och PLACEHOLDER_ID med respektive buy_btn_... ID från Stripe.
+             Skript laddas en gång (se slutet av body).
+        ──────────────────────────────────────────────────────────────── -->
 
-        <div class="lab-card" data-cat="energy">
-          <div class="lab-card-img">⚡</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-energy">Energi</span>
+        <div class="lab-product-row" data-cat="energy">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-energy">⚡ Energi</span>
             <h3>Shelly Pro 3EM</h3>
-            <p>Trefas energimätare med WiFi och lokal API. Mät exakt förbrukning och exportera till UCI-plattformen för realtidsvärdering.</p>
-            <ul class="lab-specs">
-              <li>3-fas mätning upp till 120A</li>
-              <li>REST + MQTT API</li>
-              <li>DIN-skena montering</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">1 890 kr</span>
-                <span class="lab-price-uci">≈ 18,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('shelly-pro-3em')">Köp</button>
-            </div>
+            <p>Trefas energimätare med WiFi och lokal API. Mät exakt förbrukning i realtid och exportera data till UCI-plattformen.</p>
+            <ul class="lab-specs"><li>3-fas upp till 120A</li><li>REST + MQTT API</li><li>DIN-skena</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <!-- stripe-buy-button web component -->
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_SHELLY"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-        <div class="lab-card" data-cat="energy">
-          <div class="lab-card-img">☀️</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-energy">Energi</span>
+        <div class="lab-product-row" data-cat="energy">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-energy">☀️ Energi</span>
             <h3>Victron SmartShunt 500A</h3>
-            <p>Batteriövervakare med Bluetooth och VE.Direct. Spåra energiflöden och beräkna UCI-värde på egenproducerad energi i solcellssystem.</p>
-            <ul class="lab-specs">
-              <li>500A kontinuerlig mätning</li>
-              <li>Bluetooth + VE.Direct</li>
-              <li>Victron Connect app</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">1 290 kr</span>
-                <span class="lab-price-uci">≈ 12,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('victron-smartshunt')">Köp</button>
-            </div>
+            <p>Batteriövervakare med Bluetooth för solcellssystem. Spåra energiflöden och beräkna UCI-värde på egenproducerad energi.</p>
+            <ul class="lab-specs"><li>500A kontinuerlig mätning</li><li>Bluetooth + VE.Direct</li><li>Victron Connect app</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_VICTRON"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-        <div class="lab-card" data-cat="nfc">
-          <div class="lab-card-img">📡</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-nfc">NFC</span>
+        <div class="lab-product-row" data-cat="nfc">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-nfc">📡 NFC &amp; Handel</span>
             <h3>ACR122U NFC-läsare</h3>
-            <p>USB NFC-läsare/skrivare för ISO 14443 A/B och Mifare. Skriv UCI-transaktioner till NFC-taggar för offline-handel på bytesmarknaden.</p>
-            <ul class="lab-specs">
-              <li>ISO 14443 A/B, Mifare</li>
-              <li>USB-A, drivrutinsfri</li>
-              <li>SDK medföljer</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">590 kr</span>
-                <span class="lab-price-uci">≈ 5,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('acr122u-nfc')">Köp</button>
-            </div>
+            <p>USB NFC-läsare/skrivare. Skriv UCI-transaktioner till NFC-taggar för offline-handel på bytesmarknaden.</p>
+            <ul class="lab-specs"><li>ISO 14443 A/B, Mifare</li><li>USB-A, drivrutinsfri</li><li>SDK medföljer</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_ACR"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-        <div class="lab-card" data-cat="nfc">
-          <div class="lab-card-img">🏷️</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-nfc">NFC</span>
+        <div class="lab-product-row" data-cat="nfc">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-nfc">🏷️ NFC &amp; Handel</span>
             <h3>NTAG215 NFC-taggar (50-pack)</h3>
-            <p>Högkapacitets NFC-taggar kompatibla med alla smartphones. Märk varor på bytesmarknaden med UCI-värde och ursprung.</p>
-            <ul class="lab-specs">
-              <li>504 bytes EEPROM</li>
-              <li>ISO/IEC 14443-3 Type A</li>
-              <li>30mm runda etiketter</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">290 kr</span>
-                <span class="lab-price-uci">≈ 2,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('ntag215-50pack')">Köp</button>
-            </div>
+            <p>Högkapacitets NFC-taggar. Märk varor på bytesmarknaden med UCI-värde och ursprung.</p>
+            <ul class="lab-specs"><li>504 bytes EEPROM</li><li>ISO/IEC 14443-3 Type A</li><li>30mm runda etiketter</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_NFC"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-        <div class="lab-card" data-cat="compute">
-          <div class="lab-card-img">🖥️</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-compute">Datorkraft</span>
+        <div class="lab-product-row" data-cat="compute">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-compute">🖥️ Datorkraft</span>
             <h3>Raspberry Pi 5 Starter Kit</h3>
-            <p>Komplett kit med Pi 5 (4GB), nätaggregat, kylare och 64GB SD. Kör din egna UCI-nod, lokal värderingsserver eller bytesmarknads-gateway.</p>
-            <ul class="lab-specs">
-              <li>Raspberry Pi 5, 4GB RAM</li>
-              <li>64GB SD med Raspberry Pi OS</li>
-              <li>Officiellt nätaggregat 27W</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">1 490 kr</span>
-                <span class="lab-price-uci">≈ 14,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('rpi5-starter')">Köp</button>
-            </div>
+            <p>Komplett kit med Pi 5 (4GB), nätaggregat, kylare och 64GB SD. Kör din egna UCI-nod eller bytesmarknads-gateway.</p>
+            <ul class="lab-specs"><li>Raspberry Pi 5, 4GB RAM</li><li>64GB SD med Raspberry Pi OS</li><li>Officiellt nätaggregat 27W</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_RPI"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-        <div class="lab-card" data-cat="iot">
-          <div class="lab-card-img">📊</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-iot">IoT</span>
+        <div class="lab-product-row" data-cat="iot">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-iot">📊 IoT &amp; Sensorer</span>
             <h3>Ruuvi Tag Pro (4-pack)</h3>
-            <p>Öppen källkod Bluetooth-sensorer för temperatur, luftfuktighet, lufttryck och rörelse. Spåra miljövärden för UCI-prissättning av råvaror.</p>
-            <ul class="lab-specs">
-              <li>Temp, fuktig, tryck, rörelse</li>
-              <li>Bluetooth 5, 2+ år batteri</li>
-              <li>IP67 vattentät</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">990 kr</span>
-                <span class="lab-price-uci">≈ 9,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('ruuvitag-4pack')">Köp</button>
-            </div>
+            <p>Öppen källkod Bluetooth-sensorer för temperatur, luftfuktighet och rörelse. Spåra miljövärden för UCI-prissättning av råvaror.</p>
+            <ul class="lab-specs"><li>Temp, fuktig, tryck, rörelse</li><li>Bluetooth 5, 2+ år batteri</li><li>IP67 vattentät</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_RUUVI"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-        <div class="lab-card" data-cat="security">
-          <div class="lab-card-img">🔐</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-security">Säkerhet</span>
+        <div class="lab-product-row" data-cat="security">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-security">🔐 Säkerhet</span>
             <h3>Ledger Nano X</h3>
-            <p>Hårdvaruplånbok med Bluetooth för säker signering av UCI-transaktioner och förvaring av kryptografiska nycklar för bytesmarknaden.</p>
-            <ul class="lab-specs">
-              <li>Bluetooth + USB-C</li>
-              <li>CC EAL5+ certifierad chip</li>
-              <li>Stöd för 5500+ appar</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">1 290 kr</span>
-                <span class="lab-price-uci">≈ 12,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('ledger-nano-x')">Köp</button>
-            </div>
+            <p>Hårdvaruplånbok med Bluetooth för säker signering av UCI-transaktioner och förvaring av kryptografiska nycklar.</p>
+            <ul class="lab-specs"><li>Bluetooth + USB-C</li><li>CC EAL5+ certifierad chip</li><li>Stöd för 5500+ appar</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_LEDGER"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-        <div class="lab-card" data-cat="iot">
-          <div class="lab-card-img">🌿</div>
-          <div class="lab-card-body">
-            <span class="lab-badge lab-badge-iot">IoT</span>
+        <div class="lab-product-row" data-cat="iot">
+          <div class="lab-product-info">
+            <span class="lab-badge lab-badge-iot">🌿 IoT &amp; Sensorer</span>
             <h3>Aranet4 CO₂-mätare</h3>
-            <p>Portabel CO₂/luftkvalitetsmätare med e-ink display och Bluetooth. Rapportera miljödata direkt till UCI:s ESG-kategori.</p>
-            <ul class="lab-specs">
-              <li>CO₂, temp, fuktighet, alarm</li>
-              <li>E-ink display, 4 år batteri</li>
-              <li>Bluetooth + öppen API</li>
-            </ul>
-            <div class="lab-price-row">
-              <div class="lab-price">
-                <span class="lab-price-sek">2 190 kr</span>
-                <span class="lab-price-uci">≈ 21,9 ⊙</span>
-              </div>
-              <button class="btn-buy" onclick="labCheckout('aranet4-co2')">Köp</button>
-            </div>
+            <p>Portabel CO₂/luftkvalitetsmätare med e-ink display och Bluetooth. Rapportera miljödata till UCI:s ESG-kategori.</p>
+            <ul class="lab-specs"><li>CO₂, temp, fuktighet, alarm</li><li>E-ink display, 4 år batteri</li><li>Bluetooth + öppen API</li></ul>
+          </div>
+          <div class="lab-buy-area">
+            <stripe-buy-button
+              buy-button-id="PLACEHOLDER_BTN_ARANET"
+              publishable-key="PLACEHOLDER_PK">
+            </stripe-buy-button>
           </div>
         </div>
 
-      </div>
+      </div><!-- /lab-shop-area -->
 
-      <div class="lab-info-strip">
-        <div class="lab-info-item">
-          <span class="lab-info-icon">🚚</span>
-          <span>Fri frakt över 500 kr</span>
-        </div>
-        <div class="lab-info-item">
-          <span class="lab-info-icon">↩️</span>
-          <span>30 dagars öppet köp</span>
-        </div>
-        <div class="lab-info-item">
-          <span class="lab-info-icon">⊙</span>
-          <span>Pris i SEK och UCI</span>
-        </div>
-        <div class="lab-info-item">
-          <span class="lab-info-icon">🔒</span>
-          <span>Säker betalning via Stripe</span>
-        </div>
-      </div>
-
-      <!-- Checkout overlay -->
-      <div class="lab-checkout-overlay hidden" id="labCheckoutOverlay">
-        <div class="lab-checkout-modal">
-          <button class="lab-close-btn" onclick="closeLabCheckout()">✕</button>
-          <div class="lab-checkout-content" id="labCheckoutContent">
-            <div class="lab-checkout-spinner">Laddar kassan…</div>
-          </div>
-        </div>
+      <!-- AestimAi Lab — sidfot (vår design) -->
+      <div class="lab-footer">
+        <div class="lab-footer-item">🚚 Fri frakt över 500 kr</div>
+        <div class="lab-footer-item">↩️ 30 dagars öppet köp</div>
+        <div class="lab-footer-item">⊙ Pris i SEK och UCI</div>
+        <div class="lab-footer-item">🔒 Säker betalning via Stripe</div>
       </div>
 
     </section>
@@ -1574,5 +1503,9 @@
     (adsbygoogle = window.adsbygoogle || []).push({});
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
+
+  <!-- Stripe Buy Button — laddas bara när AestimAi Lab visas -->
+  <!-- Skriptet är lätt (~10 kB) och laddas asynkront, påverkar inte sidladdning -->
+  <script async src="https://js.stripe.com/v3/buy-button.js"></script>
 </body>
 </html>
