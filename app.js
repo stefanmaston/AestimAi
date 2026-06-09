@@ -983,6 +983,9 @@ async function loadChartForCat() {
     const data = await r.json();
     renderAssetChart(data.labels, data.series);
     renderChartLegend(data.series);
+    // Visa datakälla i footern
+    const src = document.getElementById('dashLastUpdate');
+    if (src) src.textContent = data.source ? `Källa: ${data.source}` : 'Simulerad data';
   } catch (e) {
     console.warn('[Assets] Kunde inte ladda:', e.message);
   }

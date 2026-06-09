@@ -697,6 +697,76 @@ FORMAT B — säker, redo för värdering:
   }
 });
 
+// ── Riktig valutahistorik via ECB / frankfurter.app ────────
+const FX_SERIES = [
+  { id: 'eur', label: 'EUR', color: '#60a5fa', key: 'EUR' },
+  { id: 'usd', label: 'USD', color: '#f472b6', key: 'USD' },
+  { id: 'gbp', label: 'GBP', color: '#fb923c', key: 'GBP' },
+  { id: 'nok', label: 'NOK', color: '#a78bfa', key: 'NOK' },
+  { id: 'dkk', label: 'DKK', color: '#34d399', key: 'DKK' },
+  { id: 'chf', label: 'CHF', color: '#fbbf24', key: 'CHF' },
+  { id: 'jpy', label: 'JPY', color: '#f87171', key: 'JPY' },
+];
+
+const fxCache = new Map(); // key → { data, ts }
+
+function rangeToStartDate(range) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (range === '30d')  { const s = new Date(today); s.setDate(today.getDate() - 29);        return s.toISOString().split('T')[0]; }
+  if (range === '90d')  { const s = new Date(today); s.setDate(today.getDate() - 89);        return s.toISOString().split('T')[0]; }
+  if (range === 'YTD')  { return `${today.getFullYear()}-01-01`; }
+  if (range === '2Y')   { const s = new Date(today); s.setFullYear(today.getFullYear() - 2); return s.toISOString().split('T')[0]; }
+  if (range === '5Y')   { const s = new Date(today); s.setFullYear(today.getFullYear() - 5); return s.toISOString().split('T')[0]; }
+  /* 1Y default */        const s = new Date(today); s.setFullYear(today.getFullYear() - 1); return s.toISOString().split('T')[0];
+}
+
+async function fetchFxHistory(range) {
+  const cacheKey = `fx_${range}`;
+  const hit = fxCache.get(cacheKey);
+  if (hit && Date.now() - hit.ts < 60 * 60 * 1000) {
+    console.log(`[fx] cache HIT: ${cacheKey}`);
+    return hit.data;
+  }
+
+  const today   = new Date(); today.setHours(0,0,0,0);
+  const endDate = today.toISOString().split('T')[0];
+  const startDate = rangeToStartDate(range);
+  const keys = FX_SERIES.map(s => s.key).join(',');
+
+  // ECB-data via frankfurter.app: from=SEK → hur mycket valuta 1 SEK köper
+  // Vi inverterar → SEK per valutaenhet (= UCI-pris för valutan)
+  const url = `https://api.frankfurter.app/${startDate}..${endDate}?from=SEK&to=${keys}`;
+  console.log(`[fx] hämtar ${url}`);
+  const r    = await fetch(url);
+  if (!r.ok) throw new Error(`Frankfurter ${r.status}`);
+  const json = await r.json();
+
+  const dates = Object.keys(json.rates).sort();
+  if (dates.length < 2) throw new Error('För lite data från Frankfurter');
+
+  // Indexera till 100 vid första tillgängliga datum
+  const base = {};
+  for (const s of FX_SERIES) {
+    base[s.key] = 1 / json.rates[dates[0]][s.key]; // SEK per enhet
+  }
+
+  const series = FX_SERIES.map(s => ({
+    id:    s.id,
+    label: s.label,
+    color: s.color,
+    data:  dates.map(d => {
+      const sekPerUnit = 1 / json.rates[d][s.key];
+      return Math.round(sekPerUnit / base[s.key] * 10000) / 100; // index 100
+    }),
+  }));
+
+  const data = { labels: dates, series, categoryLabel: 'Valutor', source: 'ECB via frankfurter.app' };
+  fxCache.set(cacheKey, { data, ts: Date.now() });
+  console.log(`[fx] cache SET: ${cacheKey} (${dates.length} dagar)`);
+  return data;
+}
+
 // ── Asset-kategorier för multi-serie diagram ───────────────
 // Alla serier indexeras till 100 vid periodens start.
 // trend = daglig drift (positiv = stigande vs UCI), vol = daglig volatilitet.
@@ -810,9 +880,20 @@ function generateAssetHistory(cat, startDateStr, numDays) {
 }
 
 // ── GET /api/uci/assets?cat=currencies&range=1Y ────────────
-app.get('/api/uci/assets', (req, res) => {
+app.get('/api/uci/assets', async (req, res) => {
   const cat   = req.query.cat   || 'currencies';
   const range = req.query.range || '1Y';
+
+  // Valutor: riktig ECB-data via frankfurter.app, fallback till simulerad
+  if (cat === 'currencies') {
+    try {
+      const data = await fetchFxHistory(range);
+      return res.json(data);
+    } catch (e) {
+      console.warn('[assets] FX-fel, faller tillbaka på simulerad data:', e.message);
+      // fortsätter till simulerad nedan
+    }
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
