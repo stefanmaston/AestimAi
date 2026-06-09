@@ -1621,3 +1621,55 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .legend-ref { color: var(--gray-400, #aaa); }
 .legend-label { white-space: nowrap; }
+
+/* ═══════════════════════════════════════════════
+   OM AESTIMAI — About-sida
+═══════════════════════════════════════════════ */
+.about-wrap { max-width: 860px; padding: 0 0 4rem; }
+
+.about-hero { text-align:center; padding:3rem 1rem 2.5rem; border-bottom:1px solid var(--gray-200); margin-bottom:2.5rem; }
+.about-hero-symbol { font-size:3rem; color:var(--green); margin-bottom:0.5rem; }
+.about-hero-title { font-size:2.6rem; font-weight:800; color:var(--ink); margin:0 0 0.5rem; letter-spacing:-0.02em; }
+.about-hero-sub { font-size:1.1rem; color:var(--gray-500); margin:0; font-style:italic; }
+
+.about-section { margin-bottom:3rem; }
+.about-h2 { font-size:1.45rem; font-weight:700; color:var(--ink); margin:0 0 1.25rem; padding-bottom:0.5rem; border-bottom:2px solid var(--green); display:inline-block; }
+.about-lead { font-size:1.08rem; line-height:1.75; color:var(--gray-600,#555); margin:0 0 1rem; }
+
+.about-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem; }
+.about-card { background:var(--gray-50,#f8f8f5); border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:1.25rem 1.35rem; }
+.about-card--problem { border-left:3px solid var(--green); }
+.about-card-icon { font-size:1.6rem; margin-bottom:0.5rem; }
+.about-card h3 { font-size:0.95rem; font-weight:700; margin:0 0 0.4rem; }
+.about-card p  { font-size:0.88rem; color:var(--gray-600,#555); margin:0; line-height:1.6; }
+
+.about-callout { background:var(--green-light,#edf7f3); border-left:4px solid var(--green); border-radius:var(--radius-lg); padding:1.1rem 1.35rem; display:flex; gap:1rem; align-items:flex-start; }
+.about-callout-symbol { font-size:1.4rem; color:var(--green); flex-shrink:0; margin-top:0.1rem; }
+.about-callout p { margin:0; font-size:0.95rem; line-height:1.65; color:var(--ink); font-weight:500; }
+
+.about-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.25rem; }
+.about-feature { background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:1.1rem 1.15rem; }
+.about-feature-icon { font-size:1.5rem; margin-bottom:0.5rem; }
+.about-feature h4 { font-size:0.9rem; font-weight:700; margin:0 0 0.35rem; }
+.about-feature p  { font-size:0.83rem; color:var(--gray-500); margin:0; line-height:1.55; }
+
+.about-benefits { display:flex; flex-direction:column; gap:1.25rem; }
+.about-benefit { display:flex; gap:1.25rem; align-items:flex-start; padding-bottom:1.25rem; border-bottom:1px solid var(--gray-100,#f0efea); }
+.about-benefit:last-child { border-bottom:none; }
+.about-benefit-num { font-size:1.5rem; font-weight:800; color:var(--green); opacity:0.4; flex-shrink:0; line-height:1; min-width:2.2rem; }
+.about-benefit h4 { font-size:0.97rem; font-weight:700; margin:0 0 0.3rem; }
+.about-benefit p  { font-size:0.87rem; color:var(--gray-500); margin:0; line-height:1.6; }
+
+.about-apps { display:flex; flex-wrap:wrap; gap:0.5rem; }
+.about-app-tag { background:var(--green-light,#edf7f3); color:var(--green); border:1px solid rgba(29,107,78,0.18); border-radius:999px; padding:0.35rem 0.9rem; font-size:0.82rem; font-weight:600; }
+
+.about-closing { text-align:center; padding-top:1rem; }
+.about-quote { background:var(--gray-50,#f8f8f5); border-radius:var(--radius-lg); padding:2rem; margin-bottom:1.5rem; }
+.about-quote blockquote { margin:0; font-size:1.05rem; line-height:1.8; color:var(--ink); font-style:italic; font-weight:500; }
+.about-cta-text { font-size:0.92rem; color:var(--gray-500); margin:0 0 1.5rem; max-width:560px; margin-inline:auto; }
+.about-cta-buttons { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; }
+
+@media (max-width:680px) {
+  .about-grid-2, .about-grid-3 { grid-template-columns:1fr; }
+  .about-hero-title { font-size:2rem; }
+}
