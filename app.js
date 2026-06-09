@@ -604,28 +604,11 @@ function afterAuthChange() {
 }
 
 function updateAuthUI() {
-  const dot  = document.getElementById('statusDot');
-  const text = document.getElementById('statusText');
-  const btn  = document.getElementById('btnLogin');
-
+  // Äldre UI-element (pro gate etc) uppdateras här
   if (state.isLoggedIn) {
-    dot.classList.add('active');
-    text.textContent = state.user?.email || 'Inloggad';
-    btn.textContent  = 'Logga ut';
-    btn.onclick      = signOut;
-
-    document.getElementById('idcoopUnauth')?.classList.add('hidden');
-    document.getElementById('idcoopAuth')?.classList.remove('hidden');
     document.getElementById('proGate')?.classList.add('hidden');
     document.getElementById('proContent')?.classList.remove('hidden');
   } else {
-    dot.classList.remove('active');
-    text.textContent = 'Ej inloggad';
-    btn.textContent  = 'Logga in';
-    btn.onclick      = () => openAuthModal();
-
-    document.getElementById('idcoopUnauth')?.classList.remove('hidden');
-    document.getElementById('idcoopAuth')?.classList.add('hidden');
     document.getElementById('proGate')?.classList.remove('hidden');
     document.getElementById('proContent')?.classList.add('hidden');
   }
@@ -1838,23 +1821,20 @@ async function initAuth() {
 
 function onSignIn(user) {
   currentUser = user;
-  document.getElementById('statusText').textContent = user.email || 'Inloggad';
-  document.getElementById('statusDot').className = 'status-dot active';
-  document.getElementById('btnLogin').textContent = 'Mitt konto';
-  document.getElementById('btnLogin').onclick = () => navigateTo('account');
-  // Visa "Mitt konto" i nav
-  document.getElementById('navAccount')?.classList.remove('hidden');
+  // Topbar
+  document.getElementById('topbarGuest')?.classList.add('hidden');
+  const acct = document.getElementById('topbarAccount');
+  if (acct) acct.classList.remove('hidden');
+  const emailEl = document.getElementById('topbarEmail');
+  if (emailEl) emailEl.textContent = user.email || 'Inloggad';
   refreshAccountSection();
 }
 
 function onSignOut() {
   currentUser = null;
-  document.getElementById('statusText').textContent = 'Ej inloggad';
-  document.getElementById('statusDot').className = 'status-dot';
-  document.getElementById('btnLogin').textContent = 'Logga in';
-  document.getElementById('btnLogin').onclick = () => openAuthModal('login');
-  // Dölj "Mitt konto" i nav
-  document.getElementById('navAccount')?.classList.add('hidden');
+  // Topbar
+  document.getElementById('topbarGuest')?.classList.remove('hidden');
+  document.getElementById('topbarAccount')?.classList.add('hidden');
   // Om användaren var på konto-sidan, skicka till dashboard
   if (state.currentModule === 'account') navigateTo('dashboard');
 }

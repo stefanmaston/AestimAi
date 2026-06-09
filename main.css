@@ -192,7 +192,74 @@ textarea { resize: vertical; }
   overflow-y: auto;
   background: var(--white);
   padding: 2.75rem 3rem 5rem;
+  position: relative;
 }
+
+/* ── Topbar user chip ── */
+.topbar-user {
+  position: absolute;
+  top: 1.2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  z-index: 100;
+}
+.topbar-guest {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.topbar-login-btn {
+  background: none;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  padding: .3rem .8rem;
+  font-size: .82rem;
+  color: var(--gray-600, #555);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.topbar-login-btn:hover { border-color: var(--primary,#6366f1); color: var(--primary,#6366f1); }
+.topbar-register-btn {
+  background: var(--primary, #6366f1);
+  border: none;
+  border-radius: 6px;
+  padding: .3rem .8rem;
+  font-size: .82rem;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.topbar-register-btn:hover { opacity: .85; }
+.topbar-account {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .82rem;
+}
+.topbar-email {
+  color: var(--gray-700, #374151);
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar-divider { color: var(--gray-300, #d1d5db); }
+.topbar-account-link,
+.topbar-signout-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: .82rem;
+  cursor: pointer;
+  transition: color .15s;
+}
+.topbar-account-link { color: var(--primary, #6366f1); font-weight: 500; }
+.topbar-account-link:hover { text-decoration: underline; }
+.topbar-signout-link { color: var(--gray-400, #9ca3af); }
+.topbar-signout-link:hover { color: var(--gray-600, #555); }
 
 .module { display: block; }
 .module.hidden { display: none; }
