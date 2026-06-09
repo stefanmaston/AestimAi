@@ -1142,11 +1142,12 @@ function chartBaseOptions(labels) {
   return {
     responsive:          true,
     maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
+    // nearest = bara den serie pekaren är närmast
+    interaction: { mode: 'nearest', intersect: false, axis: 'x' },
     plugins: { legend: { display: false } },
     scales: {
       x: {
-        grid:  { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+        grid:  { color: 'rgba(255,255,255,0.07)', drawTicks: false },
         ticks: {
           color: '#888780', maxTicksLimit: 8, maxRotation: 0,
           callback: (_, i, arr) => {
@@ -1158,7 +1159,7 @@ function chartBaseOptions(labels) {
       },
       y: {
         position: 'right',
-        grid:     { color: 'rgba(255,255,255,0.05)' },
+        grid:     { color: 'rgba(255,255,255,0.07)' },
         border:   { display: false },
         ticks:    { color: '#888780' },
       },
@@ -1174,14 +1175,18 @@ function renderAssetChart(labels, series) {
 
   const opts = chartBaseOptions(labels);
   opts.plugins.tooltip = {
-    backgroundColor: '#111210', titleColor: '#fff',
-    bodyColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: '#111210',
+    titleColor:      '#fff',
+    bodyColor:       'rgba(255,255,255,0.85)',
+    padding:         10,
     callbacks: {
       title: items => items[0].label,
-      label: item => item.dataset.label === '⊙ UCI (referens)'
-        ? ` ⊙ UCI: 100 (referens)`
-        : ` ${item.dataset.label}: ${item.raw.toFixed(1)}`,
+      label: item => {
+        if (item.dataset.label === '⊙ UCI (referens)') return null;
+        return ` ${item.dataset.label}: ${item.raw.toFixed(1)}`;
+      },
     },
+    filter: item => item.dataset.label !== '⊙ UCI (referens)',
   };
   opts.scales.y.ticks.callback = v => v.toFixed(0);
 
@@ -1220,17 +1225,10 @@ function renderAssetChart(labels, series) {
 
 // Förklaring (legend) under diagrammet
 function renderChartLegend(series) {
-  let el = document.getElementById('chartLegend');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'chartLegend';
-    el.className = 'chart-legend';
-    document.querySelector('.dash-chart-wrap')?.after(el);
-  }
-  if (!series || series.length === 0) {
-    el.innerHTML = '';
-    return;
-  }
+  const el = document.getElementById('chartLegend');
+  if (!el) return;
+  if (!series || series.length === 0) { el.innerHTML = ''; return; }
+
   el.innerHTML = series.map(s =>
     `<span class="legend-item">
        <span class="legend-dot" style="background:${s.color}"></span>
