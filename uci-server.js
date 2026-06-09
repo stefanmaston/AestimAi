@@ -708,6 +708,7 @@ FORMAT B — säker, redo för värdering:
 // Servera alltid från DB → konsistent historik som aldrig ändras bakåt.
 
 const FX_SERIES = [
+  { id: 'sek', label: 'SEK', color: '#4ade80', col: null,  key: null  }, // SEK = UCI-bas, alltid 100
   { id: 'eur', label: 'EUR', color: '#60a5fa', col: 'eur', key: 'EUR' },
   { id: 'usd', label: 'USD', color: '#f472b6', col: 'usd', key: 'USD' },
   { id: 'gbp', label: 'GBP', color: '#fb923c', col: 'gbp', key: 'GBP' },
@@ -747,6 +748,7 @@ async function syncFxFromApi(fromDate, toDate) {
   const rows = dates.map(d => {
     const row = { date: d };
     for (const s of FX_SERIES) {
+      if (!s.col) continue; // SEK har ingen DB-kolumn
       const rateVal = json.rates[d][s.key];
       row[s.col] = rateVal ? Math.round((1 / rateVal) * 1e6) / 1e6 : null;
     }
@@ -842,10 +844,12 @@ async function fetchFxHistory(range) {
     id:    s.id,
     label: s.label,
     color: s.color,
-    data:  rows.map(row => {
-      const v = row[s.col];
-      return (v && base[s.col]) ? Math.round(v / base[s.col] * 10000) / 100 : null;
-    }),
+    data:  s.col === null
+      ? rows.map(() => 100)   // SEK = UCI-bas, alltid 100
+      : rows.map(row => {
+          const v = row[s.col];
+          return (v && base[s.col]) ? Math.round(v / base[s.col] * 10000) / 100 : null;
+        }),
   }));
 
   const data = { labels, series, categoryLabel: 'Valutor', source: 'ECB via frankfurter.app' };
