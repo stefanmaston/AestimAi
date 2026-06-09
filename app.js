@@ -105,8 +105,8 @@ function navigateTo(moduleId) {
     loadLabProducts();
   }
 
-  // Visa konto-info när Priser & Konto öppnas
-  if (moduleId === 'pricing') {
+  // Uppdatera konto-sidan när den öppnas
+  if (moduleId === 'account') {
     refreshAccountSection();
   }
 }
@@ -1841,8 +1841,9 @@ function onSignIn(user) {
   document.getElementById('statusText').textContent = user.email || 'Inloggad';
   document.getElementById('statusDot').className = 'status-dot active';
   document.getElementById('btnLogin').textContent = 'Mitt konto';
-  document.getElementById('btnLogin').onclick = () => navigateTo('pricing');
-  // Uppdatera konto-sektionen om pricing-modulen är öppen
+  document.getElementById('btnLogin').onclick = () => navigateTo('account');
+  // Visa "Mitt konto" i nav
+  document.getElementById('navAccount')?.classList.remove('hidden');
   refreshAccountSection();
 }
 
@@ -1852,16 +1853,14 @@ function onSignOut() {
   document.getElementById('statusDot').className = 'status-dot';
   document.getElementById('btnLogin').textContent = 'Logga in';
   document.getElementById('btnLogin').onclick = () => openAuthModal('login');
-  const acc = document.getElementById('accountSection');
-  if (acc) acc.classList.add('hidden');
+  // Dölj "Mitt konto" i nav
+  document.getElementById('navAccount')?.classList.add('hidden');
+  // Om användaren var på konto-sidan, skicka till dashboard
+  if (state.currentModule === 'account') navigateTo('dashboard');
 }
 
 function refreshAccountSection() {
   if (!currentUser) return;
-  const acc = document.getElementById('accountSection');
-  if (!acc) return;
-  acc.classList.remove('hidden');
-
   const email = document.getElementById('acctEmail');
   const since = document.getElementById('acctSince');
   if (email) email.textContent = currentUser.email || '—';
