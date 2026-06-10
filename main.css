@@ -115,17 +115,12 @@ textarea { resize: vertical; }
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-.logo-mark {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: var(--green);
-  color: var(--white);
+.logo-img {
   width: 38px; height: 38px;
   border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  letter-spacing: -0.02em;
+  object-fit: cover;
+  display: block;
 }
 
 .logo-text {
