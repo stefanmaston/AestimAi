@@ -641,114 +641,158 @@
     <section class="module hidden" id="module-pro">
       <div class="module-header">
         <h1>AestimAi Pro</h1>
-        <p class="module-desc">Fastighets- och energivärdering — investerarrapporter med UCI-index</p>
+        <p class="module-desc">Professionella abonnemang, white-label och OEM-integrationer</p>
       </div>
 
-      <div class="pro-gate" id="proGate">
-        <div class="gate-icon">▣</div>
-        <h2>AestimAi Pro — €75/mån</h2>
-        <p>Professionell värdering för fastigheter, energitillgångar och portföljer. Exportera kryptografiskt signerade investerarrapporter med UCI-index.</p>
-        <ul class="gate-features">
-          <li>✓ Fastighetsvärdering med AestimAi-motor</li>
-          <li>✓ Energitillgångsvärdering (solceller, CHP2X, batteri)</li>
-          <li>✓ Investerarrapport — PDF, AE ID-signerad</li>
-          <li>✓ Portföljvy med UCI-totalvärde</li>
-          <li>✓ API-nycklar för systemintegration</li>
-        </ul>
-        <button class="btn-primary" data-module="idcoop">Aktivera Pro-prenumeration</button>
+      <!-- Intro -->
+      <div class="pro-intro">
+        <p>AestimAi:s värderingsmodeller är byggda för att fungera både som en konsumenttjänst och som en underliggande motor i andra system. Här beskriver vi vad de betalda abonnemangen innehåller, hur white-label fungerar och vilka möjligheter som finns för partners som vill integrera UCI-värdering i sina egna produkter.</p>
       </div>
 
-      <div class="pro-content hidden" id="proContent">
-        <div class="pro-tabs">
-          <button class="tab-btn active" data-pro-tab="property">Fastighet</button>
-          <button class="tab-btn" data-pro-tab="energy">Energitillgång</button>
-          <button class="tab-btn" data-pro-tab="portfolio">Portfölj</button>
-          <button class="tab-btn" data-pro-tab="api">API-nycklar</button>
+      <!-- Pro & Enterprise -->
+      <div class="pro-plans-grid">
+
+        <div class="pro-plan-card">
+          <div class="pro-plan-header">
+            <span class="pro-plan-label">Pro</span>
+            <span class="pro-plan-price">€25 <span>/mån</span></span>
+          </div>
+          <p class="pro-plan-desc">För privatpersoner, konsulter och småföretag som behöver mer kapacitet och professionella verktyg i sin dagliga värderingsverksamhet.</p>
+          <div class="pro-feature-group">
+            <h4>Värdering &amp; data</h4>
+            <ul>
+              <li>50 UCI-värderingar per dag</li>
+              <li>Fullständig värderingshistorik i 12 månader</li>
+              <li>CSV-export av värderingsdata</li>
+              <li>Alla kategorier i UCI Marknadsdata</li>
+            </ul>
+          </div>
+          <div class="pro-feature-group">
+            <h4>Bytesmarknad</h4>
+            <ul>
+              <li>Upp till 10 aktiva annonser</li>
+              <li>Prioriterad placering i sökresultat</li>
+            </ul>
+          </div>
+          <div class="pro-feature-group">
+            <h4>API</h4>
+            <ul>
+              <li>REST API-access med 500 requests/dag</li>
+              <li>Webhook för marknadsdataändringar</li>
+            </ul>
+          </div>
+          <button class="btn-plan btn-plan-pro" onclick="navigateTo('pricing')">Se priser och registrera →</button>
         </div>
 
-        <div class="pro-tab-content" id="pro-tab-property">
-          <h2>Fastighetsvärdering</h2>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Adress</label>
-              <input type="text" placeholder="Gatuadress, postnummer, ort">
-            </div>
-            <div class="form-group">
-              <label>Fastighetstyp</label>
-              <select>
-                <option>Villa</option>
-                <option>Bostadsrätt</option>
-                <option>Kommersiell fastighet</option>
-                <option>Industrifastighet</option>
-                <option>Jordbruksfastighet</option>
-              </select>
-            </div>
+        <div class="pro-plan-card pro-plan-card-dark">
+          <div class="pro-plan-header">
+            <span class="pro-plan-label">Enterprise</span>
+            <span class="pro-plan-price">€75 <span>/mån</span></span>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Area (m²)</label>
-              <input type="number" placeholder="m²">
-            </div>
-            <div class="form-group">
-              <label>Energiprestanda (kWh/m²/år)</label>
-              <input type="number" placeholder="kWh/m²/år">
-            </div>
-            <div class="form-group">
-              <label>Skick</label>
-              <select>
-                <option value="5">5 — Nyskick</option>
-                <option value="4">4 — Bra</option>
-                <option value="3">3 — OK</option>
-                <option value="2">2 — Renoveringsbehov</option>
-                <option value="1">1 — Dåligt skick</option>
-              </select>
-            </div>
+          <p class="pro-plan-desc">För organisationer, mäklare, banker, revisionsbolag och plattformar som behöver hög kapacitet, teamfunktioner och SLA-garantier.</p>
+          <div class="pro-feature-group">
+            <h4>Värdering &amp; data</h4>
+            <ul>
+              <li>Obegränsat antal UCI-värderingar</li>
+              <li>Obegränsad värderingshistorik</li>
+              <li>Realtidsdata med webhooks</li>
+              <li>Bulk-värdering via API</li>
+            </ul>
           </div>
-          <button class="btn-primary">Generera värdering</button>
+          <div class="pro-feature-group">
+            <h4>Team &amp; organisation</h4>
+            <ul>
+              <li>5 teammedlemmar under ett konto</li>
+              <li>Rollbaserade behörigheter</li>
+              <li>Gemensam värderingshistorik</li>
+            </ul>
+          </div>
+          <div class="pro-feature-group">
+            <h4>API &amp; SLA</h4>
+            <ul>
+              <li>10 000 API-requests per dag</li>
+              <li>Garanterad drifttid 99,9 %</li>
+              <li>Dedikerad support med svarstid</li>
+            </ul>
+          </div>
+          <button class="btn-plan btn-plan-pro" onclick="navigateTo('pricing')">Se priser och registrera →</button>
         </div>
 
-        <div class="pro-tab-content hidden" id="pro-tab-energy">
-          <h2>Energitillgångsvärdering</h2>
-          <p class="form-hint">Värdera solcellsanläggning, CHP2X-elverk eller batterilager i UCI.</p>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Typ av anläggning</label>
-              <select>
-                <option>Solcellsanläggning</option>
-                <option>CHP2X-elverk</option>
-                <option>Batterilager</option>
-                <option>Kombinerad anläggning</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Installerad effekt (kWp / kWe)</label>
-              <input type="number" placeholder="kWp eller kWe">
-            </div>
-          </div>
-          <button class="btn-primary">Generera energivärdering</button>
-        </div>
+      </div>
 
-        <div class="pro-tab-content hidden" id="pro-tab-portfolio">
-          <div class="empty-state">
-            <div class="empty-icon">▣</div>
-            <h2>Portföljen är tom</h2>
-            <p>Värderingar du genomför sparas här automatiskt.</p>
+      <!-- White-label -->
+      <div class="pro-section">
+        <h2>White-label</h2>
+        <p>Enterprise-abonnemanget inkluderar möjligheten att använda AestimAi:s gränssnitt och värderingsmotor under eget varumärke. Lämpligt för:</p>
+        <div class="pro-usecase-grid">
+          <div class="pro-usecase">
+            <h4>Fastighetsmäklare &amp; banker</h4>
+            <p>Erbjud UCI-baserad värdering direkt i din befintliga kundportal eller app under eget namn och logotype.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4>Försäkringsbolag</h4>
+            <p>Integrera neutral objektvärdering i skadehantering och försäkringsteckning utan att bygga egna modeller.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4>Marknadsplatser</h4>
+            <p>Lägg till en "Vad är det värt?"-funktion på din köp- och säljtjänst med automatisk UCI-värdering per annons.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4>Revisionsbyråer</h4>
+            <p>Komplettera balansräkningsvärdering med ett neutralt, maskinläsbart UCI-index som referensram i rapporter.</p>
           </div>
         </div>
+        <p class="pro-contact-note">White-label kräver Enterprise-abonnemang. Kontakta oss för anpassad konfiguration av domän, logotype och färger.</p>
+      </div>
 
-        <div class="pro-tab-content hidden" id="pro-tab-api">
-          <h2>API-nycklar</h2>
-          <p>Integrera AestimAi i dina egna system med REST API.</p>
-          <div class="api-key-box">
-            <label>Din API-nyckel</label>
-            <div class="api-key-row">
-              <input type="password" value="aestim_sk_••••••••••••••••" readonly id="apiKeyField">
-              <button class="btn-secondary" id="btnRevealKey">Visa</button>
-              <button class="btn-secondary" id="btnCopyKey">Kopiera</button>
+      <!-- OEM / Specialistlösningar -->
+      <div class="pro-section">
+        <h2>OEM &amp; specialistintegrationer</h2>
+        <p>Utöver abonnemangen erbjuder vi djupare tekniska integrationer för partners som vill bädda in AestimAi:s värderingsmodeller direkt i sina egna produkter — utan att exponera AestimAi-varumärket alls.</p>
+        <div class="pro-oem-grid">
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">API-first integration</div>
+            <p>Anropa våra värderingsmodeller direkt via REST API från vilket system som helst. Resultaten returneras som strukturerad JSON med UCI-värde, konfidensintervall och källhänvisningar. Ingen UI krävs.</p>
+            <div class="pro-oem-tags">
+              <span>REST API</span><span>JSON</span><span>Webhook</span>
             </div>
           </div>
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">Inbäddad värderingsmotor</div>
+            <p>Licensiera AestimAi:s Bayesianska värderingsmodell för lokal körning i din infrastruktur. Passar regulatoriska miljöer där data inte får lämna organisationen.</p>
+            <div class="pro-oem-tags">
+              <span>On-premise</span><span>Docker</span><span>Dataskydd</span>
+            </div>
+          </div>
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">Branschspecifik kalibrering</div>
+            <p>Vi kalibrerar värderingsmodellen mot din branschs specifika data — exempelvis jordbruksfastigheter, marina tillgångar, industriutrustning eller immateriella rättigheter.</p>
+            <div class="pro-oem-tags">
+              <span>Anpassad modell</span><span>Träningsdata</span><span>Validering</span>
+            </div>
+          </div>
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">UCI-index som referens i IoT</div>
+            <p>Koppla mätdata från energimätare, sensorer och spårningssystem direkt till UCI-indexet för automatisk realtidsvärdering av fysiska tillgångar.</p>
+            <div class="pro-oem-tags">
+              <span>IoT</span><span>MQTT</span><span>Realtid</span>
+            </div>
+          </div>
+
         </div>
       </div>
+
+      <!-- Kontakt-CTA -->
+      <div class="pro-cta">
+        <h3>Intresserad av white-label eller OEM?</h3>
+        <p>Kontakta oss för en teknisk genomgång och prisförslag anpassat efter er volym och integration.</p>
+        <a class="btn-plan btn-plan-enterprise" href="mailto:kontakt@aestimai.org?subject=White-label%20%2F%20OEM-förfrågan">Kontakta oss →</a>
+      </div>
+
     </section>
 
 
