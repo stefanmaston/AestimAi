@@ -76,7 +76,30 @@ textarea { resize: vertical; }
 /* ===== SIDEBAR ===== */
 .sidebar {
   grid-column: 1;
-  background: var(--gray-900);
+  /* Deep charcoal-indigo bas */
+  background-color: #0b0c15;
+  /* Herringbone — klassisk lyxtextil, inte störande för text */
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 7px,
+      rgba(255, 252, 220, 0.026) 7px,
+      rgba(255, 252, 220, 0.026) 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 7px,
+      rgba(255, 252, 220, 0.026) 7px,
+      rgba(255, 252, 220, 0.026) 8px
+    ),
+    /* Subtil brand-ton uppifrån — kopplar till primärfärgen */
+    linear-gradient(180deg,
+      rgba(99, 102, 241, 0.10) 0%,
+      rgba(99, 102, 241, 0.03) 35%,
+      transparent 70%
+    );
   color: var(--white);
   height: 100vh;
   display: flex;
