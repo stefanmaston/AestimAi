@@ -364,7 +364,7 @@ textarea { resize: vertical; }
   flex-wrap: wrap;
 }
 .condition-row label { font-size: 0.82rem; font-weight: 600; color: var(--gray-500); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em; }
-.val-image-row { display: flex; align-items: center; gap: 0.75rem; }
+.val-image-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.4rem; }
 .val-image-hint { font-size: 0.78rem; color: var(--gray-400); }
 .val-photo-slot { cursor: pointer; width: 112px !important; height: 53px !important; border-radius: var(--radius-sm) !important; }
 .val-photo-slot:hover { opacity: 0.8; }
