@@ -1950,7 +1950,9 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-bottom: 3rem;
-  align-items: start;
+  margin-inline: auto;
+  max-width: 80%;
+  align-items: stretch;
 }
 .pricing-card {
   background: #fff;
@@ -1959,11 +1961,11 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 .pricing-card-featured {
   border: 2px solid var(--primary, #6366f1);
   box-shadow: 0 8px 32px rgba(99,102,241,.15);
-  transform: translateY(-6px);
 }
 .pricing-card-top {
   padding: 1.8rem 1.8rem 1.4rem;
