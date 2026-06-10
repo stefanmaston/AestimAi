@@ -1810,7 +1810,12 @@ async function initAuth() {
   try {
     const sb = await getSb();
     const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) onSignIn(session.user);
+    if (session?.user) {
+      onSignIn(session.user);
+    } else {
+      // Auth-gate: visa registrering direkt om inte inloggad
+      openAuthModal('register');
+    }
 
     sb.auth.onAuthStateChange((_event, session) => {
       if (session?.user) onSignIn(session.user);
@@ -1821,12 +1826,18 @@ async function initAuth() {
 
 function onSignIn(user) {
   currentUser = user;
+  // Stäng auth-modalen om öppen
+  document.getElementById('authOverlay')?.classList.add('hidden');
   // Topbar
   document.getElementById('topbarGuest')?.classList.add('hidden');
   const acct = document.getElementById('topbarAccount');
   if (acct) acct.classList.remove('hidden');
   const emailEl = document.getElementById('topbarEmail');
-  if (emailEl) emailEl.textContent = user.email || 'Inloggad';
+  if (emailEl) {
+    // Visa namn om det finns, annars e-post
+    const name = user.user_metadata?.full_name || user.email || 'Inloggad';
+    emailEl.textContent = name;
+  }
   refreshAccountSection();
 }
 
@@ -1858,6 +1869,8 @@ function openAuthModal(panel = 'login') {
 }
 
 function closeAuthModal(e, force = false) {
+  // Om ingen är inloggad kan modalen inte stängas (auth-gate)
+  if (!currentUser && !force) return;
   if (!force && e && e.target !== document.getElementById('authOverlay')) return;
   document.getElementById('authOverlay').classList.add('hidden');
 }
@@ -1883,30 +1896,56 @@ async function doLogin() {
   const pass  = document.getElementById('loginPassword').value;
   setAuthError('loginError', '');
   if (!email || !pass) return setAuthError('loginError', 'Fyll i e-post och lösenord.');
+  const btn = document.getElementById('btnLogin');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
     const sb = await getSb();
-    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
     if (error) return setAuthError('loginError', error.message);
-    closeAuthModal(null, true);
-  } catch (e) { setAuthError('loginError', 'Något gick fel. Försök igen.'); }
+    // onAuthStateChange hanterar onSignIn — men vi kallar direkt för omedelbar respons
+    if (data?.user) onSignIn(data.user);
+  } catch (e) {
+    setAuthError('loginError', 'Något gick fel. Försök igen.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Logga in'; }
+  }
 }
 
 async function doRegister() {
+  const name  = document.getElementById('regName')?.value.trim() || '';
   const email = document.getElementById('regEmail').value.trim();
   const pass  = document.getElementById('regPassword').value;
   const pass2 = document.getElementById('regPassword2').value;
   setAuthError('regError', '');
+  if (!name)  return setAuthError('regError', 'Ange ditt namn.');
   if (!email) return setAuthError('regError', 'Ange en e-postadress.');
   if (pass.length < 8) return setAuthError('regError', 'Lösenordet måste vara minst 8 tecken.');
   if (pass !== pass2) return setAuthError('regError', 'Lösenorden matchar inte.');
+  const btn = document.getElementById('btnRegister');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
     const sb = await getSb();
-    const { error } = await sb.auth.signUp({ email, password: pass });
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: pass,
+      options: { data: { full_name: name } },
+    });
     if (error) return setAuthError('regError', error.message);
-    document.getElementById('confirmMsg').textContent =
-      'Vi har skickat ett bekräftelsemail till ' + email + '. Klicka på länken för att aktivera ditt konto.';
-    switchPanel('confirm');
-  } catch (e) { setAuthError('regError', 'Något gick fel. Försök igen.'); }
+    // Om Supabase kräver e-postbekräftelse — visa bekräftelsepanel
+    // Om auto-confirm är på (inget identityData-mail) — logga in direkt
+    if (data?.user && !data.user.email_confirmed_at && data.session === null) {
+      document.getElementById('confirmMsg').textContent =
+        'Vi har skickat ett bekräftelsemail till ' + email + '. Klicka på länken för att aktivera ditt konto.';
+      switchPanel('confirm');
+    } else {
+      // Auto-confirmerat — stäng modal och uppdatera UI
+      closeAuthModal(null, true);
+    }
+  } catch (e) {
+    setAuthError('regError', 'Något gick fel. Försök igen.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Skapa konto'; }
+  }
 }
 
 async function doForgot() {

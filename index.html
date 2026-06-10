@@ -1528,7 +1528,7 @@
           <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
         </div>
         <p class="auth-error hidden" id="loginError"></p>
-        <button class="btn-plan btn-plan-pro" style="width:100%" onclick="doLogin()">Logga in</button>
+        <button class="btn-plan btn-plan-pro" id="btnLogin" style="width:100%" onclick="doLogin()">Logga in</button>
         <div class="auth-links">
           <button class="auth-link" onclick="switchPanel('forgot')">Glömt lösenord?</button>
           <button class="auth-link" onclick="switchPanel('register')">Skapa konto →</button>
@@ -1539,6 +1539,10 @@
       <div class="auth-panel hidden" id="panelRegister">
         <h2>Skapa konto</h2>
         <p class="auth-sub">Kom igång gratis — inget kreditkort krävs</p>
+        <div class="form-group">
+          <label>Ditt namn</label>
+          <input type="text" id="regName" placeholder="Förnamn Efternamn" autocomplete="name">
+        </div>
         <div class="form-group">
           <label>E-postadress</label>
           <input type="email" id="regEmail" placeholder="din@epost.se" autocomplete="email">
@@ -1552,7 +1556,7 @@
           <input type="password" id="regPassword2" placeholder="••••••••" autocomplete="new-password">
         </div>
         <p class="auth-error hidden" id="regError"></p>
-        <button class="btn-plan btn-plan-pro" style="width:100%" onclick="doRegister()">Skapa konto</button>
+        <button class="btn-plan btn-plan-pro" id="btnRegister" style="width:100%" onclick="doRegister()">Skapa konto</button>
         <div class="auth-links">
           <button class="auth-link" onclick="switchPanel('login')">← Logga in istället</button>
         </div>
