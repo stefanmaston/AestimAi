@@ -2138,3 +2138,48 @@ window.doForgot           = doForgot;
 window.signOut            = signOut;
 window.confirmDeleteAccount = confirmDeleteAccount;
 window.selectPlan         = selectPlan;
+
+// ── Kontaktformulär ───────────────────────────────────────────────────────────
+async function submitContact() {
+  const name    = document.getElementById('cfName').value.trim();
+  const email   = document.getElementById('cfEmail').value.trim();
+  const subject = document.getElementById('cfSubject').value;
+  const message = document.getElementById('cfMessage').value.trim();
+  const hp      = document.getElementById('cfHp').value;
+  const errEl   = document.getElementById('cfError');
+  const okEl    = document.getElementById('cfSuccess');
+  const btn     = document.getElementById('btnCfSubmit');
+  const btnTxt  = document.getElementById('btnCfText');
+
+  errEl.classList.add('hidden');
+  okEl.classList.add('hidden');
+
+  if (hp) return; // honeypot — trolig bot
+  if (!name)    { errEl.textContent = 'Ange ditt namn.';          errEl.classList.remove('hidden'); return; }
+  if (!email)   { errEl.textContent = 'Ange din e-postadress.';   errEl.classList.remove('hidden'); return; }
+  if (!message) { errEl.textContent = 'Skriv ett meddelande.';    errEl.classList.remove('hidden'); return; }
+
+  btn.disabled = true; btnTxt.textContent = 'Skickar…';
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, subject, message }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Något gick fel.');
+
+    // Rensa formuläret och visa bekräftelse
+    document.getElementById('cfName').value    = '';
+    document.getElementById('cfEmail').value   = '';
+    document.getElementById('cfMessage').value = '';
+    okEl.classList.remove('hidden');
+  } catch (e) {
+    errEl.textContent = e.message || 'Kunde inte skicka. Försök igen eller mejla kontakt@aestimai.org.';
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btnTxt.textContent = 'Skicka meddelande';
+  }
+}
+window.submitContact = submitContact;
