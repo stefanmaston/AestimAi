@@ -124,6 +124,10 @@ function updatePanelHelp(moduleId) {
 }
 
 // ── UCI Värdering (Claude API) ──────────────────────
+// Räknare för anonyma sökningar (återställs per session)
+let _anonSearchCount = parseInt(sessionStorage.getItem('anonSearchCount') || '0', 10);
+const ANON_SEARCH_LIMIT = 3;
+
 async function runUciValuation() {
   const input    = document.getElementById('uciInput').value.trim();
   const category = document.getElementById('uciCategory').value;
@@ -132,6 +136,16 @@ async function runUciValuation() {
   if (!input && !category) {
     document.getElementById('uciInput').focus();
     return;
+  }
+
+  // Auth-gate efter 3 anonyma sökningar
+  if (!currentUser) {
+    _anonSearchCount++;
+    sessionStorage.setItem('anonSearchCount', _anonSearchCount);
+    if (_anonSearchCount > ANON_SEARCH_LIMIT) {
+      openAuthModal('register');
+      return;
+    }
   }
 
   // Visa laddning
@@ -1810,12 +1824,7 @@ async function initAuth() {
   try {
     const sb = await getSb();
     const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) {
-      onSignIn(session.user);
-    } else {
-      // Auth-gate: visa registrering direkt om inte inloggad
-      openAuthModal('register');
-    }
+    if (session?.user) onSignIn(session.user);
 
     sb.auth.onAuthStateChange((_event, session) => {
       if (session?.user) onSignIn(session.user);
@@ -1826,8 +1835,10 @@ async function initAuth() {
 
 function onSignIn(user) {
   currentUser = user;
-  // Stäng auth-modalen om öppen
+  // Stäng auth-modalen och återställ söksräknare
   document.getElementById('authOverlay')?.classList.add('hidden');
+  _anonSearchCount = 0;
+  sessionStorage.setItem('anonSearchCount', '0');
   // Topbar
   document.getElementById('topbarGuest')?.classList.add('hidden');
   const acct = document.getElementById('topbarAccount');
@@ -1869,8 +1880,8 @@ function openAuthModal(panel = 'login') {
 }
 
 function closeAuthModal(e, force = false) {
-  // Om ingen är inloggad kan modalen inte stängas (auth-gate)
-  if (!currentUser && !force) return;
+  // Om man nått gränsen och inte är inloggad kan modalen inte stängas
+  if (!currentUser && _anonSearchCount > ANON_SEARCH_LIMIT && !force) return;
   if (!force && e && e.target !== document.getElementById('authOverlay')) return;
   document.getElementById('authOverlay').classList.add('hidden');
 }
