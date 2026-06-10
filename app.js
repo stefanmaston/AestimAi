@@ -155,7 +155,12 @@ async function runUciValuation() {
     const res = await fetch(`${UCI_SERVER}/api/uci/value`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ description: input, category, condition: cond }),
+      body:    JSON.stringify({
+        description: input,
+        category,
+        condition: cond,
+        ..._valImageBase64 ? { imageBase64: _valImageBase64 } : {},
+      }),
     });
 
     const data = await res.json();
@@ -660,6 +665,49 @@ function resetPhotoGrid() {
   state.listingFiles = [];
   const grid = document.getElementById('photoGrid');
   grid?.querySelectorAll('.photo-slot:not(.add-photo)').forEach(s => s.remove());
+}
+
+// ── Bildup­pladdning för UCI Värdering ──────────────────────────────────────
+let _valImageBase64 = null;   // base64-sträng för aktuell värderingsbild
+
+function setupValImage() {
+  const addBtn = document.getElementById('valAddPhotoBtn');
+  const input  = document.getElementById('valPhotoInput');
+  const grid   = document.getElementById('valPhotoGrid');
+  if (!addBtn || !input || !grid) return;
+
+  addBtn.addEventListener('click', () => input.click());
+
+  input.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Ta bort eventuell tidigare bild
+    grid.querySelectorAll('.photo-slot:not(.add-photo)').forEach(s => s.remove());
+    _valImageBase64 = null;
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      _valImageBase64 = ev.target.result; // data:image/...;base64,...
+
+      // Visa miniatyr
+      const slot = document.createElement('div');
+      slot.className = 'photo-slot val-photo-slot';
+      slot.style.backgroundImage    = `url(${ev.target.result})`;
+      slot.style.backgroundSize     = 'cover';
+      slot.style.backgroundPosition = 'center';
+      // Klick på miniatyr tar bort bilden
+      slot.title = 'Klicka för att ta bort';
+      slot.addEventListener('click', () => {
+        slot.remove();
+        _valImageBase64 = null;
+        input.value = '';
+      });
+      grid.insertBefore(slot, addBtn);
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  });
 }
 
 // ── UCI-justering ────────────────────────────────────
@@ -1711,6 +1759,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMarketplace();
   setupAuth();
   setupPhotoUpload();
+  setupValImage();
   setupUciAdjust();
   setupApiKey();
   setupDataModuleLinks();
