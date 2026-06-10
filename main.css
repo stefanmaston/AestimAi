@@ -2185,7 +2185,7 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
   background: #ede9fe; color: #6366f1;
 }
-.acct-action-btn { margin-top: 1.2rem; width: 100%; }
+.acct-action-btn { margin: 1.2rem 0 0; width: 100%; box-sizing: border-box; }
 
 /* ── Fara-zon ── */
 .acct-danger-zone {
