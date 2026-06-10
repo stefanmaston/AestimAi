@@ -1912,13 +1912,39 @@ function onSignOut() {
 
 function refreshAccountSection() {
   if (!currentUser) return;
-  const email = document.getElementById('acctEmail');
-  const since = document.getElementById('acctSince');
-  if (email) email.textContent = currentUser.email || '—';
-  if (since) {
-    const d = new Date(currentUser.created_at || Date.now());
-    since.textContent = d.toLocaleDateString('sv-SE');
-  }
+  const u    = currentUser;
+  const name = u.user_metadata?.full_name || '';
+  const email = u.email || '—';
+  const since = u.created_at ? new Date(u.created_at).toLocaleDateString('sv-SE') : '—';
+  const shortId = u.id ? u.id.slice(0, 8) + '…' : '—';
+
+  // Avatar-initial
+  const avatarEl = document.getElementById('acctAvatar');
+  if (avatarEl) avatarEl.textContent = (name || email).charAt(0).toUpperCase();
+
+  // Hero
+  const heroName = document.getElementById('acctName');
+  if (heroName) heroName.textContent = name || email;
+  const heroEmail = document.getElementById('acctEmail');
+  if (heroEmail) heroEmail.textContent = email;
+
+  // Kort — kontouppgifter
+  const nameRow = document.getElementById('acctNameRow');
+  if (nameRow) nameRow.textContent = name || '—';
+  const emailRow = document.getElementById('acctEmailRow');
+  if (emailRow) emailRow.textContent = email;
+  const sinceEl = document.getElementById('acctSince');
+  if (sinceEl) sinceEl.textContent = since;
+  const idEl = document.getElementById('acctId');
+  if (idEl) idEl.textContent = shortId;
+
+  // Kort — abonnemang
+  const planBadge = document.getElementById('acctPlan');
+  if (planBadge) planBadge.textContent = 'Freemium';
+  const activePlan = document.getElementById('acctActivePlan');
+  if (activePlan) activePlan.textContent = 'Freemium';
+  const nextBill = document.getElementById('acctNextBill');
+  if (nextBill) nextBill.textContent = '—';
 }
 
 // ── Auth modal ────────────────────────────────────────────────────────────────

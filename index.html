@@ -1206,31 +1206,81 @@
 
     <!-- ===== MITT KONTO (visas bara när inloggad) ===== -->
     <section class="module hidden" id="module-account">
-      <div class="module-header">
-        <h1>Mitt konto</h1>
-        <p class="module-desc">Dina personuppgifter och abonnemang</p>
+
+      <!-- Profil-hero -->
+      <div class="acct-hero">
+        <div class="acct-avatar" id="acctAvatar">—</div>
+        <div class="acct-hero-info">
+          <h1 class="acct-hero-name" id="acctName">—</h1>
+          <p class="acct-hero-email" id="acctEmail">—</p>
+          <span class="acct-plan-badge" id="acctPlan">Freemium</span>
+        </div>
+        <button class="acct-signout-btn" onclick="signOut()">Logga ut</button>
       </div>
+
+      <!-- Kort-grid -->
       <div class="account-grid">
+
+        <!-- Kontouppgifter -->
         <div class="account-card">
-          <h3>Kontouppgifter</h3>
-          <div class="account-row"><span>E-post</span><span id="acctEmail">—</span></div>
-          <div class="account-row"><span>Plan</span><span id="acctPlan">Freemium</span></div>
-          <div class="account-row"><span>Medlem sedan</span><span id="acctSince">—</span></div>
-          <button class="btn-secondary btn-sm" style="margin-top:.8rem" onclick="openAuthModal('forgot')">Byt lösenord</button>
+          <div class="acct-card-header">
+            <span class="acct-card-icon">👤</span>
+            <h3>Kontouppgifter</h3>
+          </div>
+          <div class="account-row">
+            <span>Namn</span>
+            <span id="acctNameRow">—</span>
+          </div>
+          <div class="account-row">
+            <span>E-post</span>
+            <span id="acctEmailRow">—</span>
+          </div>
+          <div class="account-row">
+            <span>Medlem sedan</span>
+            <span id="acctSince">—</span>
+          </div>
+          <div class="account-row">
+            <span>Konto-ID</span>
+            <span id="acctId" class="acct-mono">—</span>
+          </div>
+          <button class="btn-secondary btn-sm acct-action-btn" onclick="openAuthModal('forgot')">Byt lösenord</button>
         </div>
+
+        <!-- Abonnemang -->
         <div class="account-card">
-          <h3>Abonnemang</h3>
-          <div class="account-row"><span>Aktiv plan</span><span id="acctActivePlan">Freemium</span></div>
-          <div class="account-row"><span>Nästa faktura</span><span id="acctNextBill">—</span></div>
-          <button class="btn-plan btn-plan-pro" style="width:100%;margin-top:.8rem;" onclick="navigateTo('pricing')">Hantera plan →</button>
+          <div class="acct-card-header">
+            <span class="acct-card-icon">⭐</span>
+            <h3>Abonnemang</h3>
+          </div>
+          <div class="account-row">
+            <span>Aktiv plan</span>
+            <span id="acctActivePlan" class="acct-plan-pill">Freemium</span>
+          </div>
+          <div class="account-row">
+            <span>Värderingar idag</span>
+            <span id="acctUsage">—</span>
+          </div>
+          <div class="account-row">
+            <span>Nästa faktura</span>
+            <span id="acctNextBill">—</span>
+          </div>
+          <button class="btn-plan btn-plan-pro acct-action-btn" onclick="navigateTo('pricing')">Uppgradera plan →</button>
         </div>
-        <div class="account-card account-card-danger">
-          <h3>Avsluta konto</h3>
-          <p>Ditt konto, ditt namn och din e-postadress raderas permanent. Dina tidigare värderingar behålls i anonymiserad form — de kan inte längre kopplas till dig. Aktiva abonnemang avslutas omedelbart.</p>
-          <button class="btn-danger" onclick="confirmDeleteAccount()">Avsluta konto</button>
-        </div>
+
       </div>
-      <button class="btn-secondary" style="margin-top:1.5rem;" onclick="signOut()">Logga ut</button>
+
+      <!-- Fara-zon -->
+      <div class="acct-danger-zone">
+        <div class="acct-danger-header">
+          <span class="acct-danger-icon">⚠️</span>
+          <div>
+            <h3>Avsluta konto</h3>
+            <p>Ditt namn och din e-postadress raderas permanent. Dina värderingar behålls anonymiserade och kan inte längre kopplas till dig.</p>
+          </div>
+        </div>
+        <button class="btn-danger" onclick="confirmDeleteAccount()">Avsluta konto permanent</button>
+      </div>
+
     </section>
 
     <!-- ===== OM AESTIMAI ===== -->
