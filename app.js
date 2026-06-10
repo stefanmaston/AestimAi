@@ -2033,14 +2033,50 @@ async function signOut() {
 }
 
 async function confirmDeleteAccount() {
-  if (!confirm('Är du säker? Ditt konto och all data tas bort permanent.')) return;
+  if (!currentUser) return;
+  const ok = confirm(
+    'Är du säker på att du vill avsluta ditt konto?\n\n' +
+    '• Ditt namn och din e-postadress raderas permanent.\n' +
+    '• Dina värderingar behålls i anonymiserad form — de kan inte längre kopplas till dig.\n' +
+    '• Aktiva abonnemang avslutas omedelbart.'
+  );
+  if (!ok) return;
+
   try {
     const sb = await getSb();
-    await sb.auth.admin?.deleteUser(currentUser.id); // kräver service-role — annars via support
+    const userId = currentUser.id;
+
+    // Steg 1: Anonymisera värderingar — sätt user_id = NULL så de inte
+    // längre kan kopplas till personen (GDPR-kompatibel anonymisering)
+    const { error: anonErr } = await sb
+      .from('aestimai_valuations')
+      .update({ user_id: null })
+      .eq('user_id', userId);
+    if (anonErr) console.warn('[Delete] Anonymisering misslyckades:', anonErr.message);
+
+    // Steg 2: Radera auth-kontot via vår server-side API
+    // (kräver service-role-nyckel som aldrig exponeras i frontend)
+    const res = await fetch('/api/auth/delete-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!res.ok) {
+      // Fallback: logga ut och informera om manuell hantering
+      console.warn('[Delete] Server-radering misslyckades, loggar ut.');
+      await sb.auth.signOut();
+      alert('Dina personuppgifter är anonymiserade. Kontakta support@aestimai.org för slutlig radering av auth-kontot.');
+      onSignOut();
+      return;
+    }
+
+    // Steg 3: Logga ut lokalt
     await sb.auth.signOut();
-    alert('Ditt konto har avslutats.');
+    onSignOut();
+    alert('Ditt konto är avslutat. Tack för att du använt AestimAi.');
   } catch (e) {
-    alert('Kontakta support@aestimai.org för att avsluta kontot.');
+    alert('Något gick fel. Kontakta support@aestimai.org om problemet kvarstår.');
   }
 }
 
