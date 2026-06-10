@@ -1779,7 +1779,11 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background-color: #0b0c15;
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0, transparent 7px, rgba(255,252,220,.026) 7px, rgba(255,252,220,.026) 8px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 7px, rgba(255,252,220,.026) 7px, rgba(255,252,220,.026) 8px),
+    linear-gradient(135deg, rgba(99,102,241,.10) 0%, rgba(99,102,241,.03) 40%, transparent 70%);
   border-radius: 16px;
   padding: 1.8rem 2.5rem;
   margin-bottom: 2rem;
@@ -2302,7 +2306,11 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   gap: 1.2rem;
 }
 .pro-plan-card-dark {
-  background: #0f172a;
+  background-color: #0b0c15;
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0, transparent 7px, rgba(255,252,220,.026) 7px, rgba(255,252,220,.026) 8px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 7px, rgba(255,252,220,.026) 7px, rgba(255,252,220,.026) 8px),
+    linear-gradient(135deg, rgba(99,102,241,.10) 0%, rgba(99,102,241,.03) 40%, transparent 70%);
   border-color: #1e293b;
   color: #fff;
 }
@@ -2457,7 +2465,11 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 
 /* CTA-rad */
 .pro-cta {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background-color: #0b0c15;
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0, transparent 7px, rgba(255,252,220,.026) 7px, rgba(255,252,220,.026) 8px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 7px, rgba(255,252,220,.026) 7px, rgba(255,252,220,.026) 8px),
+    linear-gradient(135deg, rgba(99,102,241,.10) 0%, rgba(99,102,241,.03) 40%, transparent 70%);
   border-radius: 16px;
   padding: 2rem 2.5rem;
   color: #fff;
