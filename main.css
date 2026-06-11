@@ -1650,7 +1650,8 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   padding: 0.9rem 1.1rem; background: var(--white);
 }
 .my-item-info h3 { margin: 0 0 0.2rem; font-size: 0.98rem; }
-.my-item-info .card-cat { margin: 0 0 0.4rem; font-size: 0.82rem; color: var(--gray-500); }
+.my-item-info .card-cat { margin: 0 0 0.2rem; font-size: 0.82rem; color: var(--gray-500); }
+.my-item-date { margin: 0 0 0.4rem; font-size: 0.74rem; color: var(--gray-500); }
 .my-item-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .my-item-actions .mi-kind { padding: 0.4rem 0.5rem; border-radius: 8px; border: 1px solid var(--gray-200, #e6e5e0); }
 

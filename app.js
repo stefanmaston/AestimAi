@@ -1601,10 +1601,14 @@ async function loadMyItems() {
 function myItemRowHTML(row) {
   const v = listingView(row);
   const pub = !!row.is_public;
+  const dateStr = row.created_at
+    ? new Date(row.created_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })
+    : '';
   return `<div class="my-item" data-id="${escHtml(row.id)}">
     <div class="my-item-info">
       <h3>${escHtml(v.title)}</h3>
       <p class="card-cat">${escHtml(v.category)}${v.uci != null ? ' · ' + v.uci.toLocaleString('sv-SE') + ' UCI' : ''}</p>
+      ${dateStr ? `<p class="my-item-date">Värderad ${escHtml(dateStr)}</p>` : ''}
       <span class="status-pill ${pub ? 'pill-public' : 'pill-private'}">${pub ? 'Publik i Bytesmarknad' : 'Ej publik'}</span>
     </div>
     <div class="my-item-actions">
@@ -1947,6 +1951,45 @@ function refreshAccountSection() {
   if (nextBill) nextBill.textContent = '—';
 }
 
+// ── Redigera kontouppgifter (namn + e-post) ───────────────────────────────────
+function openEditAccount() {
+  if (!currentUser) { openAuthModal('login'); return; }
+  const n = document.getElementById('editName');
+  const e = document.getElementById('editEmail');
+  if (n) n.value = currentUser.user_metadata?.full_name || '';
+  if (e) e.value = currentUser.email || '';
+  setAuthError('editError', '');
+  openAuthModal('edit');
+}
+
+async function doEditAccount() {
+  const name  = document.getElementById('editName').value.trim();
+  const email = document.getElementById('editEmail').value.trim();
+  setAuthError('editError', '');
+  if (!name)  return setAuthError('editError', 'Ange ditt namn.');
+  if (!email) return setAuthError('editError', 'Ange en e-postadress.');
+  const btn = document.getElementById('btnEditAccount');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  try {
+    const sb = await getSb();
+    const emailChanged = email !== (currentUser?.email || '');
+    const updates = { data: { full_name: name } };
+    if (emailChanged) updates.email = email;
+    const { data, error } = await sb.auth.updateUser(updates);
+    if (error) return setAuthError('editError', error.message);
+    if (data?.user) currentUser = data.user;
+    refreshAccountSection();
+    closeAuthModal(null, true);
+    showToast(emailChanged
+      ? 'Sparat. En bekräftelselänk kan ha skickats till din nya e-post.'
+      : 'Uppgifterna är uppdaterade.');
+  } catch (e) {
+    setAuthError('editError', 'Något gick fel. Försök igen.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Spara'; }
+  }
+}
+
 // ── Auth modal ────────────────────────────────────────────────────────────────
 
 function openAuthModal(panel = 'login') {
@@ -1962,7 +2005,7 @@ function closeAuthModal(e, force = false) {
 }
 
 function switchPanel(name) {
-  ['login','register','forgot','confirm'].forEach(p => {
+  ['login','register','forgot','confirm','edit'].forEach(p => {
     document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1))
       ?.classList.add('hidden');
   });
@@ -2138,6 +2181,8 @@ window.doForgot           = doForgot;
 window.signOut            = signOut;
 window.confirmDeleteAccount = confirmDeleteAccount;
 window.selectPlan         = selectPlan;
+window.openEditAccount    = openEditAccount;
+window.doEditAccount      = doEditAccount;
 
 // ── Kontaktformulär ───────────────────────────────────────────────────────────
 async function submitContact() {

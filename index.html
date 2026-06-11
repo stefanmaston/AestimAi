@@ -1248,7 +1248,8 @@
             <span>Konto-ID</span>
             <span id="acctId" class="acct-mono">—</span>
           </div>
-          <button class="btn-secondary btn-sm acct-action-btn" onclick="openAuthModal('forgot')">Byt lösenord</button>
+          <button class="btn-primary btn-sm acct-action-btn" onclick="openEditAccount()">Redigera uppgifter</button>
+          <button class="btn-secondary btn-sm" onclick="openAuthModal('forgot')">Byt lösenord</button>
         </div>
 
         <!-- Abonnemang -->
@@ -1698,6 +1699,25 @@
         <button class="btn-plan btn-plan-pro" id="btnRegister" style="width:100%" onclick="doRegister()">Skapa konto</button>
         <div class="auth-links">
           <button class="auth-link" onclick="switchPanel('login')">← Logga in istället</button>
+        </div>
+      </div>
+
+      <!-- Redigera kontouppgifter -->
+      <div class="auth-panel hidden" id="panelEdit">
+        <h2>Redigera uppgifter</h2>
+        <p class="auth-sub">Uppdatera namn och e-post för ditt konto</p>
+        <div class="form-group">
+          <label>Ditt namn</label>
+          <input type="text" id="editName" placeholder="Förnamn Efternamn" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label>E-postadress</label>
+          <input type="email" id="editEmail" placeholder="din@epost.se" autocomplete="email">
+        </div>
+        <p class="auth-error hidden" id="editError"></p>
+        <button class="btn-plan btn-plan-pro" id="btnEditAccount" style="width:100%" onclick="doEditAccount()">Spara</button>
+        <div class="auth-links">
+          <button class="auth-link" onclick="closeAuthModal(null, true)">Avbryt</button>
         </div>
       </div>
 
