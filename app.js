@@ -1916,7 +1916,7 @@ function refreshAccountSection() {
   const name = u.user_metadata?.full_name || '';
   const email = u.email || '—';
   const since = u.created_at ? new Date(u.created_at).toLocaleDateString('sv-SE') : '—';
-  const shortId = u.id ? u.id.slice(0, 8) + '…' : '—';
+  const fullId = u.id || '—';
 
   // Avatar-initial
   const avatarEl = document.getElementById('acctAvatar');
@@ -1936,7 +1936,7 @@ function refreshAccountSection() {
   const sinceEl = document.getElementById('acctSince');
   if (sinceEl) sinceEl.textContent = since;
   const idEl = document.getElementById('acctId');
-  if (idEl) idEl.textContent = shortId;
+  if (idEl) idEl.textContent = fullId;
 
   // Kort — abonnemang
   const planBadge = document.getElementById('acctPlan');
