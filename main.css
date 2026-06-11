@@ -1157,18 +1157,17 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 /* Sunthetics-annons — pinnad featured */
 .ad-pinned { order: -99; }
 .news-ad-card--featured {
-  border: 2px solid var(--green);
-  box-shadow: 0 2px 8px rgba(29,107,78,0.12);
+  border: none;
+  box-shadow: none;
 }
 .news-ad-card--featured:hover {
-  box-shadow: 0 4px 16px rgba(29,107,78,0.22);
-  border-color: var(--amber);
+  box-shadow: none;
+  border-color: transparent;
 }
 .ad-img-sunthetics {
   background: #ffffff;
   padding: 16px 20px;
   display: flex; align-items: center; justify-content: center;
-  border-bottom: 1px solid var(--gray-200);
 }
 .sunthetics-logo-img {
   width: 100%;
