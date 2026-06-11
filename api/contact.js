@@ -1,6 +1,6 @@
 // POST /api/contact
 // Tar emot kontaktformulär och skickar e-post via Resend.
-// Kräver miljövariabel: RESEND_API_KEY
+// Kräver miljövariabler: RESEND_API_KEY, valfritt CONTACT_TO_EMAIL
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,6 +13,7 @@ module.exports = async (req, res) => {
   }
 
   const RESEND_KEY = process.env.RESEND_API_KEY;
+  const contactTo  = process.env.CONTACT_TO_EMAIL || 'kontakt@aestimai.org';
   if (!RESEND_KEY) {
     console.error('[contact] RESEND_API_KEY saknas');
     return res.status(500).json({ error: 'Serverkonfiguration saknas' });
@@ -27,7 +28,7 @@ module.exports = async (req, res) => {
       },
       body: JSON.stringify({
         from:    'AestimAi Kontakt <no-reply@aestimai.org>',
-        to:      ['kontakt@aestimai.org'],
+        to:      [contactTo],
         reply_to: email,
         subject: `[Kontakt] ${subject || 'Allmän fråga'} — ${name}`,
         html: `
