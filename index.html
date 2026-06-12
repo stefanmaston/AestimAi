@@ -145,16 +145,16 @@
     <div class="topbar-user" id="topbarUser">
       <!-- Ej inloggad -->
       <div class="topbar-guest" id="topbarGuest">
-        <button class="topbar-login-btn" onclick="openAuthModal('login')">Logga in</button>
-        <button class="topbar-register-btn" onclick="openAuthModal('register')">Skapa konto</button>
+        <button class="topbar-login-btn" onclick="openAuthModal('login')" data-i18n="auth.login">Log in</button>
+        <button class="topbar-register-btn" onclick="openAuthModal('register')" data-i18n="auth.register">Create account</button>
       </div>
       <!-- Inloggad (dold som standard) -->
       <div class="topbar-account hidden" id="topbarAccount">
         <span class="topbar-email" id="topbarEmail"></span>
         <span class="topbar-divider">|</span>
-        <button class="topbar-account-link" onclick="navigateTo('account')">Mitt konto</button>
+        <button class="topbar-account-link" onclick="navigateTo('account')" data-i18n="auth.myAccount">My account</button>
         <span class="topbar-divider">|</span>
-        <button class="topbar-signout-link" onclick="signOut()">Logga ut</button>
+        <button class="topbar-signout-link" onclick="signOut()" data-i18n="auth.signOut">Log out</button>
       </div>
     </div>
 
@@ -1373,7 +1373,7 @@
           <p class="acct-hero-email" id="acctEmail">—</p>
           <span class="acct-plan-badge" id="acctPlan">Freemium</span>
         </div>
-        <button class="acct-signout-btn" onclick="signOut()">Logga ut</button>
+        <button class="acct-signout-btn" onclick="signOut()" data-i18n="auth.signOut">Log out</button>
       </div>
 
       <!-- Kort-grid -->

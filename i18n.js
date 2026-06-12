@@ -125,6 +125,10 @@
       'contact.subject.support': 'Teknisk support',
       'contact.subject.other': 'Övrigt',
       'panel.contact': '<h4>Kontakt</h4><p>Frågor om värdering, bytesmarknad, enterprise eller teknisk support — vi svarar inom 1–2 arbetsdagar.</p>',
+      'auth.login': 'Logga in',
+      'auth.register': 'Skapa konto',
+      'auth.myAccount': 'Mitt konto',
+      'auth.signOut': 'Logga ut',
     },
     en: {
       'nav.uci': 'UCI Valuation',
@@ -209,6 +213,10 @@
       'contact.subject.support': 'Technical support',
       'contact.subject.other': 'Other',
       'panel.contact': '<h4>Contact</h4><p>Questions about valuation, marketplace, enterprise or technical support — we reply within 1–2 business days.</p>',
+      'auth.login': 'Log in',
+      'auth.register': 'Create account',
+      'auth.myAccount': 'My account',
+      'auth.signOut': 'Log out',
     },
     de: {
       'nav.uci': 'UCI-Bewertung',
@@ -293,6 +301,10 @@
       'contact.subject.support': 'Technischer Support',
       'contact.subject.other': 'Sonstiges',
       'panel.contact': '<h4>Kontakt</h4><p>Fragen zu Bewertung, Marktplatz, Enterprise oder Support — Antwort innerhalb von 1–2 Werktagen.</p>',
+      'auth.login': 'Anmelden',
+      'auth.register': 'Konto erstellen',
+      'auth.myAccount': 'Mein Konto',
+      'auth.signOut': 'Abmelden',
     },
     fr: {
       'nav.uci': 'Évaluation UCI',
@@ -377,6 +389,10 @@
       'contact.subject.support': 'Support technique',
       'contact.subject.other': 'Autre',
       'panel.contact': '<h4>Contact</h4><p>Questions sur la valorisation, le marché, l\'enterprise ou le support — réponse sous 1–2 jours ouvrés.</p>',
+      'auth.login': 'Se connecter',
+      'auth.register': 'Créer un compte',
+      'auth.myAccount': 'Mon compte',
+      'auth.signOut': 'Se déconnecter',
     },
     it: {
       'nav.uci': 'Valutazione UCI',
@@ -461,6 +477,10 @@
       'contact.subject.support': 'Supporto tecnico',
       'contact.subject.other': 'Altro',
       'panel.contact': '<h4>Contatto</h4><p>Domande su valutazione, mercato, enterprise o supporto — risposta entro 1–2 giorni lavorativi.</p>',
+      'auth.login': 'Accedi',
+      'auth.register': 'Crea account',
+      'auth.myAccount': 'Il mio account',
+      'auth.signOut': 'Esci',
     },
     es: {
       'nav.uci': 'Valoración UCI',
@@ -545,6 +565,10 @@
       'contact.subject.support': 'Soporte técnico',
       'contact.subject.other': 'Otros',
       'panel.contact': '<h4>Contacto</h4><p>Preguntas sobre valoración, mercado, enterprise o soporte — respuesta en 1–2 días laborables.</p>',
+      'auth.login': 'Iniciar sesión',
+      'auth.register': 'Crear cuenta',
+      'auth.myAccount': 'Mi cuenta',
+      'auth.signOut': 'Cerrar sesión',
     },
   };
 
