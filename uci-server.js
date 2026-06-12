@@ -22,6 +22,118 @@ const app    = express();
 const PORT   = process.env.PORT || process.env.API_PORT || 3004;
 const client = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+const CATEGORY_VALUES =
+  'Elektronik|Möbler|Fordon|Kläder & accessoarer|Konst & samlarvärde|Verktyg & maskiner|Sport & fritid|Vitvaror|Musik & instrument|Övrigt';
+
+const SUPPORTED_LANGUAGES = ['sv', 'en', 'de', 'fr', 'it', 'es'];
+const AI_LANGUAGE_NAMES = {
+  sv: 'Swedish',
+  en: 'English',
+  de: 'German',
+  fr: 'French',
+  it: 'Italian',
+  es: 'Spanish',
+};
+
+function normalizeLanguage(lang) {
+  return SUPPORTED_LANGUAGES.includes(lang) ? lang : 'sv';
+}
+
+function categoryFieldInstruction(language) {
+  const list = CATEGORY_VALUES.replace(/\|/g, ', ');
+  if (language === 'sv') {
+    return `Fältet "category" måste vara exakt ett av: ${list}.`;
+  }
+  return `The "category" field must use one of these exact Swedish labels: ${list}.`;
+}
+
+function textLanguageInstruction(language) {
+  if (language === 'sv') return 'Skriv alla textfält på svenska.';
+  return `Write all user-facing text fields in ${AI_LANGUAGE_NAMES[language] || 'English'}.`;
+}
+
+function answerLabels(language) {
+  if (language === 'sv') return { q: 'Fråga', a: 'Svar' };
+  return { q: 'Question', a: 'Answer' };
+}
+
+function buildCameraAnalyzeRound2Text(answersText, language) {
+  if (language === 'sv') {
+    return `Jag har svarat på dina kontrollfrågor:\n\n${answersText}\n\nGe nu en slutgiltig identifiering. Svara ENBART med giltig JSON (inga kodblockar):\n{\n  "status": "ready",\n  "confidence": <80-100>,\n  "valuationData": {\n    "description": "<detaljerad beskrivning inkl. märke, modell, skick, ålder>",\n    "category": "<en av: ${CATEGORY_VALUES}>",\n    "condition": <1-5>,\n    "condition_reasoning": "<varför detta skick-betyg>"\n  }\n}`;
+  }
+  return `I have answered your follow-up questions:\n\n${answersText}\n\nProvide a final identification. Reply ONLY with valid JSON (no code fences):\n{\n  "status": "ready",\n  "confidence": <80-100>,\n  "valuationData": {\n    "description": "<detailed description incl. brand, model, condition, age>",\n    "category": "<one of: ${CATEGORY_VALUES}>",\n    "condition": <1-5>,\n    "condition_reasoning": "<why this condition score>"\n  }\n}\n\n${textLanguageInstruction(language)}\n${categoryFieldInstruction(language)}`;
+}
+
+function buildCameraAnalyzeRound1Text(language) {
+  if (language === 'sv') {
+    return `Analysera bilden och identifiera objektet för värdering i AestimAi (UCI-systemet).
+
+Om du är tillräckligt säker på vad objektet är (>80% säker), svara med status "ready".
+Om du behöver mer information, ställ max 3 kortfattade kontrollfrågor och svara med status "questions".
+
+${textLanguageInstruction(language)}
+${categoryFieldInstruction(language)}
+
+Svara ENBART med giltig JSON i ett av dessa två format:
+
+FORMAT A — osäker, behöver svar:
+{
+  "status": "questions",
+  "identified_as": "<vad du tror det är, eller tom sträng>",
+  "confidence": <0-79>,
+  "questions": [
+    "<konkret kontrollfråga 1>",
+    "<konkret kontrollfråga 2>"
+  ]
+}
+
+FORMAT B — säker, redo för värdering:
+{
+  "status": "ready",
+  "confidence": <80-100>,
+  "valuationData": {
+    "description": "<detaljerad beskrivning av objektet inkl. märke, modell, skick, ålder om synligt>",
+    "category": "<en av: ${CATEGORY_VALUES}>",
+    "condition": <1-5>,
+    "condition_reasoning": "<varför detta skick-betyg>"
+  }
+}`;
+  }
+
+  return `Analyze the image and identify the object for valuation in AestimAi (UCI system).
+
+If you are confident enough (>80%), reply with status "ready".
+If you need more information, ask up to 3 short follow-up questions and reply with status "questions".
+
+${textLanguageInstruction(language)}
+${categoryFieldInstruction(language)}
+
+Reply ONLY with valid JSON in one of these formats:
+
+FORMAT A — uncertain, need answers:
+{
+  "status": "questions",
+  "identified_as": "<what you think it is, or empty string>",
+  "confidence": <0-79>,
+  "questions": [
+    "<concrete follow-up question 1>",
+    "<concrete follow-up question 2>"
+  ]
+}
+
+FORMAT B — confident, ready for valuation:
+{
+  "status": "ready",
+  "confidence": <80-100>,
+  "valuationData": {
+    "description": "<detailed description incl. brand, model, condition, age if visible>",
+    "category": "<one of: ${CATEGORY_VALUES}>",
+    "condition": <1-5>,
+    "condition_reasoning": "<why this condition score>"
+  }
+}`;
+}
+
 app.use(cors({ origin: true })); // Tillåt alla localhost-portar
 app.use(express.json({ limit: '10mb' })); // Bilder som base64 kan vara flera MB
 
@@ -144,9 +256,66 @@ Svara ENBART med giltig JSON:
 }
 
 // ── Claude-värderingsprompt ────────────────────────────────
-function buildPrompt(item, anchor) {
-  const condLabels = { 1: 'Dåligt', 2: 'Slitet', 3: 'OK', 4: 'Bra', 5: 'Utmärkt' };
+function buildPrompt(item, anchor, language = 'sv') {
+  const lang = normalizeLanguage(language);
+  const condLabels = lang === 'sv'
+    ? { 1: 'Dåligt', 2: 'Slitet', 3: 'OK', 4: 'Bra', 5: 'Utmärkt' }
+    : { 1: 'Poor', 2: 'Worn', 3: 'OK', 4: 'Good', 5: 'Excellent' };
   const cond = condLabels[item.condition] || 'OK';
+
+  if (lang !== 'sv') {
+    return `${textLanguageInstruction(lang)}
+
+You are AestimAi — an AI system for objective valuation using UCI (Universal Coin Index).
+UCI is a currency-neutral barter index where 1 UCI ≈ 62 SEK ≈ 5.5 EUR ≈ 6 USD (June 2026).
+
+Value the following item and return ONLY valid JSON with no markdown or text outside the JSON structure.
+
+ITEM TO VALUE:
+- Description: ${item.description}
+- Category: ${item.category}
+- Condition: ${item.condition}/5 (${cond})
+${item.location ? `- Location: ${item.location}` : ''}
+
+${anchor ? `MARKET PRICE ANCHOR (pre-check):
+Type: ${anchor.category_label} (${anchor.object_type})
+Typical market price: ${anchor.typical_price_low_sek.toLocaleString('en-US')}–${anchor.typical_price_high_sek.toLocaleString('en-US')} SEK
+Price basis: ${anchor.price_basis}
+Detected quantity: ${anchor.quantity_detected}
+→ UCI value MUST be within ±40% of this range unless strong reasons exist.
+
+` : ''}CRITICAL — QUANTITY AND UNIT:
+- Read the description carefully and identify any quantity (count, area, weight, time, volume, etc.)
+- UCI value and prices must always reflect the TOTAL amount described
+- If no quantity is given, assume 1 unit
+- Always state in reasoning which total quantity you valued
+
+Return exactly this JSON format:
+{
+  "uci_value": <integer>,
+  "uci_low": <integer>,
+  "uci_high": <integer>,
+  "confidence_pct": <0-100>,
+  "sek_approx": <integer>,
+  "eur_approx": <integer>,
+  "usd_approx": <integer>,
+  "reasoning": "<2-3 sentences on what drives the value>",
+  "key_factors": ["<factor 1>", "<factor 2>", "<factor 3>"],
+  "comparables": [
+    {"name": "<comparable>", "uci": <integer>},
+    {"name": "<comparable>", "uci": <integer>},
+    {"name": "<comparable>", "uci": <integer>}
+  ],
+  "depreciation_note": "<brief note on depreciation/appreciation if relevant>",
+  "survey_question": "<one concrete survey question>",
+  "market_context": {
+    "category_label": "<what the item is>",
+    "typical_price_low_sek": <integer>,
+    "typical_price_high_sek": <integer>,
+    "price_basis": "<how the price was determined>"
+  }
+}`;
+  }
 
   return `Du är AestimAi — ett AI-system för objektiv värdering med UCI (Universal Coin Index).
 UCI är ett valutaoberoende bytesindex där 1 UCI ≈ 62 SEK ≈ 5.5 EUR ≈ 6 USD (juni 2026).
@@ -237,7 +406,8 @@ app.post('/api/uci/check', async (req, res) => {
 
 // ── POST /api/uci/value ────────────────────────────────────
 app.post('/api/uci/value', async (req, res) => {
-  const { description, category, condition, location } = req.body;
+  const { description, category, condition, location, language } = req.body;
+  const lang = normalizeLanguage(language);
 
   if (!description && !category) {
     return res.status(400).json({ error: 'description eller category krävs' });
@@ -258,7 +428,7 @@ app.post('/api/uci/value', async (req, res) => {
       max_tokens: 1024,
       messages: [{
         role:    'user',
-        content: buildPrompt({ description, category, condition: parseInt(condition) || 3, location }, anchor),
+        content: buildPrompt({ description, category, condition: parseInt(condition) || 3, location }, anchor, lang),
       }],
     });
 
@@ -526,7 +696,7 @@ function todayStr() { return new Date().toISOString().slice(0, 10); }
 // Hämtar dagens finansnyhetsrubriker från news-tjänsten (best-effort).
 async function fetchNewsHeadlines() {
   try {
-    const url = process.env.NEWS_URL || 'https://news-production-370c.up.railway.app/api/news?cat=all';
+    const url = process.env.NEWS_URL || 'https://aestimai.org/api/news?cat=all';
     const r = await fetch(url);
     if (!r.ok) return [];
     const d = await r.json();
@@ -610,7 +780,8 @@ cron.schedule('0 18 * * *', () => {
 // valuationData matchar fälten i buildPrompt: { description, category, condition }
 //
 app.post('/api/uci/camera-analyze', async (req, res) => {
-  const { image, mediaType, answers } = req.body;
+  const { image, mediaType, answers, language } = req.body;
+  const lang = normalizeLanguage(language);
 
   if (!image) return res.status(400).json({ error: 'image (base64) krävs' });
 
@@ -632,45 +803,18 @@ app.post('/api/uci/camera-analyze', async (req, res) => {
     });
 
     if (answers && answers.length > 0) {
+      const { q: qLabel, a: aLabel } = answerLabels(lang);
       const answersText = answers
-        .map(a => `Fråga: ${a.question}\nSvar: ${a.answer}`)
+        .map(a => `${qLabel}: ${a.question}\n${aLabel}: ${a.answer}`)
         .join('\n\n');
       userContent.push({
         type: 'text',
-        text: `Jag har svarat på dina kontrollfrågor:\n\n${answersText}\n\nGe nu en slutgiltig identifiering. Svara ENBART med giltig JSON (inga kodblockar):\n{\n  "status": "ready",\n  "confidence": <80-100>,\n  "valuationData": {\n    "description": "<detaljerad beskrivning inkl. märke, modell, skick, ålder>",\n    "category": "<en av: Elektronik|Möbler|Fordon|Kläder & accessoarer|Konst & samlarvärde|Verktyg & maskiner|Sport & fritid|Vitvaror|Musik & instrument|Övrigt>",\n    "condition": <1-5>,\n    "condition_reasoning": "<varför detta skick-betyg>"\n  }\n}`,
+        text: buildCameraAnalyzeRound2Text(answersText, lang),
       });
     } else {
       userContent.push({
         type: 'text',
-        text: `Analysera bilden och identifiera objektet för värdering i AestimAi (UCI-systemet).
-
-Om du är tillräckligt säker på vad objektet är (>80% säker), svara med status "ready".
-Om du behöver mer information, ställ max 3 kortfattade kontrollfrågor och svara med status "questions".
-
-Svara ENBART med giltig JSON i ett av dessa två format:
-
-FORMAT A — osäker, behöver svar:
-{
-  "status": "questions",
-  "identified_as": "<vad du tror det är, eller tom sträng>",
-  "confidence": <0-79>,
-  "questions": [
-    "<konkret kontrollfråga 1>",
-    "<konkret kontrollfråga 2>"
-  ]
-}
-
-FORMAT B — säker, redo för värdering:
-{
-  "status": "ready",
-  "confidence": <80-100>,
-  "valuationData": {
-    "description": "<detaljerad beskrivning av objektet inkl. märke, modell, skick, ålder om synligt>",
-    "category": "<en av: Elektronik|Möbler|Fordon|Kläder & accessoarer|Konst & samlarvärde|Verktyg & maskiner|Sport & fritid|Vitvaror|Musik & instrument|Övrigt>",
-    "condition": <1-5>,
-    "condition_reasoning": "<varför detta skick-betyg>"
-  }
-}`,
+        text: buildCameraAnalyzeRound1Text(lang),
       });
     }
 

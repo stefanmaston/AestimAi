@@ -132,7 +132,7 @@ function updatePanelHelp(moduleId) {
     market: '<h4>Om UCI Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
     pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med AE ID barter or pay DS-certifikat.</p><p>€75/mån — kräver AE ID barter or pay-kort.</p>',
     idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
-    news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras dagligen.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
+    news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras högst en gång per timme.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
   };
   const el = document.getElementById('panelHelp');
   if (el) el.innerHTML = helpTexts[moduleId] || helpTexts.uci;
@@ -740,10 +740,36 @@ function showToast(msg) {
 
 // ── Nyheter ──────────────────────────────────────────
 const NEWS_PROXY = IS_LOCAL ? 'http://localhost:3002/api/news' : '/api/news';
+const NEWS_TTL_MS = 60 * 60 * 1000; // 1 timme — matchar server-cache
+const NEWS_STORAGE_KEY = 'aestimai_news_v1';
 let newsCache = {};    // cat → { articles, fetchedAt }
 let newsLoaded = false;
+let newsPrefetchStarted = false;
+
+function restoreNewsCache() {
+  try {
+    const raw = sessionStorage.getItem(NEWS_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed?.fetchedAt && Date.now() - parsed.fetchedAt < NEWS_TTL_MS) {
+      newsCache = parsed.items || {};
+    }
+  } catch (_) {}
+}
+
+function persistNewsCache() {
+  try {
+    sessionStorage.setItem(NEWS_STORAGE_KEY, JSON.stringify({
+      fetchedAt: Date.now(),
+      items: newsCache,
+    }));
+  } catch (_) {}
+}
 
 function setupNews() {
+  restoreNewsCache();
+  prefetchNews();
+
   const dateEl = document.getElementById('newsDate');
   if (dateEl) {
     const d = new Date();
@@ -761,11 +787,30 @@ function setupNews() {
   });
 }
 
+/** Förladdar nyheter i bakgrunden — högst 1 gång/timme per session. */
+function prefetchNews() {
+  if (newsPrefetchStarted) return;
+  newsPrefetchStarted = true;
+  if (newsCache.all && Date.now() - newsCache.all.fetchedAt < NEWS_TTL_MS) return;
+  fetchNewsFromServer('all', { silent: true }).catch(() => {});
+}
+
+async function fetchNewsFromServer(cat, opts = {}) {
+  const res = await fetch(`${NEWS_PROXY}?cat=${encodeURIComponent(cat)}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  const fetchedAt = data.cachedAt ? Date.parse(data.cachedAt) : Date.now();
+  newsCache[cat] = { articles: data.articles || [], fetchedAt };
+  persistNewsCache();
+  return newsCache[cat];
+}
+
 // Hämta nyheter — anropas första gången modulen visas
 async function loadNews(cat = 'all') {
-  // Använd cache om färskare än 10 min
+  restoreNewsCache();
   const cached = newsCache[cat];
-  if (cached && Date.now() - cached.fetchedAt < 600_000) {
+  if (cached && Date.now() - cached.fetchedAt < NEWS_TTL_MS) {
     renderNews(cached.articles, cat);
     return;
   }
@@ -773,17 +818,11 @@ async function loadNews(cat = 'all') {
   setNewsLoading(true);
 
   try {
-    const res  = await fetch(`${NEWS_PROXY}?cat=${cat}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-
-    newsCache[cat] = { articles: data.articles, fetchedAt: Date.now() };
-    renderNews(data.articles, cat);
+    const entry = await fetchNewsFromServer(cat);
+    renderNews(entry.articles, cat);
   } catch (err) {
     console.warn('[AestimAi news] Proxy inte nåbar — visar demo-innehåll:', err.message);
     setNewsLoading(false);
-    // Faller tillbaka på det hårdkodade HTML-innehållet
     filterNewsStatic(cat);
   }
 }
