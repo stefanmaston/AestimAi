@@ -72,6 +72,11 @@ async function saveWebValuation(objectData, result) {
 
 // ── Navigation ─────────────────────────────────────
 function navigateTo(moduleId) {
+  if (moduleId === 'account' && !isRealUser(currentUser)) {
+    openAuthModal('login');
+    moduleId = 'dashboard';
+  }
+
   document.querySelectorAll('.module').forEach(m => m.classList.add('hidden'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
@@ -463,41 +468,46 @@ function setupPanel() {
   });
 }
 
-// ── Inloggning (riktig Supabase-auth, e-post/lösenord) ──────────
-let authMode = 'login';            // 'login' | 'signup'
-let authResolve = null;            // promise-resolver när inloggning krävs i ett flöde
+// ── Inloggning (Supabase, e-post/lösenord) ───────────────────────
+let currentUser = null;
+let authResolve = null;
 
 function isRealUser(user) {
   return !!(user && user.is_anonymous !== true);
 }
 
+function syncAuthState(user) {
+  const real = isRealUser(user) ? user : null;
+  state.user = real;
+  state.isLoggedIn = !!real;
+  currentUser = real;
+  updateAuthUI();
+}
+
+function mapAuthError(msg) {
+  if (!msg) return 'Något gick fel. Försök igen.';
+  const m = msg.toLowerCase();
+  if (m.includes('invalid login credentials')) return 'Fel e-post eller lösenord.';
+  if (m.includes('user already registered')) return 'Det finns redan ett konto med den e-postadressen.';
+  if (m.includes('email not confirmed')) return 'Bekräfta din e-post innan du loggar in — kolla inkorgen.';
+  if (m.includes('password should be at least')) return 'Lösenordet uppfyller inte kraven.';
+  if (m.includes('rate limit') || m.includes('too many requests')) return 'För många försök. Vänta en stund och försök igen.';
+  if (m.includes('new email should be different')) return 'Den nya e-postadressen är samma som den nuvarande.';
+  return msg;
+}
+
 function setupAuth() {
-  // Sidopanelens login-knapp får sitt beteende i updateAuthUI() (onclick).
-  document.getElementById('btnActivateCard')?.addEventListener('click', () => openAuthModal());
+  document.getElementById('btnActivateCard')?.addEventListener('click', () => openAuthModal('login'));
   document.getElementById('btnOrderCard')?.addEventListener('click', () => {
     showToast('Kortbeställning öppnas snart.');
   });
   document.getElementById('btnRegisterLogin')?.addEventListener('click', () =>
-    openAuthModal({ intro: 'Skapa konto eller logga in för att registrera objekt.' }));
+    openAuthModal({ panel: 'register', intro: 'Skapa konto eller logga in för att registrera objekt.' }));
   document.getElementById('btnMyItemsLogin')?.addEventListener('click', () =>
-    openAuthModal({ intro: 'Logga in för att se och publicera dina objekt.' }));
+    openAuthModal({ panel: 'login', intro: 'Logga in för att se och publicera dina objekt.' }));
 
-  // Auth-modalens kontroller
-  document.getElementById('btnCloseAuth').addEventListener('click', closeAuthModal);
-  document.getElementById('btnAuthToggle').addEventListener('click', () => {
-    authMode = authMode === 'login' ? 'signup' : 'login';
-    applyAuthMode();
-  });
-  document.getElementById('btnAuthSubmit').addEventListener('click', submitAuth);
-  document.getElementById('authModalOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('authModalOverlay')) closeAuthModal();
-  });
-  document.getElementById('authPassword').addEventListener('keydown', e => {
-    if (e.key === 'Enter') submitAuth();
-  });
-
-  updateAuthUI();   // sätter sidopanelens onclick
-  peekSession();    // optimistisk status utan att ladda SDK vid sidladdning
+  peekSession();
+  updateAuthUI();
 }
 
 /** Snabb koll av befintlig session i localStorage – laddar inte supabase-js. */
@@ -507,109 +517,27 @@ function peekSession() {
     if (!raw) return;
     const obj = JSON.parse(raw);
     const u = obj?.user || obj?.currentSession?.user || obj?.[0];
-    if (u && u.is_anonymous !== true) {
-      state.user = u;
-      state.isLoggedIn = true;
-      updateAuthUI();
-    }
+    if (isRealUser(u)) syncAuthState(u);
   } catch (_) {}
-}
-
-function openAuthModal(opts = {}) {
-  authMode = opts.mode || 'login';
-  if (opts.intro) document.getElementById('authIntro').textContent = opts.intro;
-  document.getElementById('authEmail').value = '';
-  document.getElementById('authPassword').value = '';
-  document.getElementById('authError').classList.add('hidden');
-  applyAuthMode();
-  document.getElementById('authModalOverlay').classList.remove('hidden');
-  setTimeout(() => document.getElementById('authEmail').focus(), 50);
-  return new Promise(resolve => { authResolve = resolve; });
-}
-
-function closeAuthModal() {
-  document.getElementById('authModalOverlay').classList.add('hidden');
-  if (authResolve) { authResolve(false); authResolve = null; }
-}
-
-function applyAuthMode() {
-  const isLogin = authMode === 'login';
-  document.getElementById('authTitle').textContent     = isLogin ? 'Logga in' : 'Skapa konto';
-  document.getElementById('btnAuthSubmit').textContent = isLogin ? 'Logga in' : 'Skapa konto';
-  document.getElementById('btnAuthToggle').textContent = isLogin ? 'Inget konto? Skapa ett' : 'Har du redan konto? Logga in';
-  document.getElementById('authPassword').setAttribute('autocomplete', isLogin ? 'current-password' : 'new-password');
-}
-
-function showAuthError(msg) {
-  const el = document.getElementById('authError');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-}
-
-async function submitAuth() {
-  const email    = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  if (!email || !password) { showAuthError('Fyll i e-post och lösenord.'); return; }
-  if (password.length < 6)  { showAuthError('Lösenordet måste vara minst 6 tecken.'); return; }
-
-  const btn = document.getElementById('btnAuthSubmit');
-  const orig = btn.textContent;
-  btn.disabled = true; btn.textContent = '…';
-  try {
-    const sb = await getSb();
-    const { data: { user: existing } } = await sb.auth.getUser();
-
-    if (authMode === 'signup') {
-      if (existing && existing.is_anonymous) {
-        // Uppgradera anonym session → behåll historiken (som mobilappen)
-        const { error } = await sb.auth.updateUser({ email, password });
-        if (error) throw error;
-      } else {
-        const { error } = await sb.auth.signUp({ email, password });
-        if (error) throw error;
-      }
-    } else {
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-    }
-
-    await refreshAuth();
-    closeAuthModal();
-    showToast(authMode === 'signup' ? 'Konto skapat — välkommen!' : 'Inloggad!');
-    if (authResolve) { authResolve(isRealUser(state.user)); authResolve = null; }
-    afterAuthChange();
-  } catch (e) {
-    showAuthError(e?.message || 'Något gick fel. Försök igen.');
-  } finally {
-    btn.disabled = false; btn.textContent = orig;
-  }
 }
 
 async function refreshAuth() {
   try {
     const sb = await getSb();
     const { data: { user } } = await sb.auth.getUser();
-    state.user = user || null;
-    state.isLoggedIn = isRealUser(user);
-    updateAuthUI();
+    if (isRealUser(user)) syncAuthState(user);
+    else syncAuthState(null);
   } catch (_) {}
-}
-
-async function signOut() {
-  try { const sb = await getSb(); await sb.auth.signOut(); } catch (_) {}
-  state.user = null;
-  state.isLoggedIn = false;
-  updateAuthUI();
-  afterAuthChange();
-  showToast('Utloggad.');
 }
 
 /** Säkerställer en riktig (icke-anonym) session. Öppnar annars auth-modalen. */
 async function requireRealUser(intro) {
   await refreshAuth();
-  if (isRealUser(state.user)) return state.user;
-  const ok = await openAuthModal({ intro: intro || 'Logga in för att fortsätta.' });
-  return ok ? state.user : null;
+  if (isRealUser(currentUser)) return currentUser;
+  await openAuthModal(typeof intro === 'string'
+    ? { panel: 'login', intro }
+    : { panel: 'login', intro: 'Logga in för att fortsätta.' });
+  return isRealUser(currentUser) ? currentUser : null;
 }
 
 function afterAuthChange() {
@@ -623,13 +551,21 @@ function afterAuthChange() {
 }
 
 function updateAuthUI() {
-  // Äldre UI-element (pro gate etc) uppdateras här
-  if (state.isLoggedIn) {
+  if (state.isLoggedIn && currentUser) {
     document.getElementById('proGate')?.classList.add('hidden');
     document.getElementById('proContent')?.classList.remove('hidden');
+    document.getElementById('topbarGuest')?.classList.add('hidden');
+    document.getElementById('topbarAccount')?.classList.remove('hidden');
+    const emailEl = document.getElementById('topbarEmail');
+    if (emailEl) {
+      const name = currentUser.user_metadata?.full_name || currentUser.email || 'Inloggad';
+      emailEl.textContent = name;
+    }
   } else {
     document.getElementById('proGate')?.classList.remove('hidden');
     document.getElementById('proContent')?.classList.add('hidden');
+    document.getElementById('topbarGuest')?.classList.remove('hidden');
+    document.getElementById('topbarAccount')?.classList.add('hidden');
   }
 }
 
@@ -1868,50 +1804,32 @@ function filterLab(cat) {
 
 window.filterLab = filterLab;
 
-// ─── Auth & Pricing ───────────────────────────────────────────────────────────
-
-let currentUser = null;
-
-// Initiera auth-lyssnare vid sidladdning
-async function initAuth() {
-  try {
-    const sb = await getSb();
-    const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) onSignIn(session.user);
-
-    sb.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) onSignIn(session.user);
-      else onSignOut();
-    });
-  } catch (e) { /* Supabase ej tillgänglig */ }
-}
+// ─── Auth & Konto ─────────────────────────────────────────────────────────────
 
 function onSignIn(user) {
-  currentUser = user;
-  // Stäng auth-modalen och återställ söksräknare
+  if (!isRealUser(user)) return;
+  syncAuthState(user);
   document.getElementById('authOverlay')?.classList.add('hidden');
   _anonSearchCount = 0;
   sessionStorage.setItem('anonSearchCount', '0');
-  // Topbar
   document.getElementById('topbarGuest')?.classList.add('hidden');
-  const acct = document.getElementById('topbarAccount');
-  if (acct) acct.classList.remove('hidden');
+  document.getElementById('topbarAccount')?.classList.remove('hidden');
   const emailEl = document.getElementById('topbarEmail');
   if (emailEl) {
-    // Visa namn om det finns, annars e-post
     const name = user.user_metadata?.full_name || user.email || 'Inloggad';
     emailEl.textContent = name;
   }
   refreshAccountSection();
+  afterAuthChange();
+  if (authResolve) { authResolve(true); authResolve = null; }
 }
 
 function onSignOut() {
-  currentUser = null;
-  // Topbar
+  syncAuthState(null);
   document.getElementById('topbarGuest')?.classList.remove('hidden');
   document.getElementById('topbarAccount')?.classList.add('hidden');
-  // Om användaren var på konto-sidan, skicka till dashboard
   if (state.currentModule === 'account') navigateTo('dashboard');
+  afterAuthChange();
 }
 
 function refreshAccountSection() {
@@ -1922,17 +1840,14 @@ function refreshAccountSection() {
   const since = u.created_at ? new Date(u.created_at).toLocaleDateString('sv-SE') : '—';
   const fullId = u.id || '—';
 
-  // Avatar-initial
   const avatarEl = document.getElementById('acctAvatar');
   if (avatarEl) avatarEl.textContent = (name || email).charAt(0).toUpperCase();
 
-  // Hero
   const heroName = document.getElementById('acctName');
   if (heroName) heroName.textContent = name || email;
   const heroEmail = document.getElementById('acctEmail');
   if (heroEmail) heroEmail.textContent = email;
 
-  // Kort — kontouppgifter
   const nameRow = document.getElementById('acctNameRow');
   if (nameRow) nameRow.textContent = name || '—';
   const emailRow = document.getElementById('acctEmailRow');
@@ -1942,7 +1857,6 @@ function refreshAccountSection() {
   const idEl = document.getElementById('acctId');
   if (idEl) idEl.textContent = fullId;
 
-  // Kort — abonnemang
   const planBadge = document.getElementById('acctPlan');
   if (planBadge) planBadge.textContent = 'Freemium';
   const activePlan = document.getElementById('acctActivePlan');
@@ -1951,7 +1865,6 @@ function refreshAccountSection() {
   if (nextBill) nextBill.textContent = '—';
 }
 
-// ── Redigera kontouppgifter (namn + e-post) ───────────────────────────────────
 function openEditAccount() {
   if (!currentUser) { openAuthModal('login'); return; }
   const n = document.getElementById('editName');
@@ -1976,12 +1889,11 @@ async function doEditAccount() {
     const updates = { data: { full_name: name } };
     if (emailChanged) updates.email = email;
     const { data, error } = await sb.auth.updateUser(updates);
-    if (error) return setAuthError('editError', error.message);
-    if (data?.user) currentUser = data.user;
-    refreshAccountSection();
+    if (error) return setAuthError('editError', mapAuthError(error.message));
+    if (data?.user) onSignIn(data.user);
     closeAuthModal(null, true);
     showToast(emailChanged
-      ? 'Sparat. En bekräftelselänk kan ha skickats till din nya e-post.'
+      ? 'Sparat. Bekräfta din nya e-post via länken vi skickade.'
       : 'Uppgifterna är uppdaterade.');
   } catch (e) {
     setAuthError('editError', 'Något gick fel. Försök igen.');
@@ -1990,22 +1902,51 @@ async function doEditAccount() {
   }
 }
 
-// ── Auth modal ────────────────────────────────────────────────────────────────
+function openAuthModal(panelOrOpts = 'login') {
+  let panel = 'login';
+  let intro = null;
+  if (typeof panelOrOpts === 'object') {
+    panel = panelOrOpts.panel || (panelOrOpts.mode === 'signup' ? 'register' : 'login');
+    intro = panelOrOpts.intro || null;
+  } else {
+    panel = panelOrOpts;
+  }
 
-function openAuthModal(panel = 'login') {
+  const loginSub = document.getElementById('loginIntro');
+  if (loginSub) {
+    loginSub.textContent = intro || 'Välkommen tillbaka till AestimAi';
+  }
+
   document.getElementById('authOverlay').classList.remove('hidden');
   switchPanel(panel);
+
+  if (panel === 'forgot' && currentUser?.email) {
+    const fe = document.getElementById('forgotEmail');
+    if (fe) fe.value = currentUser.email;
+  }
+
+  setTimeout(() => {
+    const focusMap = {
+      login: 'loginEmail',
+      register: 'regName',
+      forgot: 'forgotEmail',
+      edit: 'editName',
+      reset: 'resetPassword',
+    };
+    document.getElementById(focusMap[panel] || 'loginEmail')?.focus();
+  }, 50);
+  return new Promise(resolve => { authResolve = resolve; });
 }
 
 function closeAuthModal(e, force = false) {
-  // Om man nått gränsen och inte är inloggad kan modalen inte stängas
   if (!currentUser && _anonSearchCount > ANON_SEARCH_LIMIT && !force) return;
   if (!force && e && e.target !== document.getElementById('authOverlay')) return;
   document.getElementById('authOverlay').classList.add('hidden');
+  if (authResolve) { authResolve(isRealUser(currentUser)); authResolve = null; }
 }
 
 function switchPanel(name) {
-  ['login','register','forgot','confirm','edit'].forEach(p => {
+  ['login','register','forgot','confirm','edit','reset'].forEach(p => {
     document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1))
       ?.classList.add('hidden');
   });
@@ -2030,9 +1971,10 @@ async function doLogin() {
   try {
     const sb = await getSb();
     const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-    if (error) return setAuthError('loginError', error.message);
-    // onAuthStateChange hanterar onSignIn — men vi kallar direkt för omedelbar respons
+    if (error) return setAuthError('loginError', mapAuthError(error.message));
     if (data?.user) onSignIn(data.user);
+    closeAuthModal(null, true);
+    showToast('Inloggad!');
   } catch (e) {
     setAuthError('loginError', 'Något gick fel. Försök igen.');
   } finally {
@@ -2054,21 +1996,35 @@ async function doRegister() {
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
     const sb = await getSb();
+    const { data: { user: existing } } = await sb.auth.getUser();
+
+    if (existing?.is_anonymous) {
+      const { data, error } = await sb.auth.updateUser({
+        email,
+        password: pass,
+        data: { full_name: name },
+      });
+      if (error) return setAuthError('regError', mapAuthError(error.message));
+      if (data?.user) onSignIn(data.user);
+      closeAuthModal(null, true);
+      showToast('Konto skapat — välkommen!');
+      return;
+    }
+
     const { data, error } = await sb.auth.signUp({
       email,
       password: pass,
       options: { data: { full_name: name } },
     });
-    if (error) return setAuthError('regError', error.message);
-    // Om Supabase kräver e-postbekräftelse — visa bekräftelsepanel
-    // Om auto-confirm är på (inget identityData-mail) — logga in direkt
+    if (error) return setAuthError('regError', mapAuthError(error.message));
     if (data?.user && !data.user.email_confirmed_at && data.session === null) {
       document.getElementById('confirmMsg').textContent =
         'Vi har skickat ett bekräftelsemail till ' + email + '. Klicka på länken för att aktivera ditt konto.';
       switchPanel('confirm');
-    } else {
-      // Auto-confirmerat — stäng modal och uppdatera UI
+    } else if (data?.user) {
+      onSignIn(data.user);
       closeAuthModal(null, true);
+      showToast('Konto skapat — välkommen!');
     }
   } catch (e) {
     setAuthError('regError', 'Något gick fel. Försök igen.');
@@ -2081,16 +2037,45 @@ async function doForgot() {
   const email = document.getElementById('forgotEmail').value.trim();
   setAuthError('forgotError', '');
   if (!email) return setAuthError('forgotError', 'Ange din e-postadress.');
+  const btn = document.querySelector('#panelForgot .btn-plan');
+  if (btn) { btn.disabled = true; btn.textContent = 'Skickar…'; }
   try {
     const sb = await getSb();
     const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: location.origin + '/?reset=1',
+      redirectTo: location.origin + location.pathname + '?reset=1',
     });
-    if (error) return setAuthError('forgotError', error.message);
+    if (error) return setAuthError('forgotError', mapAuthError(error.message));
     document.getElementById('confirmMsg').textContent =
-      'Återställningslänk skickad till ' + email + '.';
+      'Återställningslänk skickad till ' + email + '. Kolla inkorgen (och skräppost).';
     switchPanel('confirm');
-  } catch (e) { setAuthError('forgotError', 'Något gick fel. Försök igen.'); }
+  } catch (e) {
+    setAuthError('forgotError', 'Något gick fel. Försök igen.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Skicka återställningslänk'; }
+  }
+}
+
+async function doResetPassword() {
+  const pass  = document.getElementById('resetPassword').value;
+  const pass2 = document.getElementById('resetPassword2').value;
+  setAuthError('resetError', '');
+  if (pass.length < 8) return setAuthError('resetError', 'Lösenordet måste vara minst 8 tecken.');
+  if (pass !== pass2) return setAuthError('resetError', 'Lösenorden matchar inte.');
+  const btn = document.getElementById('btnResetPassword');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  try {
+    const sb = await getSb();
+    const { data, error } = await sb.auth.updateUser({ password: pass });
+    if (error) return setAuthError('resetError', mapAuthError(error.message));
+    if (data?.user) onSignIn(data.user);
+    history.replaceState(null, '', location.pathname + location.hash);
+    closeAuthModal(null, true);
+    showToast('Lösenordet är uppdaterat.');
+  } catch (e) {
+    setAuthError('resetError', 'Något gick fel. Försök igen.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Spara nytt lösenord'; }
+  }
 }
 
 async function signOut() {
@@ -2099,6 +2084,7 @@ async function signOut() {
     await sb.auth.signOut();
   } catch (e) {}
   onSignOut();
+  showToast('Utloggad.');
 }
 
 async function confirmDeleteAccount() {
@@ -2114,25 +2100,29 @@ async function confirmDeleteAccount() {
   try {
     const sb = await getSb();
     const userId = currentUser.id;
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) {
+      alert('Din session har gått ut. Logga in igen och försök på nytt.');
+      openAuthModal('login');
+      return;
+    }
 
-    // Steg 1: Anonymisera värderingar — sätt user_id = NULL så de inte
-    // längre kan kopplas till personen (GDPR-kompatibel anonymisering)
     const { error: anonErr } = await sb
       .from('aestimai_valuations')
       .update({ user_id: null })
       .eq('user_id', userId);
     if (anonErr) console.warn('[Delete] Anonymisering misslyckades:', anonErr.message);
 
-    // Steg 2: Radera auth-kontot via vår server-side API
-    // (kräver service-role-nyckel som aldrig exponeras i frontend)
     const res = await fetch('/api/auth/delete-account', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
       body: JSON.stringify({ userId }),
     });
 
     if (!res.ok) {
-      // Fallback: logga ut och informera om manuell hantering
       console.warn('[Delete] Server-radering misslyckades, loggar ut.');
       await sb.auth.signOut();
       alert('Dina personuppgifter är anonymiserade. Kontakta support@aestimai.org för slutlig radering av auth-kontot.');
@@ -2140,7 +2130,6 @@ async function confirmDeleteAccount() {
       return;
     }
 
-    // Steg 3: Logga ut lokalt
     await sb.auth.signOut();
     onSignOut();
     alert('Ditt konto är avslutat. Tack för att du använt AestimAi.');
@@ -2148,8 +2137,6 @@ async function confirmDeleteAccount() {
     alert('Något gick fel. Kontakta support@aestimai.org om problemet kvarstår.');
   }
 }
-
-// ── Plan-val ──────────────────────────────────────────────────────────────────
 
 function selectPlan(plan) {
   if (plan === 'enterprise') {
@@ -2165,11 +2152,34 @@ function selectPlan(plan) {
   }
 }
 
-// Visa konto-sektion när pricing-modulen öppnas
-const _origNavigateTo = navigateTo;
-// (konto-refresh sker via onSignIn/refreshAccountSection)
+function checkPasswordRecoveryLink() {
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  if (hash.get('type') === 'recovery') {
+    openAuthModal('reset');
+    return true;
+  }
+  return false;
+}
 
-// Initiera
+async function initAuth() {
+  try {
+    const sb = await getSb();
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user && isRealUser(session.user)) onSignIn(session.user);
+
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        openAuthModal('reset');
+        return;
+      }
+      if (session?.user && isRealUser(session.user)) onSignIn(session.user);
+      else if (!session?.user) onSignOut();
+    });
+
+    checkPasswordRecoveryLink();
+  } catch (e) { /* Supabase ej tillgänglig */ }
+}
+
 document.addEventListener('DOMContentLoaded', () => { initAuth(); });
 
 window.openAuthModal      = openAuthModal;
@@ -2178,6 +2188,7 @@ window.switchPanel        = switchPanel;
 window.doLogin            = doLogin;
 window.doRegister         = doRegister;
 window.doForgot           = doForgot;
+window.doResetPassword    = doResetPassword;
 window.signOut            = signOut;
 window.confirmDeleteAccount = confirmDeleteAccount;
 window.selectPlan         = selectPlan;

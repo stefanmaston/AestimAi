@@ -1658,7 +1658,7 @@
       <!-- Logga in -->
       <div class="auth-panel" id="panelLogin">
         <h2>Logga in</h2>
-        <p class="auth-sub">Välkommen tillbaka till AestimAi</p>
+        <p class="auth-sub" id="loginIntro">Välkommen tillbaka till AestimAi</p>
         <div class="form-group">
           <label>E-postadress</label>
           <input type="email" id="loginEmail" placeholder="din@epost.se" autocomplete="email">
@@ -1734,6 +1734,22 @@
         <div class="auth-links">
           <button class="auth-link" onclick="switchPanel('login')">← Tillbaka</button>
         </div>
+      </div>
+
+      <!-- Nytt lösenord (efter återställningslänk) -->
+      <div class="auth-panel hidden" id="panelReset">
+        <h2>Nytt lösenord</h2>
+        <p class="auth-sub">Ange ditt nya lösenord nedan</p>
+        <div class="form-group">
+          <label>Nytt lösenord <span class="auth-hint">(minst 8 tecken)</span></label>
+          <input type="password" id="resetPassword" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Bekräfta lösenord</label>
+          <input type="password" id="resetPassword2" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <p class="auth-error hidden" id="resetError"></p>
+        <button class="btn-plan btn-plan-pro" id="btnResetPassword" style="width:100%" onclick="doResetPassword()">Spara nytt lösenord</button>
       </div>
 
       <!-- Bekräftelse -->
