@@ -161,52 +161,52 @@
     <!-- Modul: UCI Värdering -->
     <section class="module" id="module-uci">
       <div class="module-header">
-        <h1>UCI Värdering</h1>
-        <p class="module-desc">AI-driven värdering med respondentvalidering — inloggning krävs för &gt;3 sökningar</p>
+        <h1 data-i18n="uci.title">UCI Valuation</h1>
+        <p class="module-desc" data-i18n="uci.desc">AI-driven valuation with respondent validation — login required after 3 searches</p>
       </div>
 
       <!-- Inmatning -->
       <div class="uci-search-area">
         <div class="search-box">
-          <input type="text" id="uciInput" placeholder="Beskriv vad du vill värdera, ju mer detaljer desto bättre…" autocomplete="off">
+          <input type="text" id="uciInput" data-i18n-placeholder="uci.placeholder" placeholder="Describe what you want to value — the more detail, the better…" autocomplete="off">
           <select id="uciCategory">
-            <option value="">Välj kategori</option>
-            <option value="Fastighet">Fastighet</option>
-            <option value="Fordon">Fordon</option>
-            <option value="Verktyg">Verktyg</option>
-            <option value="Elektronik">Elektronik</option>
-            <option value="Kläder">Kläder</option>
-            <option value="Möbler">Möbler</option>
-            <option value="Värdemetaller">Värdemetaller</option>
-            <option value="Tjänster / Tid">Tjänster / Tid</option>
-            <option value="Energiutrustning">Energiutrustning</option>
-            <option value="Tokeniserade tillgångar">Tokeniserade tillgångar</option>
-            <option value="Övrigt">Övrigt</option>
+            <option value="">Select category</option>
+            <option value="Fastighet">Real estate</option>
+            <option value="Fordon">Vehicle</option>
+            <option value="Verktyg">Tools</option>
+            <option value="Elektronik">Electronics</option>
+            <option value="Kläder">Clothing</option>
+            <option value="Möbler">Furniture</option>
+            <option value="Värdemetaller">Precious metals</option>
+            <option value="Tjänster / Tid">Services / Time</option>
+            <option value="Energiutrustning">Energy equipment</option>
+            <option value="Tokeniserade tillgångar">Tokenized assets</option>
+            <option value="Övrigt">Other</option>
           </select>
           <button class="btn-primary" id="btnUciValue">
-            <span id="btnUciText">Värdera</span>
+            <span id="btnUciText" data-i18n="uci.btnValuate">Valuate</span>
           </button>
         </div>
         <div class="condition-row">
-          <label>Skick:</label>
+          <label data-i18n="uci.conditionLabel">Condition:</label>
           <div class="condition-buttons">
-            <button class="cond-btn" data-cond="1">1 — Dåligt</button>
-            <button class="cond-btn" data-cond="2">2 — Slitet</button>
-            <button class="cond-btn active" data-cond="3">3 — OK</button>
-            <button class="cond-btn" data-cond="4">4 — Bra</button>
-            <button class="cond-btn" data-cond="5">5 — Utmärkt</button>
+            <button class="cond-btn" data-cond="1" data-i18n="uci.cond1">1 — Poor</button>
+            <button class="cond-btn" data-cond="2" data-i18n="uci.cond2">2 — Worn</button>
+            <button class="cond-btn active" data-cond="3" data-i18n="uci.cond3">3 — OK</button>
+            <button class="cond-btn" data-cond="4" data-i18n="uci.cond4">4 — Good</button>
+            <button class="cond-btn" data-cond="5" data-i18n="uci.cond5">5 — Excellent</button>
           </div>
         </div>
         <div class="condition-row">
-          <label>Bild:</label>
+          <label data-i18n="uci.photoLabel">Photo:</label>
           <div class="val-image-row">
             <div class="photo-upload-grid" id="valPhotoGrid">
-              <div class="photo-slot add-photo" id="valAddPhotoBtn" title="Lägg till bild">
+              <div class="photo-slot add-photo" id="valAddPhotoBtn" data-i18n-title="uci.photoAddTitle" title="Add photo">
                 <span>+</span>
                 <input type="file" accept="image/*" id="valPhotoInput" hidden>
               </div>
             </div>
-            <span class="val-image-hint">Valfritt — förbättrar precisionen</span>
+            <span class="val-image-hint" data-i18n="uci.photoHint">Optional — improves accuracy</span>
           </div>
         </div>
       </div>
@@ -215,7 +215,7 @@
       <div class="uci-loading hidden" id="uciLoading">
         <div class="uci-loading-inner">
           <div class="uci-spinner"></div>
-          <p>AestimAi analyserar objektet…</p>
+          <p data-i18n="uci.loadingText">AestimAi is analyzing the item…</p>
         </div>
       </div>
 
@@ -1335,17 +1335,24 @@
         <div class="account-card">
           <div class="acct-card-header">
             <span class="acct-card-icon">🌐</span>
-            <h3 data-i18n="settings.language.title">Språk</h3>
+            <h3 data-i18n="settings.language.title">Language</h3>
           </div>
-          <p class="settings-card-desc" data-i18n="settings.language.desc">Samma språk som i mobilappen. Påverkar AI-värderingar och gränssnittet.</p>
-          <div class="settings-lang-grid" id="settingsLangGrid"></div>
+          <p class="settings-card-desc" data-i18n="settings.language.desc">Same languages as the mobile app. Affects AI valuations and the menu.</p>
+          <div class="settings-lang-grid" id="settingsLangGrid">
+            <button type="button" class="settings-lang-btn" data-lang="sv">Svenska</button>
+            <button type="button" class="settings-lang-btn" data-lang="en">English</button>
+            <button type="button" class="settings-lang-btn" data-lang="de">Deutsch</button>
+            <button type="button" class="settings-lang-btn" data-lang="fr">Français</button>
+            <button type="button" class="settings-lang-btn" data-lang="it">Italiano</button>
+            <button type="button" class="settings-lang-btn" data-lang="es">Español</button>
+          </div>
         </div>
         <div class="account-card">
           <div class="acct-card-header">
             <span class="acct-card-icon">💱</span>
-            <h3 data-i18n="settings.currency.title">Visningsvaluta (Marknadsdata)</h3>
+            <h3 data-i18n="settings.currency.title">Display currency (Market Data)</h3>
           </div>
-          <p class="settings-card-desc" data-i18n="settings.currency.desc">Gäller Search Cap, Verified Cap och liknande summeringar — inte diagrammet.</p>
+          <p class="settings-card-desc" data-i18n="settings.currency.desc">Applies to Search Cap, Verified Cap and similar summaries — not the chart.</p>
           <select id="settingsCapCurrency" class="settings-select" aria-label="Display currency">
             <option value="SEK" data-i18n-label="settings.currency.sek">SEK — Swedish kronor</option>
             <option value="EUR" data-i18n-label="settings.currency.eur" selected>EUR — Euro</option>

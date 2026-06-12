@@ -227,8 +227,11 @@ function setUciLoading(on) {
   const btn     = document.getElementById('btnUciValue');
   const loading = document.getElementById('uciLoading');
   const result  = document.getElementById('uciResult');
+  const i18n    = window.AestimI18n;
   btn.disabled  = on;
-  document.getElementById('btnUciText').textContent = on ? 'Analyserar…' : 'Värdera';
+  document.getElementById('btnUciText').textContent = on
+    ? (i18n?.t?.('uci.btnLoading') || 'Analyzing…')
+    : (i18n?.t?.('uci.btnValuate') || 'Valuate');
   loading.classList.toggle('hidden', !on);
   if (on) result.classList.add('hidden');
 }
@@ -2140,6 +2143,7 @@ function setupSettings() {
       syncLanguageToSupabase(value);
       updatePanelHelp(state.currentModule);
       refreshDashboardCaps();
+      i18n.applyTranslations();
     } else if (kind === 'currency') {
       showToast(i18n.t('settings.currency.saved'));
       refreshDashboardCaps();
