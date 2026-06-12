@@ -1848,6 +1848,18 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .publish-toggle input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
 
+.listing-quota-hint {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--gray-700);
+  background: var(--green-light);
+  border: 1px solid rgba(29, 107, 78, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  margin: 0.75rem 0 0;
+}
+.listing-quota-hint strong { color: var(--green); }
+
 /* Mina objekt */
 .my-items-header { margin-bottom: 1.25rem; }
 .my-items-header h2 { margin: 0 0 0.25rem; }

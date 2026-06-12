@@ -438,6 +438,7 @@ function setupMarketTabs() {
         refreshAuth().then(() => {
           document.getElementById('registerGate').classList.toggle('hidden', state.isLoggedIn);
           document.getElementById('registerForm').classList.toggle('hidden', !state.isLoggedIn);
+          refreshListingQuotaHint();
         });
       } else if (btn.dataset.tab === 'search') {
         searchMarket();
@@ -1484,6 +1485,155 @@ async function uploadListingImages(userId) {
   return urls;
 }
 
+// ── Bytesmarknad — annonsgränser & betalning (Freemium) ───────────
+const LISTING_LIMITS = { free: 1, pro: 10, enterprise: Infinity };
+
+function getUserPlan(user) {
+  return user?.user_metadata?.plan || 'free';
+}
+
+function listingLimitForPlan(plan) {
+  return LISTING_LIMITS[plan] ?? LISTING_LIMITS.free;
+}
+
+async function countPublicListings(userId) {
+  const sb = await getSb();
+  const { count, error } = await sb
+    .from('aestimai_valuations')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('is_public', true);
+  if (error) throw error;
+  return count || 0;
+}
+
+async function needsExtraListingPayment(user, additionalPublic = 1) {
+  const limit = listingLimitForPlan(getUserPlan(user));
+  if (!Number.isFinite(limit)) return false;
+  const current = await countPublicListings(user.id);
+  return (current + additionalPublic) > limit;
+}
+
+async function refreshListingQuotaHint() {
+  const hint = document.getElementById('listingQuotaHint');
+  const btn  = document.getElementById('btnPublishListing');
+  const publishNow = document.getElementById('publishNow');
+  if (!hint || !btn) return;
+
+  await refreshAuth();
+  if (!isRealUser(state.user)) {
+    hint.classList.add('hidden');
+    btn.textContent = 'Spara objekt';
+    return;
+  }
+
+  try {
+    const limit = listingLimitForPlan(getUserPlan(state.user));
+    const used  = await countPublicListings(state.user.id);
+    const publishChecked = publishNow?.checked !== false;
+
+    if (!Number.isFinite(limit)) {
+      hint.classList.add('hidden');
+      btn.textContent = 'Spara objekt';
+      return;
+    }
+
+    if (used >= limit) {
+      hint.innerHTML = `Du har <strong>${used}/${limit}</strong> gratis aktiv${limit === 1 ? ' annons' : 'a annonser'}. ` +
+        'Nästa publicering kostar <strong>€1</strong> via Stripe.';
+      hint.classList.remove('hidden');
+      if (publishChecked) btn.textContent = 'Betala €1 och publicera';
+      else btn.textContent = 'Spara objekt';
+    } else if (publishChecked && used + 1 > limit) {
+      hint.innerHTML = 'Den här annonsen blir din extra publicering — <strong>€1</strong> debiteras vid publicering.';
+      hint.classList.remove('hidden');
+      btn.textContent = 'Betala €1 och publicera';
+    } else {
+      hint.innerHTML = `Freemium: <strong>${used}/${limit}</strong> aktiv${limit === 1 ? ' annons' : 'a annonser'} ingår. Extra annonser: €1/st.`;
+      hint.classList.remove('hidden');
+      btn.textContent = publishChecked ? 'Spara och publicera' : 'Spara objekt';
+    }
+  } catch (_) {
+    hint.classList.add('hidden');
+    btn.textContent = 'Spara objekt';
+  }
+}
+
+async function startListingCheckout(listingId) {
+  const sb = await getSb();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session?.access_token) {
+    showToast('Din session har gått ut. Logga in igen.');
+    openAuthModal('login');
+    return false;
+  }
+
+  const res = await fetch('/api/market/checkout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ listingId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.url) {
+    showToast(data.error || 'Kunde inte starta betalningen.');
+    return false;
+  }
+  window.location.href = data.url;
+  return true;
+}
+
+async function confirmListingPayment(sessionId, listingId) {
+  try {
+    const sb = await getSb();
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) throw new Error('Inloggning krävs');
+
+    const res = await fetch('/api/market/confirm-listing', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ sessionId, listingId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Bekräftelse misslyckades');
+
+    showToast('Betalning mottagen — annonsen är publicerad!');
+    marketLoaded = false;
+    switchMarketTab('my-items');
+    loadMyItems();
+  } catch (e) {
+    showToast(e?.message || 'Kunde inte bekräfta betalningen.');
+  }
+}
+
+async function handleListingCheckoutReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const checkout = params.get('checkout');
+  const listingId = params.get('listing');
+  if (!checkout || !listingId) return;
+
+  if (checkout === 'listing-success') {
+    const sessionId = params.get('session_id');
+    if (sessionId) await confirmListingPayment(sessionId, listingId);
+  } else if (checkout === 'listing-cancel') {
+    showToast('Betalning avbruten — objektet sparades utan publicering.');
+    switchMarketTab('my-items');
+  }
+
+  params.delete('checkout');
+  params.delete('listing');
+  params.delete('session_id');
+  const q = params.toString();
+  const clean = window.location.pathname + (q ? `?${q}` : '') + '#market';
+  history.replaceState(null, '', clean);
+  navigateTo('market');
+}
+
 async function submitListing() {
   const user = await requireRealUser('Logga in för att registrera och spara objekt.');
   if (!isRealUser(user)) return;
@@ -1520,6 +1670,8 @@ async function submitListing() {
     if (location)      marketplace.location = location;
     if (images.length) marketplace.images = images;
 
+    const needsPay = publishNow && await needsExtraListingPayment(user, 1);
+
     const row = {
       user_id:      user.id,
       object_data,
@@ -1527,14 +1679,25 @@ async function submitListing() {
       source:       'manual',
       kind,
       marketplace,
-      is_public:    publishNow,
-      published_at: publishNow ? new Date().toISOString() : null,
+      is_public:    publishNow && !needsPay,
+      published_at: publishNow && !needsPay ? new Date().toISOString() : null,
       image_url:    images[0] || null,
     };
 
     const sb = await getSb();
-    const { error } = await sb.from('aestimai_valuations').insert(row);
+    const { data: inserted, error } = await sb
+      .from('aestimai_valuations')
+      .insert(row)
+      .select('id')
+      .single();
     if (error) throw error;
+
+    if (needsPay) {
+      showToast('Objekt sparat — du skickas till betalning…');
+      resetRegisterForm();
+      await startListingCheckout(inserted.id);
+      return;
+    }
 
     showToast(publishNow ? 'Publicerat i Bytesmarknad!' : 'Sparat under Mina objekt.');
     resetRegisterForm();
@@ -1640,6 +1803,20 @@ function myItemRowHTML(row) {
 async function toggleMyItem(id, makePublic) {
   const kindSel = document.querySelector(`.mi-kind[data-id="${id}"]`);
   const kind = kindSel ? kindSel.value : 'offer';
+
+  if (makePublic) {
+    await refreshAuth();
+    if (!isRealUser(state.user)) return;
+    if (await needsExtraListingPayment(state.user, 1)) {
+      const ok = window.confirm(
+        'Freemium inkluderar 1 aktiv annons. Publicera den här kostar €1.\n\nFortsätt till betalning?'
+      );
+      if (!ok) return;
+      await startListingCheckout(id);
+      return;
+    }
+  }
+
   const patch = { is_public: makePublic, kind };
   if (makePublic) patch.published_at = new Date().toISOString();
   try {
@@ -1730,6 +1907,7 @@ function setupMarketplace() {
 
   document.getElementById('btnValueListing')?.addEventListener('click', valueListing);
   document.getElementById('btnPublishListing')?.addEventListener('click', submitListing);
+  document.getElementById('publishNow')?.addEventListener('change', refreshListingQuotaHint);
 
   // Kontakt via kort (delegering)
   document.getElementById('marketGrid')?.addEventListener('click', e => {
@@ -1793,6 +1971,8 @@ document.addEventListener('DOMContentLoaded', () => {
   updatePanelHelp('uci');
 
   // Navigering från URL-hash, annars default = UCI Värdering
+  handleListingCheckoutReturn();
+
   const hash = location.hash.replace('#', '');
   if (hash && document.getElementById('module-' + hash)) {
     navigateTo(hash);
@@ -1900,6 +2080,7 @@ function onSignIn(user) {
   }
   refreshAccountSection();
   afterAuthChange();
+  refreshListingQuotaHint();
   if (authResolve) { authResolve(true); authResolve = null; }
 }
 
