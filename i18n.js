@@ -92,6 +92,7 @@
       'uci.cond3': '3 — OK',
       'uci.cond4': '4 — Bra',
       'uci.cond5': '5 — Utmärkt',
+      'uci.removeImage': 'Klicka för att ta bort',
       'uci.photoLabel': 'Bild:',
       'uci.photoHint': 'Valfritt — förbättrar precisionen',
       'uci.photoAddTitle': 'Lägg till bild',
@@ -187,6 +188,7 @@
       'uci.cond3': '3 — OK',
       'uci.cond4': '4 — Good',
       'uci.cond5': '5 — Excellent',
+      'uci.removeImage': 'Click to remove',
       'uci.photoLabel': 'Photo:',
       'uci.photoHint': 'Optional — improves accuracy',
       'uci.photoAddTitle': 'Add photo',
@@ -620,6 +622,9 @@
   APP_LANGUAGES.forEach(lang => {
     if (global.MARKET_I18N?.[lang]) Object.assign(STRINGS[lang], global.MARKET_I18N[lang]);
   });
+  APP_LANGUAGES.forEach(lang => {
+    if (global.SITE_I18N?.[lang]) Object.assign(STRINGS[lang], global.SITE_I18N[lang]);
+  });
 
   let currentLang = DEFAULT_LANGUAGE;
   let capDisplayCurrency = DEFAULT_CAP_CURRENCY;
@@ -707,8 +712,34 @@
     if (typeof window.refreshListingQuotaHint === 'function') window.refreshListingQuotaHint();
   }
 
+  function updateDashSelectLabels() {
+    const sel = document.getElementById('dashCatSelect');
+    if (!sel) return;
+    sel.querySelectorAll('option[data-i18n]').forEach(opt => {
+      const key = opt.getAttribute('data-i18n');
+      if (key) opt.textContent = t(key);
+    });
+  }
+
+  function updateWalletStaticLabels() {
+    const connect = document.getElementById('btnConnectWallet');
+    if (connect && !connect.disabled) {
+      const icon = connect.querySelector('.wallet-icon');
+      const label = t('wallet.connect');
+      if (icon) connect.innerHTML = `<span class="wallet-icon">⬡</span> ${label}`;
+      else connect.textContent = label;
+    }
+    const sw = document.getElementById('btnSwitchNetwork');
+    if (sw && !sw.disabled) sw.textContent = t('wallet.switchNetwork');
+    const disc = document.getElementById('btnDisconnectWallet');
+    if (disc) disc.title = t('wallet.disconnectTitle');
+    const refresh = document.getElementById('btnRefreshChain');
+    if (refresh && !refresh.disabled) refresh.textContent = t('wallet.refreshChain');
+  }
+
   function applyTranslations() {
     document.documentElement.lang = localeTag();
+    document.title = t('site.title');
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (key) el.textContent = t(key);
@@ -732,6 +763,8 @@
     updateContactDynamicLabels();
     updateMarketSelectLabels();
     updateMarketDynamicLabels();
+    updateDashSelectLabels();
+    updateWalletStaticLabels();
   }
 
   function hydrate() {

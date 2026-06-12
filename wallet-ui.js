@@ -17,6 +17,17 @@ import {
   wallet,
 } from './wallet.js';
 
+function wtr(key, vars, fb) {
+  if (typeof window.str === 'function') return window.str(key, vars, fb);
+  let s = window.AestimI18n?.t?.(key) || fb || key;
+  if (vars && s) Object.entries(vars).forEach(([k, v]) => { s = s.split(`{${k}}`).join(String(v)); });
+  return s;
+}
+
+function walletLocale() {
+  return window.AestimI18n?.localeTag?.() || 'en-US';
+}
+
 // ── DOM-referenser ─────────────────────────────────────────
 
 const btnConnect      = document.getElementById('btnConnectWallet');
@@ -105,7 +116,7 @@ function renderOnchainData(data) {
 
   const ts = new Date(data.timestamp * 1000);
   document.getElementById('chainTimestamp').textContent =
-    'Uppdaterat: ' + ts.toLocaleString('sv-SE');
+    wtr('wallet.chainUpdated', { date: ts.toLocaleString(walletLocale()) }, 'Updated: ' + ts.toLocaleString(walletLocale()));
 
   const link = document.getElementById('chainExplorerLink');
   if (link) {
@@ -116,7 +127,16 @@ function renderOnchainData(data) {
   if (panelTickerValue) panelTickerValue.textContent = `1 UCI = ${data.rateSEK.toFixed(2)} SEK`;
   if (panelTickerSub)   panelTickerSub.textContent   = `≈ €${data.rateEUR.toFixed(2)} / $${data.rateUSD.toFixed(2)}`;
   if (tickerOnchain)    tickerOnchain.classList.remove('hidden');
-  if (tickerChainLabel) tickerChainLabel.textContent = '⬡ Live on Base';
+  if (tickerChainLabel) tickerChainLabel.textContent = wtr('wallet.onChainLive', null, '⬡ Live on Base');
+}
+
+function resetConnectButton() {
+  if (!btnConnect) return;
+  const label = wtr('wallet.connect', null, 'Connect MetaMask');
+  const icon = btnConnect.querySelector('.wallet-icon');
+  if (icon) btnConnect.innerHTML = `<span class="wallet-icon">⬡</span> ${label}`;
+  else btnConnect.textContent = label;
+  btnConnect.disabled = false;
 }
 
 // ── Event listeners ─────────────────────────────────────────
@@ -124,47 +144,46 @@ function renderOnchainData(data) {
 btnConnect?.addEventListener('click', async () => {
   if (!isMetaMaskInstalled()) {
     window.open('https://metamask.io/download/', '_blank');
-    showToastWallet('MetaMask är inte installerat — öppnar nedladdningssida');
+    showToastWallet(wtr('wallet.toastNotInstalled', null, 'MetaMask is not installed — opening download page'));
     return;
   }
-  btnConnect.textContent = 'Ansluter…';
+  btnConnect.textContent = wtr('wallet.connecting', null, 'Connecting…');
   btnConnect.disabled    = true;
   try {
     await connectWallet();
   } catch (err) {
-    showToastWallet('Kunde inte ansluta: ' + err.message);
-    btnConnect.textContent = '⬡ Anslut MetaMask';
-    btnConnect.disabled    = false;
+    showToastWallet(wtr('wallet.toastConnectFailed', { msg: err.message }, 'Could not connect: ' + err.message));
+    resetConnectButton();
   }
 });
 
 btnDisconnect?.addEventListener('click', () => {
   disconnectWallet();
-  showToastWallet('Wallet frånkopplad');
+  showToastWallet(wtr('wallet.toastDisconnected', null, 'Wallet disconnected'));
 });
 
 btnSwitch?.addEventListener('click', async () => {
-  btnSwitch.textContent = 'Byter…';
+  btnSwitch.textContent = wtr('wallet.switching', null, 'Switching…');
   try {
     await switchToBaseSepolia();
-    showToastWallet('✓ Ansluten till Base Sepolia');
+    showToastWallet(wtr('wallet.toastSwitched', null, '✓ Connected to Base Sepolia'));
   } catch (err) {
-    showToastWallet('Kunde inte byta nätverk: ' + err.message);
+    showToastWallet(wtr('wallet.toastSwitchFailed', { msg: err.message }, 'Could not switch network: ' + err.message));
   }
-  btnSwitch.textContent = 'Byt till Base Sepolia';
+  btnSwitch.textContent = wtr('wallet.switchNetwork', null, 'Switch to Base Sepolia');
 });
 
 btnRefreshChain?.addEventListener('click', async () => {
-  btnRefreshChain.textContent = '↻ Hämtar…';
+  btnRefreshChain.textContent = wtr('wallet.refreshing', null, '↻ Loading…');
   btnRefreshChain.disabled    = true;
   const data = await readOnChainUCI();
   if (data) {
     renderOnchainData(data);
-    showToastWallet('On-chain UCI uppdaterad');
+    showToastWallet(wtr('wallet.toastChainUpdated', null, 'On-chain UCI updated'));
   } else {
-    showToastWallet('Kontraktet är inte deployd än');
+    showToastWallet(wtr('wallet.toastNoContract', null, 'Contract is not deployed yet'));
   }
-  btnRefreshChain.textContent = '↻ Uppdatera';
+  btnRefreshChain.textContent = wtr('wallet.refreshChain', null, '↻ Refresh');
   btnRefreshChain.disabled    = false;
 });
 
@@ -194,16 +213,11 @@ function showToastWallet(msg) {
 // ── Init ────────────────────────────────────────────────────
 
 async function init() {
-  // Ladda kontraktsadress om den finns
   await loadContractAddress();
-
-  // Visa initial state (ej ansluten)
   renderWallet(wallet);
-
-  // Försök auto-återansluta om användaren godkänt tidigare
   const w = await autoConnect();
   if (w) {
-    showToastWallet('✓ Wallet återansluten: ' + shortAddress(w.address));
+    showToastWallet(wtr('wallet.toastReconnected', { address: shortAddress(w.address) }, '✓ Wallet reconnected: ' + shortAddress(w.address)));
   }
 }
 

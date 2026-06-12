@@ -32,6 +32,17 @@ function formatLicenseAcceptance(user) {
 
 window.LICENSE_AGREEMENT = LICENSE_AGREEMENT;
 
+function str(key, vars, fb) {
+  let s = window.AestimI18n?.t?.(key) || fb || key;
+  if (vars && s) Object.entries(vars).forEach(([k, v]) => { s = s.split(`{${k}}`).join(String(v)); });
+  return s;
+}
+function appLocale() {
+  return window.AestimI18n?.localeTag?.() || 'en-US';
+}
+
+window.str = str;
+
 // ── State ──────────────────────────────────────────
 const state = {
   currentModule:     'uci',
@@ -181,13 +192,17 @@ function updatePanelHelp(moduleId) {
     return;
   }
   const helpTexts = {
-    uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Coin Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
-    market: '<h4>Om UCI Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
-    pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med AE ID barter or pay DS-certifikat.</p><p>€75/mån — kräver AE ID barter or pay-kort.</p>',
-    ucilab: '<h4>AestimAi Lab</h4><p>Forskning kring UCI-värderingsmotorn — agentisk, retrieval-grundad och kalibrerad värdering.</p><p>Under <strong>Shop · Amazon</strong> hittar du rekommenderad hårdvara.</p>',
-    idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
-    news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras högst en gång per timme.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
-    settings: '<h4>Settings</h4><p>Choose language and display currency for UCI Market Data. Your choice is saved in the browser and synced to your account when logged in.</p>',
+    uci: str('panel.uci', null, '<h4>About UCI valuation</h4><p>UCI measures real trade value — no login required.</p>'),
+    market: str('panel.market', null, '<h4>About UCI Marketplace</h4><p>Trade goods and services without currency.</p>'),
+    pro: str('panel.pro', null, '<h4>AestimAi Pro</h4><p>Professional valuation for property and portfolios.</p>'),
+    ucilab: str('panel.ucilab', null, '<h4>AestimAi Lab</h4><p>Research on the UCI valuation engine.</p>'),
+    idcoop: str('panel.about', null, '<h4>About AestimAi</h4><p>Universal Coin Index for fairer trades.</p>'),
+    news: str('panel.news', null, '<h4>AestimAi News</h4><p>News on valuation, trade and energy.</p>'),
+    settings: str('panel.settings', null, '<h4>Settings</h4><p>Choose language and display currency.</p>'),
+    dashboard: str('panel.dashboard', null, '<h4>UCI Market Data</h4><p>Live rate and key metrics.</p>'),
+    pricing: str('panel.pricing', null, '<h4>Pricing & Account</h4><p>Freemium, Pro and Enterprise plans.</p>'),
+    about: str('panel.about', null, '<h4>About AestimAi</h4><p>Building the missing measure of value.</p>'),
+    account: str('panel.pricing', null, '<h4>Pricing & Account</h4><p>Manage your subscription.</p>'),
   };
   el.innerHTML = helpTexts[moduleId] || helpTexts.uci;
 }
@@ -248,7 +263,7 @@ async function runUciValuation() {
       console.warn('[UCI] Server ej nåbar — använder lokal fallback');
       renderUciFallback(input, category, cond);
     } else {
-      showToast('Värdering misslyckades: ' + err.message);
+      showToast(str('uci.toast.valuationFailed', { msg: err.message }, 'Valuation failed: ' + err.message));
     }
   }
 }
@@ -268,23 +283,25 @@ function setUciLoading(on) {
 
 function renderUciResult(data) {
   setUciLoading(false);
+  const locale = marketLocaleTag();
 
   state.currentItemId   = data.itemId;
   state.currentUciPrior = data.uci_value;
   state.hasVoted        = false;
 
-  // Huvud-siffror
-  document.getElementById('uciValue').textContent = data.uci_value.toLocaleString('sv-SE');
-  document.getElementById('convSEK').textContent  = (data.sek_approx || Math.round(data.uci_value * state.uciRateToSEK)).toLocaleString('sv-SE') + ' kr';
-  document.getElementById('convEUR').textContent  = (data.eur_approx || Math.round(data.uci_value * state.uciRateToEUR)).toLocaleString('sv-SE') + ' €';
-  document.getElementById('convUSD').textContent  = (data.usd_approx || Math.round(data.uci_value * state.uciRateToUSD)).toLocaleString('sv-SE') + ' $';
+  document.getElementById('uciValue').textContent = data.uci_value.toLocaleString(locale);
+  document.getElementById('convSEK').textContent  = (data.sek_approx || Math.round(data.uci_value * state.uciRateToSEK)).toLocaleString(locale) + ' kr';
+  document.getElementById('convEUR').textContent  = (data.eur_approx || Math.round(data.uci_value * state.uciRateToEUR)).toLocaleString(locale) + ' €';
+  document.getElementById('convUSD').textContent  = (data.usd_approx || Math.round(data.uci_value * state.uciRateToUSD)).toLocaleString(locale) + ' $';
 
-  // Konfidens
   const conf = data.confidence_pct || 70;
   document.getElementById('confBar').style.width   = conf + '%';
-  document.getElementById('confPct').textContent   = conf + '% konfidens';
+  document.getElementById('confPct').textContent   = str('uci.result.confidencePct', { pct: conf }, conf + '% confidence');
   document.getElementById('confRange').textContent =
-    `${data.uci_low?.toLocaleString('sv-SE')} – ${data.uci_high?.toLocaleString('sv-SE')} UCI (90% intervall)`;
+    str('uci.result.confidenceRange', {
+      low: data.uci_low?.toLocaleString(locale),
+      high: data.uci_high?.toLocaleString(locale),
+    }, `${data.uci_low?.toLocaleString(locale)} – ${data.uci_high?.toLocaleString(locale)} UCI`);
 
   // AI-analys
   document.getElementById('reasoningText').textContent = data.reasoning || '';
@@ -296,7 +313,7 @@ function renderUciResult(data) {
   cl.innerHTML = (data.comparables || []).map(c =>
     `<div class="comparable-row">
        <span class="comp-name">${c.name}</span>
-       <span class="comp-uci">${c.uci?.toLocaleString('sv-SE')} UCI</span>
+       <span class="comp-uci">${c.uci?.toLocaleString(locale)} UCI</span>
      </div>`
   ).join('');
 
@@ -320,7 +337,7 @@ function renderUciResult(data) {
     mcEl.innerHTML = `
       <div class="mc-header">
         <span class="mc-icon">⊛</span>
-        <span class="mc-label">Marknadsprisankar</span>
+        <span class="mc-label">${str('uci.result.marketAnchor', null, 'Market price anchor')}</span>
         <span class="mc-category">${mc.category_label || ''}</span>
       </div>
       <div class="mc-range">${lo} – ${hi} SEK</div>
@@ -335,7 +352,7 @@ function renderUciResult(data) {
 
   // Föreslå UCI-pris i registrering
   const autoVal = document.getElementById('uciAutoValue');
-  if (autoVal) autoVal.textContent = data.uci_value.toLocaleString('sv-SE');
+  if (autoVal) autoVal.textContent = data.uci_value.toLocaleString(locale);
 
   document.getElementById('uciResult').classList.remove('hidden');
   document.getElementById('uciResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -360,11 +377,11 @@ function renderUciFallback(input, category, cond) {
     sek_approx:      Math.round(uci * state.uciRateToSEK),
     eur_approx:      Math.round(uci * state.uciRateToEUR),
     usd_approx:      Math.round(uci * state.uciRateToUSD),
-    reasoning:       'Estimat baserat på lokal modell (AI-servern är inte nåbar). Starta uci-server.js för full AI-analys.',
-    key_factors:     ['Kategori: ' + (category || 'Okänd'), 'Skick: ' + cond + '/5'],
+    reasoning:       str('uci.result.fallbackReasoning', null, 'Estimate from local model.'),
+    key_factors:     ['Category: ' + (category || 'Unknown'), 'Condition: ' + cond + '/5'],
     comparables:     [],
     depreciation_note: '',
-    survey_question: 'Vad är din bedömning av värdet?',
+    survey_question: str('uci.result.surveyQuestionDefault', null, 'What is your assessment of the value?'),
     itemId:          null,
   });
 }
@@ -376,14 +393,14 @@ function setupSurvey(priorUci, question) {
   const preview = document.getElementById('sliderPreview');
   const qEl     = document.getElementById('surveyQuestion');
 
-  if (qEl)     qEl.textContent  = question || 'Vad är din bedömning av värdet?';
-  if (anchor)  anchor.textContent = priorUci.toLocaleString('sv-SE') + ' UCI (AI)';
+  if (qEl)     qEl.textContent  = question || str('uci.result.surveyQuestionDefault', null, 'What is your assessment of the value?');
+  if (anchor)  anchor.textContent = str('uci.result.sliderAnchor', { value: priorUci.toLocaleString(marketLocaleTag()) }, priorUci.toLocaleString(marketLocaleTag()) + ' UCI (AI)');
 
   // Slider: 1–100 → 20%–500% av prior
   slider.value = 50;
   updateSliderPreview();
 
-  document.getElementById('surveyN').textContent       = '0 svar';
+  document.getElementById('surveyN').textContent       = str('uci.result.surveyAnswers', { n: 0 }, '0 responses');
   document.getElementById('surveySig').classList.add('hidden');
   document.getElementById('bayesianResult').classList.add('hidden');
   document.getElementById('btnSubmitVote').disabled = false;
@@ -402,17 +419,17 @@ function updateSliderPreview() {
   const val     = parseInt(document.getElementById('surveySlider').value);
   const uci     = sliderToUci(val);
   const preview = document.getElementById('sliderPreview');
-  if (preview) preview.textContent = uci.toLocaleString('sv-SE');
+  if (preview) preview.textContent = uci.toLocaleString(marketLocaleTag());
 }
 
 async function submitVote() {
-  if (state.hasVoted) { showToast('Du har redan röstat på detta objekt.'); return; }
+  if (state.hasVoted) { showToast(str('uci.toast.alreadyVoted', null, 'You have already voted on this item.')); return; }
 
   const sliderVal = parseInt(document.getElementById('surveySlider').value);
   const voteUci   = sliderToUci(sliderVal);
 
   if (!state.currentItemId) {
-    showToast('Ingen aktiv värderingssession — värdera ett objekt först.');
+    showToast(str('uci.toast.noSession', null, 'No active valuation session — value an item first.'));
     return;
   }
 
@@ -427,42 +444,45 @@ async function submitVote() {
 
     state.hasVoted = true;
     document.getElementById('btnSubmitVote').disabled = true;
-    document.getElementById('btnSubmitVote').textContent = '✓ Röst registrerad';
+    document.getElementById('btnSubmitVote').textContent = str('uci.result.voteRegistered', null, '✓ Vote recorded');
 
     renderBayesianResult(data);
-    showToast('Tack! Din bedömning är registrerad.');
+    showToast(str('uci.toast.voteThanks', null, 'Thank you! Your assessment has been recorded.'));
 
   } catch (err) {
-    showToast('Kunde inte skicka röst: ' + err.message);
+    showToast(str('uci.toast.voteFailed', { msg: err.message }, 'Could not submit vote: ' + err.message));
   }
 }
 
 function renderBayesianResult(data) {
   const n    = data.n || 0;
+  const locale = marketLocaleTag();
   const nEl  = document.getElementById('surveyN');
   const sig  = document.getElementById('surveySig');
   const box  = document.getElementById('bayesianResult');
 
-  nEl.textContent = n + (n === 1 ? ' svar' : ' svar');
+  nEl.textContent = str('uci.result.surveyAnswers', { n }, `${n} responses`);
   if (n >= 20) sig.classList.remove('hidden');
 
-  document.getElementById('bayesValue').textContent = data.mean?.toLocaleString('sv-SE') || '—';
+  document.getElementById('bayesValue').textContent = data.mean?.toLocaleString(locale) || '—';
   document.getElementById('bayesRange').textContent =
-    `${data.low?.toLocaleString('sv-SE')} – ${data.high?.toLocaleString('sv-SE')} UCI`;
+    `${data.low?.toLocaleString(locale)} – ${data.high?.toLocaleString(locale)} UCI`;
 
   const shift    = data.mean - state.currentUciPrior;
   const shiftPct = Math.round((shift / state.currentUciPrior) * 100);
   const dir      = shift > 0 ? '▲' : shift < 0 ? '▼' : '—';
   const col      = shift > 0 ? 'var(--green)' : shift < 0 ? '#b84040' : 'var(--gray-500)';
+  const respondents = n === 1
+    ? str('uci.result.bayesianRespondentsOne', { n }, `${n} respondent`)
+    : str('uci.result.bayesianRespondentsMany', { n }, `${n} respondents`);
 
   document.getElementById('bayesMeta').innerHTML =
-    `<span style="color:${col};font-weight:700">${dir} ${Math.abs(shiftPct)}% från AI-estimat</span>
-     &nbsp;·&nbsp; ${n} respondent${n !== 1 ? 'er' : ''}
-     &nbsp;·&nbsp; Konfidens: ${data.confidence}%`;
+    `<span style="color:${col};font-weight:700">${str('uci.result.bayesianShift', { dir, pct: Math.abs(shiftPct) }, `${dir} ${Math.abs(shiftPct)}% from AI estimate`)}</span>
+     &nbsp;·&nbsp; ${respondents}
+     &nbsp;·&nbsp; ${str('uci.result.bayesianConfidence', { pct: data.confidence }, `Confidence: ${data.confidence}%`)}`;
 
-  // Uppdatera även huvud-UCI-siffran om vi har nog med svar
   if (n >= 5) {
-    document.getElementById('uciValue').textContent = data.mean?.toLocaleString('sv-SE');
+    document.getElementById('uciValue').textContent = data.mean?.toLocaleString(locale);
     document.getElementById('uciSourceBadge').innerHTML =
       `<span class="badge-crowd">⊙ ${n} respondenter</span>`;
   }
@@ -587,26 +607,26 @@ function syncAuthState(user) {
 }
 
 function mapAuthError(msg) {
-  if (!msg) return 'Något gick fel. Försök igen.';
+  if (!msg) return str('auth.errGeneric', null, 'Something went wrong. Try again.');
   const m = msg.toLowerCase();
-  if (m.includes('invalid login credentials')) return 'Fel e-post eller lösenord.';
-  if (m.includes('user already registered')) return 'Det finns redan ett konto med den e-postadressen.';
-  if (m.includes('email not confirmed')) return 'Bekräfta din e-post innan du loggar in — kolla inkorgen.';
-  if (m.includes('password should be at least')) return 'Lösenordet uppfyller inte kraven.';
-  if (m.includes('rate limit') || m.includes('too many requests')) return 'För många försök. Vänta en stund och försök igen.';
-  if (m.includes('new email should be different')) return 'Den nya e-postadressen är samma som den nuvarande.';
+  if (m.includes('invalid login credentials')) return str('auth.errInvalidCredentials', null, 'Invalid email or password.');
+  if (m.includes('user already registered')) return str('auth.errUserExists', null, 'An account with this email already exists.');
+  if (m.includes('email not confirmed')) return str('auth.errEmailNotConfirmed', null, 'Confirm your email before logging in.');
+  if (m.includes('password should be at least')) return str('auth.errPasswordWeak', null, 'Password does not meet requirements.');
+  if (m.includes('rate limit') || m.includes('too many requests')) return str('auth.errRateLimit', null, 'Too many attempts. Wait and try again.');
+  if (m.includes('new email should be different')) return str('auth.errSameEmail', null, 'The new email is the same as the current one.');
   return msg;
 }
 
 function setupAuth() {
   document.getElementById('btnActivateCard')?.addEventListener('click', () => openAuthModal('login'));
   document.getElementById('btnOrderCard')?.addEventListener('click', () => {
-    showToast('Kortbeställning öppnas snart.');
+    showToast(str('common.cardOrderSoon', null, 'Card ordering opens soon.'));
   });
   document.getElementById('btnRegisterLogin')?.addEventListener('click', () =>
-    openAuthModal({ panel: 'register', intro: 'Skapa konto eller logga in för att registrera objekt.' }));
+    openAuthModal({ panel: 'register', intro: str('auth.requireLoginMarketRegister', null, 'Create an account or log in to list items.') }));
   document.getElementById('btnMyItemsLogin')?.addEventListener('click', () =>
-    openAuthModal({ panel: 'login', intro: 'Logga in för att se och publicera dina objekt.' }));
+    openAuthModal({ panel: 'login', intro: str('auth.requireLoginMyItems', null, 'Log in to view and publish your items.') }));
 
   peekSession();
   updateAuthUI();
@@ -638,7 +658,7 @@ async function requireRealUser(intro) {
   if (isRealUser(currentUser)) return currentUser;
   await openAuthModal(typeof intro === 'string'
     ? { panel: 'login', intro }
-    : { panel: 'login', intro: 'Logga in för att fortsätta.' });
+    : { panel: 'login', intro: str('auth.requireLoginIntro', null, 'Log in to continue.') });
   return isRealUser(currentUser) ? currentUser : null;
 }
 
@@ -660,7 +680,7 @@ function updateAuthUI() {
     document.getElementById('topbarAccount')?.classList.remove('hidden');
     const emailEl = document.getElementById('topbarEmail');
     if (emailEl) {
-      const name = currentUser.user_metadata?.full_name || currentUser.email || 'Inloggad';
+      const name = currentUser.user_metadata?.full_name || currentUser.email || str('auth.loggedInLabel', null, 'Signed in');
       emailEl.textContent = name;
     }
   } else {
@@ -735,7 +755,7 @@ function setupValImage() {
       slot.style.backgroundSize     = 'cover';
       slot.style.backgroundPosition = 'center';
       // Klick på miniatyr tar bort bilden
-      slot.title = 'Klicka för att ta bort';
+      slot.title = str('uci.removeImage', null, 'Click to remove');
       slot.addEventListener('click', () => {
         slot.remove();
         _valImageBase64 = null;
@@ -763,7 +783,7 @@ function setupApiKey() {
   });
   document.getElementById('btnCopyKey')?.addEventListener('click', () => {
     navigator.clipboard.writeText('aestim_sk_demo_1234567890abcdef');
-    showToast('API-nyckel kopierad!');
+    showToast(str('common.apiKeyCopied', null, 'API key copied!'));
   });
 }
 
@@ -836,7 +856,7 @@ function setupNews() {
   const dateEl = document.getElementById('newsDate');
   if (dateEl) {
     const d = new Date();
-    dateEl.textContent = d.toLocaleDateString('sv-SE', {
+    dateEl.textContent = d.toLocaleDateString(appLocale(), {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
   }
@@ -898,7 +918,7 @@ function setNewsLoading(on) {
     if (!spinner) {
       spinner = document.createElement('div');
       spinner.id = 'newsSpinner';
-      spinner.innerHTML = '<div class="news-loading">Hämtar nyheter…</div>';
+      spinner.innerHTML = `<div class="news-loading">${str('news.loading', null, 'Loading news…')}</div>`;
       main.prepend(spinner);
     }
   } else {
@@ -922,7 +942,7 @@ function renderNews(articles, cat) {
 }
 
 function buildNewsHTML(articles, cat) {
-  if (articles.length === 0) return '<div class="news-loading">Inga artiklar hittades för denna kategori.</div>';
+  if (articles.length === 0) return `<div class="news-loading">${str('news.empty', null, 'No articles found for this category.')}</div>`;
 
   const lead      = articles[0];
   const grid1     = articles.slice(1, 4);
@@ -931,23 +951,23 @@ function buildNewsHTML(articles, cat) {
   const briefs    = articles.slice(8);
 
   const CAT_LABELS = {
-    valuation:      'Värdering',
-    energy:         'Energi',
-    coop:           'Kooperativ',
-    market:         'Marknad',
-    tech:           'Fintech',
-    sustainability: 'Hållbarhet',
-    resources:      'Resurser',
-    all:            'Nyheter',
+    valuation:      str('news.cat.valuation', null, 'Valuation'),
+    energy:         str('news.cat.energy', null, 'Energy'),
+    coop:           str('news.cat.coop', null, 'Cooperative'),
+    market:         str('news.cat.market', null, 'Market'),
+    tech:           str('news.cat.tech', null, 'Fintech'),
+    sustainability: str('news.cat.sustainability', null, 'Sustainability'),
+    resources:      str('news.cat.resources', null, 'Resources'),
+    all:            str('news.cat.all', null, 'News'),
   };
   const label = (a) => {
     const c = a.cat || cat;
-    return `<span class="news-section-label ${c}">${CAT_LABELS[c] || 'Nyheter'}</span>`;
+    return `<span class="news-section-label ${c}">${CAT_LABELS[c] || CAT_LABELS.all}</span>`;
   };
   const byline = (a) => {
-    const time = a.publishedAt ? new Date(a.publishedAt).toLocaleDateString('sv-SE') : '';
+    const time = a.publishedAt ? new Date(a.publishedAt).toLocaleDateString(appLocale()) : '';
     return `<div class="news-byline">
-      <span class="news-author">${escHtml(a.source || a.author || 'Okänd källa')}</span>
+      <span class="news-author">${escHtml(a.source || a.author || str('news.unknownSource', null, 'Unknown source'))}</span>
       ${time ? `<span class="news-dot">·</span><span class="news-time">${time}</span>` : ''}
     </div>`;
   };
@@ -1143,7 +1163,7 @@ async function loadCommentary() {
       </div>
     `).join('');
   } catch (e) {
-    grid.innerHTML = '<div class="commentary-loading">Kommentarer ej tillgängliga just nu.</div>';
+    grid.innerHTML = `<div class="commentary-loading">${str('dash.commentaryUnavailable', null, 'Commentary unavailable right now.')}</div>`;
     console.warn('[Commentary] Kunde inte ladda:', e.message);
   }
 }
@@ -1253,14 +1273,14 @@ function renderDashboard({ history, stats }, days) {
   setEl('dsLow',        toC(stats.low52w)      + ' ' + cur.label);
   setEl('dsATH',        toC(stats.allTimeHigh) + ' ' + cur.label);
   setEl('dsVolatility', stats.volatility30d + '%');
-  setEl('dsVolumeToday',  stats.volumeToday + ' st');
-  setEl('dsVolumeTotal',  stats.volumeTotal + ' st');
-  setEl('dsSurveys',    stats.activeSurveys + ' aktiva');
+  setEl('dsVolumeToday',  str('dash.unitCount', { n: stats.volumeToday }, String(stats.volumeToday)));
+  setEl('dsVolumeTotal',  str('dash.unitCount', { n: stats.volumeTotal }, String(stats.volumeTotal)));
+  setEl('dsSurveys',    str('dash.surveysActive', { n: stats.activeSurveys }, String(stats.activeSurveys)));
 
   // Search Cap & Verified Cap — visningsvaluta från Inställningar (ej diagrammet)
   renderDashboardCaps(stats);
 
-  setEl('dashLastUpdate', 'Uppdaterad: ' + new Date().toLocaleString('sv-SE'));
+  setEl('dashLastUpdate', str('dash.updated', { date: new Date().toLocaleString(appLocale()) }, 'Updated: ' + new Date().toLocaleString(appLocale())));
 
   // Valutatabell — markera aktiv rad
   const currencies = [
@@ -1392,7 +1412,7 @@ function renderChartLegend(series) {
   ).join('') +
   `<span class="legend-item legend-ref">
      <span class="legend-dash"></span>
-     <span class="legend-label">⊙ UCI (referens = 100)</span>
+     <span class="legend-label">${str('dash.chartLegendRef', null, '⊙ UCI (reference = 100)')}</span>
    </span>`;
 }
 
@@ -1439,7 +1459,7 @@ const CAT_SYNONYMS = {
   tokeniserade: ['token'],
 };
 
-const COND_LABELS = { 1: '1 — Dåligt', 2: '2 — Slitet', 3: '3 — OK', 4: '4 — Bra', 5: '5 — Utmärkt' };
+const COND_LABELS = { 1: '1 — Poor', 2: '2 — Worn', 3: '3 — OK', 4: '4 — Good', 5: '5 — Excellent' };
 
 function categoryMatches(rowCat, filterVal) {
   if (!filterVal) return true;
@@ -1608,7 +1628,8 @@ function getUserPlan(user) {
 }
 
 function planDisplayName(plan) {
-  return PLAN_LABELS[plan] || PLAN_LABELS.free;
+  const key = { free: 'account.planFree', pro: 'account.planPro', enterprise: 'account.planEnterprise' }[plan];
+  return key ? str(key, null, PLAN_LABELS[plan] || PLAN_LABELS.free) : PLAN_LABELS.free;
 }
 
 function listingLimitForPlan(plan) {
@@ -1700,7 +1721,7 @@ async function startListingCheckout(listingId) {
   const sb = await getSb();
   const { data: { session } } = await sb.auth.getSession();
   if (!session?.access_token) {
-    showToast('Din session har gått ut. Logga in igen.');
+    showToast(str('common.sessionExpired', null, 'Your session has expired. Log in again.'));
     openAuthModal('login');
     return false;
   }
@@ -1715,7 +1736,7 @@ async function startListingCheckout(listingId) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.url) {
-    showToast(data.error || 'Kunde inte starta betalningen.');
+    showToast(data.error || str('common.paymentStartFailed', null, 'Could not start payment.'));
     return false;
   }
   window.location.href = data.url;
@@ -1726,7 +1747,7 @@ async function confirmListingPayment(sessionId, listingId) {
   try {
     const sb = await getSb();
     const { data: { session } } = await sb.auth.getSession();
-    if (!session?.access_token) throw new Error('Inloggning krävs');
+    if (!session?.access_token) throw new Error(str('common.loginRequired', null, 'Login required'));
 
     const res = await fetch('/api/market/confirm-listing', {
       method: 'POST',
@@ -1737,14 +1758,14 @@ async function confirmListingPayment(sessionId, listingId) {
       body: JSON.stringify({ sessionId, listingId }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Bekräftelse misslyckades');
+    if (!res.ok) throw new Error(data.error || str('common.confirmFailed', null, 'Confirmation failed'));
 
-    showToast('Betalning mottagen — annonsen är publicerad!');
+    showToast(str('common.paymentConfirmedListing', null, 'Payment received — listing published!'));
     marketLoaded = false;
     switchMarketTab('my-items');
     loadMyItems();
   } catch (e) {
-    showToast(e?.message || 'Kunde inte bekräfta betalningen.');
+    showToast(e?.message || str('common.paymentConfirmFailed', null, 'Could not confirm payment.'));
   }
 }
 
@@ -1767,7 +1788,7 @@ async function handleListingCheckoutReturn() {
     const sessionId = params.get('session_id');
     if (sessionId) await confirmListingPayment(sessionId, listingId);
   } else if (checkout === 'listing-cancel') {
-    showToast('Betalning avbruten — objektet sparades utan publicering.');
+    showToast(str('common.paymentCancelledListing', null, 'Payment cancelled — item saved without publishing.'));
     switchMarketTab('my-items');
   }
 
@@ -1779,7 +1800,7 @@ async function startProCheckout() {
   const sb = await getSb();
   const { data: { session } } = await sb.auth.getSession();
   if (!session?.access_token) {
-    showToast('Din session har gått ut. Logga in igen.');
+    showToast(str('common.sessionExpired', null, 'Your session has expired. Log in again.'));
     openAuthModal('login');
     return false;
   }
@@ -1794,7 +1815,7 @@ async function startProCheckout() {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.url) {
-    showToast(data.error || 'Kunde inte starta Pro-betalningen.');
+    showToast(data.error || str('common.proPaymentStartFailed', null, 'Could not start Pro payment.'));
     return false;
   }
   window.location.href = data.url;
@@ -1804,7 +1825,7 @@ async function startProCheckout() {
 async function confirmProPayment(sessionId) {
   const sb = await getSb();
   const { data: { session } } = await sb.auth.getSession();
-  if (!session?.access_token) throw new Error('Inloggning krävs');
+  if (!session?.access_token) throw new Error(str('common.loginRequired', null, 'Login required'));
 
   const res = await fetch('/api/billing/confirm-pro', {
     method: 'POST',
@@ -1815,7 +1836,7 @@ async function confirmProPayment(sessionId) {
     body: JSON.stringify({ sessionId }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Bekräftelse misslyckades');
+  if (!res.ok) throw new Error(data.error || str('common.confirmFailed', null, 'Confirmation failed'));
 
   await sb.auth.refreshSession();
   const { data: { user } } = await sb.auth.getUser();
@@ -1840,7 +1861,7 @@ async function openBillingPortal() {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.url) {
-    showToast(data.error || 'Kunde inte öppna faktureringsportalen.');
+    showToast(data.error || str('common.billingPortalFailed', null, 'Could not open billing portal.'));
     return;
   }
   window.location.href = data.url;
@@ -1856,13 +1877,13 @@ async function handleProCheckoutReturn() {
     if (sessionId) {
       try {
         await confirmProPayment(sessionId);
-        showToast('Välkommen till AestimAi Pro!');
+        showToast(str('common.proWelcome', null, 'Welcome to AestimAi Pro!'));
       } catch (e) {
-        showToast(e?.message || 'Kunde inte aktivera Pro-abonnemanget.');
+        showToast(e?.message || str('common.proActivateFailed', null, 'Could not activate Pro subscription.'));
       }
     }
   } else {
-    showToast('Pro-uppgradering avbruten.');
+    showToast(str('common.proUpgradeCancelled', null, 'Pro upgrade cancelled.'));
   }
 
   cleanCheckoutQuery('#pricing');
@@ -1870,7 +1891,7 @@ async function handleProCheckoutReturn() {
 }
 
 async function submitListing() {
-  const user = await requireRealUser('Logga in för att registrera och spara objekt.');
+  const user = await requireRealUser(str('auth.requireLoginSaveItem', null, 'Log in to register and save items.'));
   if (!isRealUser(user)) return;
 
   const kind      = document.getElementById('itemKind').value || 'offer';
@@ -2088,7 +2109,7 @@ let contactCtx = null;
 
 function openContactModal(id, title) {
   contactCtx = { id, title };
-  document.getElementById('contactItem').textContent = title || 'objektet';
+  document.getElementById('contactItem').textContent = title || str('listing.defaultItem', null, 'the item');
   ['contactName', 'contactEmail', 'contactMessage', 'contactCompany'].forEach(i => {
     const el = document.getElementById(i); if (el) el.value = '';
   });
@@ -2108,14 +2129,14 @@ async function sendContact() {
   const errEl   = document.getElementById('contactError');
 
   if (!email || !message) {
-    errEl.textContent = 'Fyll i din e-post och ett meddelande.';
+    errEl.textContent = str('listing.errRequired', null, 'Enter your email and a message.');
     errEl.classList.remove('hidden');
     return;
   }
 
   const btn = document.getElementById('btnSendContact');
   const orig = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Skickar…';
+  btn.disabled = true; btn.textContent = str('listing.btnSending', null, 'Sending…');
   try {
     const res = await fetch('/api/market/contact', {
       method: 'POST',
@@ -2123,11 +2144,11 @@ async function sendContact() {
       body: JSON.stringify({ listingId: contactCtx?.id, fromEmail: email, name, message, hp }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Kunde inte skicka meddelandet.');
+    if (!res.ok) throw new Error(data.error || str('listing.errSendFailed', null, 'Could not send the message.'));
     closeContactModal();
-    showToast('Meddelandet skickat till annonsören!');
+    showToast(str('listing.toastSent', null, 'Message sent to the seller!'));
   } catch (e) {
-    errEl.textContent = e?.message || 'Något gick fel.';
+    errEl.textContent = e?.message || str('listing.errGeneric', null, 'Something went wrong.');
     errEl.classList.remove('hidden');
   } finally {
     btn.disabled = false; btn.textContent = orig;
@@ -2214,6 +2235,11 @@ function setupSettings() {
       if (labShopLoaded) renderLabProducts();
       if (marketLoaded) searchMarket();
       if (state.currentModule === 'market') loadMyItems();
+      if (state.currentModule === 'account' && currentUser) refreshAccountSection();
+      if (state.currentModule === 'news') {
+        const active = document.querySelector('.news-cat-btn.active');
+        if (active) loadNews(active.dataset.cat);
+      }
       i18n.applyTranslations();
     } else if (kind === 'currency') {
       showToast(i18n.t('settings.currency.saved'));
@@ -2426,7 +2452,7 @@ function onSignIn(user) {
   document.getElementById('topbarAccount')?.classList.remove('hidden');
   const emailEl = document.getElementById('topbarEmail');
   if (emailEl) {
-    const name = user.user_metadata?.full_name || user.email || 'Inloggad';
+    const name = user.user_metadata?.full_name || user.email || str('auth.loggedInLabel', null, 'Signed in');
     emailEl.textContent = name;
   }
   refreshAccountSection();
@@ -2448,7 +2474,7 @@ function refreshAccountSection() {
   const u    = currentUser;
   const name = u.user_metadata?.full_name || '';
   const email = u.email || '—';
-  const since = u.created_at ? new Date(u.created_at).toLocaleDateString('sv-SE') : '—';
+  const since = u.created_at ? new Date(u.created_at).toLocaleDateString(appLocale()) : '—';
   const fullId = u.id || '—';
 
   const avatarEl = document.getElementById('acctAvatar');
@@ -2478,7 +2504,7 @@ function refreshAccountSection() {
   if (nextBill) {
     const periodEnd = u.user_metadata?.plan_period_end;
     nextBill.textContent = (plan === 'pro' && periodEnd)
-      ? new Date(periodEnd).toLocaleDateString('sv-SE')
+      ? new Date(periodEnd).toLocaleDateString(appLocale())
       : '—';
   }
   const licenseEl = document.getElementById('acctLicense');
@@ -2486,13 +2512,13 @@ function refreshAccountSection() {
   const upgradeBtn = document.getElementById('btnUpgradePlan');
   if (upgradeBtn) {
     if (plan === 'pro') {
-      upgradeBtn.textContent = 'Hantera abonnemang →';
+      upgradeBtn.textContent = str('account.btnManage', null, 'Manage subscription →');
       upgradeBtn.onclick = () => openBillingPortal();
     } else if (plan === 'enterprise') {
-      upgradeBtn.textContent = 'Kontakta support →';
-      upgradeBtn.onclick = () => { window.location.href = 'mailto:kontakt@aestimai.org?subject=Enterprise-abonnemang'; };
+      upgradeBtn.textContent = str('account.btnContactSupport', null, 'Contact support →');
+      upgradeBtn.onclick = () => { window.location.href = 'mailto:kontakt@aestimai.org?subject=Enterprise'; };
     } else {
-      upgradeBtn.textContent = 'Uppgradera plan →';
+      upgradeBtn.textContent = str('account.btnUpgrade', null, 'Upgrade plan →');
       upgradeBtn.onclick = () => navigateTo('pricing');
     }
   }
@@ -2512,8 +2538,8 @@ async function doEditAccount() {
   const name  = document.getElementById('editName').value.trim();
   const email = document.getElementById('editEmail').value.trim();
   setAuthError('editError', '');
-  if (!name)  return setAuthError('editError', 'Ange ditt namn.');
-  if (!email) return setAuthError('editError', 'Ange en e-postadress.');
+  if (!name)  return setAuthError('editError', str('auth.errNameRequired', null, 'Enter your name.'));
+  if (!email) return setAuthError('editError', str('auth.errEmailRequired', null, 'Enter an email address.'));
   const btn = document.getElementById('btnEditAccount');
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
@@ -2526,12 +2552,12 @@ async function doEditAccount() {
     if (data?.user) onSignIn(data.user);
     closeAuthModal(null, true);
     showToast(emailChanged
-      ? 'Sparat. Bekräfta din nya e-post via länken vi skickade.'
-      : 'Uppgifterna är uppdaterade.');
+      ? str('auth.toastEditEmailConfirm', null, 'Saved. Confirm your new email via the link we sent.')
+      : str('auth.toastEditSaved', null, 'Details updated.'));
   } catch (e) {
-    setAuthError('editError', 'Något gick fel. Försök igen.');
+    setAuthError('editError', str('auth.errGeneric', null, 'Something went wrong.'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Spara'; }
+    if (btn) { btn.disabled = false; btn.textContent = str('auth.btnEditSave', null, 'Save'); }
   }
 }
 
@@ -2547,7 +2573,7 @@ function openAuthModal(panelOrOpts = 'login') {
 
   const loginSub = document.getElementById('loginIntro');
   if (loginSub) {
-    loginSub.textContent = intro || 'Välkommen tillbaka till AestimAi';
+    loginSub.textContent = intro || str('auth.loginIntro', null, 'Welcome back to AestimAi');
   }
 
   document.getElementById('authOverlay').classList.remove('hidden');
@@ -2602,7 +2628,7 @@ async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPassword').value;
   setAuthError('loginError', '');
-  if (!email || !pass) return setAuthError('loginError', 'Fyll i e-post och lösenord.');
+  if (!email || !pass) return setAuthError('loginError', str('auth.errFillEmailPassword', null, 'Enter email and password.'));
   const btn = document.getElementById('btnLogin');
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
@@ -2611,11 +2637,11 @@ async function doLogin() {
     if (error) return setAuthError('loginError', mapAuthError(error.message));
     if (data?.user) onSignIn(data.user);
     closeAuthModal(null, true);
-    showToast('Inloggad!');
+    showToast(str('auth.toastLoggedIn', null, 'Logged in!'));
   } catch (e) {
-    setAuthError('loginError', 'Något gick fel. Försök igen.');
+    setAuthError('loginError', str('auth.errGeneric', null, 'Something went wrong.'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Logga in'; }
+    if (btn) { btn.disabled = false; btn.textContent = str('auth.btnLogin', null, 'Log in'); }
   }
 }
 
@@ -2627,12 +2653,12 @@ async function doRegister() {
   const pass  = document.getElementById('regPassword').value;
   const pass2 = document.getElementById('regPassword2').value;
   setAuthError('regError', '');
-  if (!name)  return setAuthError('regError', 'Ange ditt namn.');
-  if (!email) return setAuthError('regError', 'Ange en e-postadress.');
-  if (pass.length < 8) return setAuthError('regError', 'Lösenordet måste vara minst 8 tecken.');
-  if (pass !== pass2) return setAuthError('regError', 'Lösenorden matchar inte.');
+  if (!name)  return setAuthError('regError', str('auth.errNameRequired', null, 'Enter your name.'));
+  if (!email) return setAuthError('regError', str('auth.errEmailRequired', null, 'Enter an email address.'));
+  if (pass.length < 8) return setAuthError('regError', str('auth.errPasswordMin8', null, 'Password must be at least 8 characters.'));
+  if (pass !== pass2) return setAuthError('regError', str('auth.errPasswordMismatch', null, 'Passwords do not match.'));
   if (!document.getElementById('regAcceptLicense')?.checked) {
-    return setAuthError('regError', tr('auth.licenseRequired', 'You must accept the User License Agreement to create an account.'));
+    return setAuthError('regError', str('auth.licenseRequired', null, 'You must accept the User License Agreement.'));
   }
   const licenseMeta = buildLicenseAcceptanceMetadata();
   const btn = document.getElementById('btnRegister');
@@ -2650,7 +2676,7 @@ async function doRegister() {
       if (error) return setAuthError('regError', mapAuthError(error.message));
       if (data?.user) onSignIn(data.user);
       closeAuthModal(null, true);
-      showToast('Konto skapat — välkommen!');
+      showToast(str('auth.toastAccountCreated', null, 'Account created — welcome!'));
       return;
     }
 
@@ -2662,26 +2688,26 @@ async function doRegister() {
     if (error) return setAuthError('regError', mapAuthError(error.message));
     if (data?.user && !data.user.email_confirmed_at && data.session === null) {
       document.getElementById('confirmMsg').textContent =
-        'Vi har skickat ett bekräftelsemail till ' + email + '. Klicka på länken för att aktivera ditt konto.';
+        str('auth.confirmEmailSent', { email }, `We sent a confirmation email to ${email}.`);
       switchPanel('confirm');
     } else if (data?.user) {
       onSignIn(data.user);
       closeAuthModal(null, true);
-      showToast('Konto skapat — välkommen!');
+      showToast(str('auth.toastAccountCreated', null, 'Account created — welcome!'));
     }
   } catch (e) {
-    setAuthError('regError', 'Något gick fel. Försök igen.');
+    setAuthError('regError', str('auth.errGeneric', null, 'Something went wrong.'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Skapa konto'; }
+    if (btn) { btn.disabled = false; btn.textContent = str('auth.btnRegister', null, 'Create account'); }
   }
 }
 
 async function doForgot() {
   const email = document.getElementById('forgotEmail').value.trim();
   setAuthError('forgotError', '');
-  if (!email) return setAuthError('forgotError', 'Ange din e-postadress.');
+  if (!email) return setAuthError('forgotError', str('auth.errForgotEmailRequired', null, 'Enter your email address.'));
   const btn = document.querySelector('#panelForgot .btn-plan');
-  if (btn) { btn.disabled = true; btn.textContent = 'Skickar…'; }
+  if (btn) { btn.disabled = true; btn.textContent = str('auth.btnSending', null, 'Sending…'); }
   try {
     const sb = await getSb();
     const { error } = await sb.auth.resetPasswordForEmail(email, {
@@ -2689,12 +2715,12 @@ async function doForgot() {
     });
     if (error) return setAuthError('forgotError', mapAuthError(error.message));
     document.getElementById('confirmMsg').textContent =
-      'Återställningslänk skickad till ' + email + '. Kolla inkorgen (och skräppost).';
+      str('auth.confirmResetSent', { email }, `Reset link sent to ${email}.`);
     switchPanel('confirm');
   } catch (e) {
-    setAuthError('forgotError', 'Något gick fel. Försök igen.');
+    setAuthError('forgotError', str('auth.errGeneric', null, 'Something went wrong.'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Skicka återställningslänk'; }
+    if (btn) { btn.disabled = false; btn.textContent = str('auth.btnForgot', null, 'Send reset link'); }
   }
 }
 
@@ -2702,8 +2728,8 @@ async function doResetPassword() {
   const pass  = document.getElementById('resetPassword').value;
   const pass2 = document.getElementById('resetPassword2').value;
   setAuthError('resetError', '');
-  if (pass.length < 8) return setAuthError('resetError', 'Lösenordet måste vara minst 8 tecken.');
-  if (pass !== pass2) return setAuthError('resetError', 'Lösenorden matchar inte.');
+  if (pass.length < 8) return setAuthError('resetError', str('auth.errPasswordMin8', null, 'Password must be at least 8 characters.'));
+  if (pass !== pass2) return setAuthError('resetError', str('auth.errPasswordMismatch', null, 'Passwords do not match.'));
   const btn = document.getElementById('btnResetPassword');
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
@@ -2713,11 +2739,11 @@ async function doResetPassword() {
     if (data?.user) onSignIn(data.user);
     history.replaceState(null, '', location.pathname + location.hash);
     closeAuthModal(null, true);
-    showToast('Lösenordet är uppdaterat.');
+    showToast(str('auth.toastPasswordUpdated', null, 'Password updated.'));
   } catch (e) {
-    setAuthError('resetError', 'Något gick fel. Försök igen.');
+    setAuthError('resetError', str('auth.errGeneric', null, 'Something went wrong.'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Spara nytt lösenord'; }
+    if (btn) { btn.disabled = false; btn.textContent = str('auth.btnReset', null, 'Save new password'); }
   }
 }
 
@@ -2727,17 +2753,12 @@ async function signOut() {
     await sb.auth.signOut();
   } catch (e) {}
   onSignOut();
-  showToast('Utloggad.');
+  showToast(str('auth.toastSignedOut', null, 'Signed out.'));
 }
 
 async function confirmDeleteAccount() {
   if (!currentUser) return;
-  const ok = confirm(
-    'Är du säker på att du vill avsluta ditt konto?\n\n' +
-    '• Ditt namn och din e-postadress raderas permanent.\n' +
-    '• Dina värderingar behålls i anonymiserad form — de kan inte längre kopplas till dig.\n' +
-    '• Aktiva abonnemang avslutas omedelbart.'
-  );
+  const ok = confirm(str('account.confirmDelete', null, 'Are you sure you want to delete your account?'));
   if (!ok) return;
 
   try {
@@ -2745,7 +2766,7 @@ async function confirmDeleteAccount() {
     const userId = currentUser.id;
     const { data: { session } } = await sb.auth.getSession();
     if (!session?.access_token) {
-      alert('Din session har gått ut. Logga in igen och försök på nytt.');
+      alert(str('account.alertSessionExpired', null, 'Your session has expired. Log in again and retry.'));
       openAuthModal('login');
       return;
     }
@@ -2768,22 +2789,22 @@ async function confirmDeleteAccount() {
     if (!res.ok) {
       console.warn('[Delete] Server-radering misslyckades, loggar ut.');
       await sb.auth.signOut();
-      alert('Dina personuppgifter är anonymiserade. Kontakta support@aestimai.org för slutlig radering av auth-kontot.');
+      alert(str('account.alertAnonymized', null, 'Your personal data is anonymized. Contact support@aestimai.org for final auth account deletion.'));
       onSignOut();
       return;
     }
 
     await sb.auth.signOut();
     onSignOut();
-    alert('Ditt konto är avslutat. Tack för att du använt AestimAi.');
+    alert(str('account.alertDeleted', null, 'Your account has been closed. Thank you for using AestimAi.'));
   } catch (e) {
-    alert('Något gick fel. Kontakta support@aestimai.org om problemet kvarstår.');
+    alert(str('account.alertDeleteFailed', null, 'Something went wrong. Contact support@aestimai.org if the problem persists.'));
   }
 }
 
 async function selectPlan(plan) {
   if (plan === 'enterprise') {
-    window.location.href = 'mailto:kontakt@aestimai.org?subject=Enterprise-abonnemang';
+    window.location.href = 'mailto:kontakt@aestimai.org?subject=Enterprise';
     return;
   }
   if (plan === 'free') {
@@ -2791,14 +2812,14 @@ async function selectPlan(plan) {
     return;
   }
   if (plan === 'pro') {
-    const user = await requireRealUser('Logga in eller skapa konto för att välja Pro.');
+    const user = await requireRealUser(str('auth.requireLoginPro', null, 'Log in or create an account to choose Pro.'));
     if (!user) return;
     if (getUserPlan(user) === 'pro') {
       await openBillingPortal();
       return;
     }
     if (getUserPlan(user) === 'enterprise') {
-      showToast('Enterprise hanteras manuellt — kontakta support.');
+      showToast(str('common.enterpriseManual', null, 'Enterprise is handled manually — contact support.'));
       return;
     }
     await startProCheckout();
