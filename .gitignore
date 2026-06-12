@@ -1,6 +1,7 @@
 # Miljövariabler — innehåller API-nycklar och privata nycklar
 .env
 .env.*
+!.env.example
 
 # Node
 node_modules/
