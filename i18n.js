@@ -625,6 +625,9 @@
   APP_LANGUAGES.forEach(lang => {
     if (global.SITE_I18N?.[lang]) Object.assign(STRINGS[lang], global.SITE_I18N[lang]);
   });
+  APP_LANGUAGES.forEach(lang => {
+    if (global.ABOUT_I18N?.[lang]) Object.assign(STRINGS[lang], global.ABOUT_I18N[lang]);
+  });
 
   let currentLang = DEFAULT_LANGUAGE;
   let capDisplayCurrency = DEFAULT_CAP_CURRENCY;
