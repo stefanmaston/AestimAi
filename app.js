@@ -63,7 +63,7 @@ async function saveWebValuation(objectData, result) {
       object_data: objectData,
       result,
       source:      'manual',
-      locale:      window.AestimI18n?.getLanguage?.() || 'sv',
+      locale:      window.AestimI18n?.getLanguage?.() || 'en',
     });
   } catch (e) {
     console.warn('[Spara] kunde inte spara värdering:', e && e.message);
@@ -142,6 +142,14 @@ function navigateTo(moduleId) {
 }
 
 function updatePanelHelp(moduleId) {
+  const i18n = window.AestimI18n;
+  const panelKey = 'panel.' + moduleId;
+  const el = document.getElementById('panelHelp');
+  if (!el) return;
+  if (i18n?.t?.(panelKey) && i18n.t(panelKey) !== panelKey) {
+    el.innerHTML = i18n.t(panelKey);
+    return;
+  }
   const helpTexts = {
     uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Coin Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
     market: '<h4>Om UCI Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
@@ -149,10 +157,9 @@ function updatePanelHelp(moduleId) {
     ucilab: '<h4>AestimAi Lab</h4><p>Forskning kring UCI-värderingsmotorn — agentisk, retrieval-grundad och kalibrerad värdering.</p><p>Under <strong>Shop · Amazon</strong> hittar du rekommenderad hårdvara.</p>',
     idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
     news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras högst en gång per timme.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
-    settings: '<h4>Inställningar</h4><p>Välj språk och visningsvaluta för UCI Marknadsdata. Språket sparas i webbläsaren och synkas till ditt konto när du är inloggad.</p>',
+    settings: '<h4>Settings</h4><p>Choose language and display currency for UCI Market Data. Your choice is saved in the browser and synced to your account when logged in.</p>',
   };
-  const el = document.getElementById('panelHelp');
-  if (el) el.innerHTML = helpTexts[moduleId] || helpTexts.uci;
+  el.innerHTML = helpTexts[moduleId] || helpTexts.uci;
 }
 
 // ── UCI Värdering (Claude API) ──────────────────────
@@ -191,7 +198,7 @@ async function runUciValuation() {
         description: input,
         category,
         condition: cond,
-        language:  window.AestimI18n?.getLanguage?.() || 'sv',
+        language:  window.AestimI18n?.getLanguage?.() || 'en',
         ..._valImageBase64 ? { imageBase64: _valImageBase64 } : {},
       }),
     });
@@ -1483,7 +1490,7 @@ async function fetchValuation(input) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...input,
-        language: window.AestimI18n?.getLanguage?.() || 'sv',
+        language: window.AestimI18n?.getLanguage?.() || 'en',
       }),
     });
     const data = await res.json();
@@ -2110,10 +2117,13 @@ async function syncLanguageToSupabase(lang) {
 function initSettingsPanel() {
   const i18n = window.AestimI18n;
   if (!i18n) return;
-  i18n.renderLanguageButtons(document.getElementById('settingsLangGrid'));
+  const grid = document.getElementById('settingsLangGrid');
+  i18n.bindLanguageGrid(grid);
+  i18n.syncLanguageButtonStates(grid);
   const capSel = document.getElementById('settingsCapCurrency');
   if (capSel) capSel.value = i18n.getCapDisplayCurrency();
   i18n.applyTranslations();
+  updatePanelHelp('settings');
 }
 
 function setupSettings() {
@@ -2122,12 +2132,13 @@ function setupSettings() {
   settingsBound = true;
 
   i18n.hydrate();
+  i18n.bindLanguageGrid(document.getElementById('settingsLangGrid'));
 
   i18n.onSettingsChange = (kind, value) => {
     if (kind === 'language') {
       showToast(i18n.t('settings.language.saved'));
       syncLanguageToSupabase(value);
-      i18n.renderLanguageButtons(document.getElementById('settingsLangGrid'));
+      updatePanelHelp(state.currentModule);
       refreshDashboardCaps();
     } else if (kind === 'currency') {
       showToast(i18n.t('settings.currency.saved'));
