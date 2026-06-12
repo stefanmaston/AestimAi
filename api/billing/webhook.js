@@ -2,7 +2,7 @@
 // Stripe webhook — håller Pro-plan synkad vid förnyelse, avslut m.m.
 // Kräver: STRIPE_WEBHOOK_SECRET
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { getStripe } = require('../_stripe');
 const { createClient } = require('@supabase/supabase-js');
 const {
   PLAN_FREE,
@@ -54,7 +54,8 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Method not allowed');
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!process.env.STRIPE_SECRET_KEY || !webhookSecret || !SERVICE_ROLE) {
+  const stripe = getStripe();
+  if (!stripe || !webhookSecret || !SERVICE_ROLE) {
     console.error('[billing/webhook] Saknar STRIPE eller SUPABASE_SERVICE_ROLE_KEY');
     return res.status(503).send('Serverkonfiguration saknas');
   }

@@ -3,7 +3,7 @@
 // Body: { sessionId }
 // Headers: Authorization: Bearer <supabase access token>
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { requireStripe } = require('../_stripe');
 const { createClient } = require('@supabase/supabase-js');
 const { PLAN_PRO, setUserPlan, subscriptionIsActive } = require('./_plan');
 
@@ -26,9 +26,12 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!process.env.STRIPE_SECRET_KEY || !SERVICE_ROLE) {
+  if (!SERVICE_ROLE) {
     return res.status(503).json({ error: 'Serverkonfiguration saknas.' });
   }
+
+  const stripe = requireStripe(res);
+  if (!stripe) return;
 
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   if (!token) return res.status(401).json({ error: 'Inloggning krävs.' });

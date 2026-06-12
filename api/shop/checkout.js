@@ -2,7 +2,7 @@
 // POST /api/shop/checkout  { productId: string, quantity?: number }
 // Returns { url: string } — Stripe hosted checkout URL
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { requireStripe } = require('../_stripe');
 
 // Map product IDs to Stripe Price IDs (set real IDs via STRIPE_PRICE_* env vars)
 const PRICE_MAP = {
@@ -37,6 +37,9 @@ module.exports = async (req, res) => {
   if (!process.env.STRIPE_SECRET_KEY) {
     return res.status(503).json({ error: 'Payment system not configured' });
   }
+
+  const stripe = requireStripe(res);
+  if (!stripe) return;
 
   try {
     const origin = req.headers.origin || 'https://aestimai.org';
