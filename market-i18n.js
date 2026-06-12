@@ -74,6 +74,9 @@
         'market.myItemsEmptyDesc': 'Registrera ditt första objekt eller gör en värdering — det dyker upp här.',
         'market.myItemsHeaderTitle': 'Mina objekt',
         'market.myItemsHeaderDesc': 'Tryck <strong>Visa i Bytesmarknad</strong> för att göra ett objekt publikt och sökbart.',
+        'market.portfolioLabel': 'Min värdeportfölj',
+        'market.portfolioFiat': '{sek} SEK · {eur} EUR · {usd} USD',
+        'market.portfolioCount': '{n} värderade objekt',
         'market.myItemsError': 'Kunde inte hämta dina objekt: {msg}',
         'market.valuedOn': 'Värderad {date}',
         'market.statusPublic': 'Publik i Bytesmarknad',
@@ -181,6 +184,9 @@
         'market.myItemsEmptyDesc': 'Register your first item or run a valuation — it will appear here.',
         'market.myItemsHeaderTitle': 'My items',
         'market.myItemsHeaderDesc': 'Click <strong>Show on marketplace</strong> to make an item public and searchable.',
+        'market.portfolioLabel': 'My value portfolio',
+        'market.portfolioFiat': '{sek} SEK · {eur} EUR · {usd} USD',
+        'market.portfolioCount': '{n} valued items',
         'market.myItemsError': 'Could not load your items: {msg}',
         'market.valuedOn': 'Valued {date}',
         'market.statusPublic': 'Public on marketplace',
@@ -239,6 +245,9 @@
       'market.loginRegisterBtn': 'Anmelden / Konto erstellen',
       'market.btnSave': 'Objekt speichern',
       'market.myItemsHeaderTitle': 'Meine Objekte',
+      'market.portfolioLabel': 'Mein Werteportfolio',
+      'market.portfolioFiat': '{sek} SEK · {eur} EUR · {usd} USD',
+      'market.portfolioCount': '{n} bewertete Objekte',
       'market.btnShow': 'Im Marktplatz anzeigen',
       'market.statusPublic': 'Öffentlich im Marktplatz',
       'panel.market': '<h4>Über den UCI-Marktplatz</h4><p>Tauschen Sie Waren, Dienstleistungen und Vermögenswerte direkt — ohne Währung. Bestätigung per AE ID barter or pay-Karte.</p><p>Erfordert AE ID barter or pay-Karte (Einmalkosten €15–25).</p>',
@@ -254,6 +263,9 @@
       'market.loading': 'Chargement du marché…',
       'market.contact': 'Contacter',
       'market.btnShow': 'Afficher sur le marché',
+      'market.portfolioLabel': 'Mon portefeuille de valeur',
+      'market.portfolioFiat': '{sek} SEK · {eur} EUR · {usd} USD',
+      'market.portfolioCount': '{n} objets valorisés',
       'panel.market': '<h4>À propos du marché UCI</h4><p>Échangez biens, services et actifs directement — sans devise. Confirmation cryptographique via carte AE ID barter or pay.</p><p>Nécessite une carte AE ID barter or pay (coût unique €15–25).</p>',
     };
     const it = {
@@ -267,6 +279,9 @@
       'market.loading': 'Caricamento mercato…',
       'market.contact': 'Contatta',
       'market.btnShow': 'Mostra nel mercato',
+      'market.portfolioLabel': 'Il mio portafoglio valore',
+      'market.portfolioFiat': '{sek} SEK · {eur} EUR · {usd} USD',
+      'market.portfolioCount': '{n} oggetti valorizzati',
       'panel.market': '<h4>Sul mercato UCI</h4><p>Scambia beni, servizi e asset direttamente — senza valuta. Conferma crittografica con carta AE ID barter or pay.</p><p>Richiede carta AE ID barter or pay (costo una tantum €15–25).</p>',
     };
     const es = {
@@ -280,6 +295,9 @@
       'market.loading': 'Cargando mercado…',
       'market.contact': 'Contactar',
       'market.btnShow': 'Mostrar en el mercado',
+      'market.portfolioLabel': 'Mi cartera de valor',
+      'market.portfolioFiat': '{sek} SEK · {eur} EUR · {usd} USD',
+      'market.portfolioCount': '{n} objetos valorados',
       'panel.market': '<h4>Sobre el mercado UCI</h4><p>Intercambia bienes, servicios y activos directamente — sin moneda. Confirmación criptográfica con tarjeta AE ID barter or pay.</p><p>Requiere tarjeta AE ID barter or pay (coste único €15–25).</p>',
     };
 

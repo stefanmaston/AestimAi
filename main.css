@@ -1864,9 +1864,49 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 .listing-quota-hint strong { color: var(--green); }
 
 /* Mina objekt — kompakt rutnät */
-.my-items-header { margin-bottom: 1rem; }
+.my-items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.my-items-header-text { flex: 1; min-width: 12rem; }
 .my-items-header h2 { margin: 0 0 0.25rem; font-size: 1.05rem; }
 .my-items-header p  { font-size: 0.82rem; color: var(--gray-500); margin: 0; }
+
+.my-portfolio-summary {
+  text-align: right;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+.my-portfolio-label {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.my-portfolio-uci {
+  margin: 0.12rem 0 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--green);
+  line-height: 1.2;
+}
+.my-portfolio-fiat {
+  margin: 0.15rem 0 0;
+  font-size: 0.65rem;
+  color: var(--gray-500);
+  line-height: 1.35;
+}
+.my-portfolio-count {
+  margin: 0.12rem 0 0;
+  font-size: 0.58rem;
+  color: var(--gray-400);
+}
 
 .my-items-grid {
   display: grid;

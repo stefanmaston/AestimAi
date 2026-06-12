@@ -1999,6 +1999,60 @@ function switchMarketTab(tab) {
   if (btn) btn.click();
 }
 
+function sumUserPortfolioUci(rows) {
+  return rows.reduce((s, row) => {
+    const uciRaw = row.result?.uci_value;
+    const uci = uciRaw === null || uciRaw === undefined || uciRaw === '' ? null : Number(uciRaw);
+    return s + (uci != null && !isNaN(uci) ? uci : 0);
+  }, 0);
+}
+
+async function fetchUciExchangeRates() {
+  try {
+    const res = await fetch(`${UCI_SERVER}/api/uci/portfolio-stats`);
+    if (!res.ok) return null;
+    const pf = await res.json();
+    return pf.rates || null;
+  } catch {
+    return null;
+  }
+}
+
+function buildMyPortfolioSummaryHtml(totalUci, itemCount, rates) {
+  if (totalUci <= 0) return '';
+  const locale = marketLocaleTag();
+  const fmt = n => Math.round(n).toLocaleString(locale);
+  const uciStr = fmt(totalUci);
+  let fiatHtml = '';
+  if (rates) {
+    const sek = fmt(totalUci * (rates.SEK || 0));
+    const eur = fmt(totalUci * (rates.EUR || 0));
+    const usd = fmt(totalUci * (rates.USD || 0));
+    fiatHtml = `<p class="my-portfolio-fiat">${mtr('market.portfolioFiat', { sek, eur, usd }, `${sek} SEK · ${eur} EUR · ${usd} USD`)}</p>`;
+  }
+  const countHtml = itemCount > 0
+    ? `<p class="my-portfolio-count">${mtr('market.portfolioCount', { n: itemCount }, `${itemCount} valued items`)}</p>`
+    : '';
+  return `<aside class="my-portfolio-summary" aria-label="${mtr('market.portfolioLabel', null, 'My value portfolio')}">
+    <p class="my-portfolio-label">${mtr('market.portfolioLabel', null, 'My value portfolio')}</p>
+    <p class="my-portfolio-uci">${uciStr} UCI</p>
+    ${fiatHtml}
+    ${countHtml}
+  </aside>`;
+}
+
+function buildMyItemsHeader(rows, rates) {
+  const totalUci = sumUserPortfolioUci(rows);
+  const summary = buildMyPortfolioSummaryHtml(totalUci, rows.length, rates);
+  return `<div class="my-items-header">
+    <div class="my-items-header-text">
+      <h2>${mtr('market.myItemsHeaderTitle', null, 'My items')}</h2>
+      <p>${mtr('market.myItemsHeaderDesc', null, '')}</p>
+    </div>
+    ${summary}
+  </div>`;
+}
+
 // ── Mina objekt ─────────────────────────────────────
 async function loadMyItems() {
   const container = document.getElementById('myItemsContent');
@@ -2042,8 +2096,8 @@ async function loadMyItems() {
       return;
     }
 
-    const header = `<div class="my-items-header"><h2>${mtr('market.myItemsHeaderTitle', null, 'My items')}</h2>
-      <p>${mtr('market.myItemsHeaderDesc', null, '')}</p></div>`;
+    const rates = await fetchUciExchangeRates();
+    const header = buildMyItemsHeader(data, rates);
     container.innerHTML = header + '<div class="my-items-grid">' + data.map(myItemRowHTML).join('') + '</div>';
   } catch (e) {
     container.innerHTML = `<div class="market-error">${mtr('market.myItemsError', { msg: escHtml(e?.message || mtr('market.unknownError', null, 'unknown error')) }, 'Could not load items.')}</div>`;
