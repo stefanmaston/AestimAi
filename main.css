@@ -2438,6 +2438,17 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   align-items: center;
   justify-content: center;
   font-size: 2rem;
+  overflow: hidden;
+}
+.lab-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+  padding: 4px;
+}
+.lab-product-emoji {
+  line-height: 1;
 }
 
 .lab-product-info { flex: 1; min-width: 0; }

@@ -2501,25 +2501,29 @@ function renderLabProducts() {
     const badgeCls = BADGE_CLASS[p.category] || '';
     const specs    = (p.specs || []).map(s => `<li>${s}</li>`).join('');
     const buyTitle = buyTitleTpl.replace('{name}', p.name);
+    const thumbInner = p.imageUrl
+      ? `<img class="lab-product-img" src="${escHtml(p.imageUrl)}" alt="${escHtml(p.name)}" loading="lazy">`
+      : `<span class="lab-product-emoji" aria-hidden="true">${p.icon || '📦'}</span>`;
+    const priceNote = p.priceLive ? '' : '';
     return `
       <div class="lab-product-row" data-cat="${p.category}">
-        <div class="lab-product-thumb">${p.icon || '📦'}</div>
+        <div class="lab-product-thumb">${thumbInner}</div>
         <div class="lab-product-info">
           <span class="lab-badge ${badgeCls}">${p.categoryLabel}</span>
-          <h3>${p.name}</h3>
-          <p>${p.description}</p>
+          <h3>${escHtml(p.name)}</h3>
+          <p>${escHtml(p.description)}</p>
           <ul class="lab-specs">${specs}</ul>
         </div>
         <div class="lab-buy-area">
           <div class="lab-price-block">
-            <span class="lab-price-sek">${p.priceSEK} kr</span>
-            <span class="lab-price-uci">≈ ${p.priceUCI} ⊙</span>
+            <span class="lab-price-sek">${escHtml(p.priceSEK)} kr${priceNote}</span>
+            <span class="lab-price-uci">≈ ${escHtml(p.priceUCI)} ⊙</span>
           </div>
           <a class="btn-buy-amazon"
-             href="${p.buyUrl}"
+             href="${escHtml(p.buyUrl)}"
              target="_blank"
              rel="noopener sponsored"
-             title="${buyTitle}">
+             title="${escHtml(buyTitle)}">
             ${buyLabel}
           </a>
         </div>

@@ -1,10 +1,11 @@
 // AestimAi Lab — produktdata med Amazon affiliate-länkar
 // GET /api/shop/products
-// Returnerar produktlista med affiliate-länk till amazon.se
+// Enrichas med bilder/priser via Amazon PA-API när nycklar finns i env.
+
+const { enrichProducts } = require('./amazon-enrich');
 
 const AFFILIATE_TAG = process.env.AMAZON_AFFILIATE_TAG || 'aestimai21-21';
 
-// Produktkatalog med Amazon-söktermer och ASIN (verifieras via amazon.se)
 const PRODUCTS = [
   {
     id: 'shelly-pro-3em',
@@ -143,20 +144,50 @@ function amazonLink(product) {
   if (product.asin) {
     return `https://www.amazon.se/dp/${product.asin}?${tag ? tag.slice(1) : ''}`;
   }
-  // Fallback: söksida
   return `https://www.amazon.se/s?k=${encodeURIComponent(product.searchQuery)}${tag}`;
 }
 
-module.exports = (req, res) => {
-  res.setHeader('Cache-Control', 'public, max-age=3600');
+let cache = { at: 0, payload: null };
+const CACHE_MS = 60 * 60 * 1000;
+
+module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const products = PRODUCTS.map(p => ({
-    ...p,
-    buyUrl: amazonLink(p),
-    affiliate: true,
-    source: 'amazon.se',
-  }));
+  try {
+    if (cache.payload && Date.now() - cache.at < CACHE_MS) {
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.status(200).json(cache.payload);
+    }
 
-  res.status(200).json({ products });
+    const base = PRODUCTS.map(p => ({
+      ...p,
+      buyUrl: amazonLink(p),
+      affiliate: true,
+      source: 'amazon.se',
+    }));
+
+    const { products, live } = await enrichProducts(base);
+    const payload = {
+      products: products.map(p => ({
+        ...p,
+        buyUrl: amazonLink(p),
+      })),
+      amazonLive: live,
+    };
+
+    cache = { at: Date.now(), payload };
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.status(200).json(payload);
+  } catch (err) {
+    console.error('[shop/products]', err);
+    res.status(200).json({
+      products: PRODUCTS.map(p => ({
+        ...p,
+        buyUrl: amazonLink(p),
+        affiliate: true,
+        source: 'amazon.se',
+      })),
+      amazonLive: false,
+    });
+  }
 };
