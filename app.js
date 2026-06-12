@@ -63,6 +63,7 @@ async function saveWebValuation(objectData, result) {
       object_data: objectData,
       result,
       source:      'manual',
+      locale:      window.AestimI18n?.getLanguage?.() || 'sv',
     });
   } catch (e) {
     console.warn('[Spara] kunde inte spara värdering:', e && e.message);
@@ -92,6 +93,14 @@ function navigateTo(moduleId) {
   if (mod) {
     mod.classList.remove('hidden');
     mod.hidden = false;
+  } else {
+    console.warn('[navigateTo] Okänd modul:', moduleId, '— faller tillbaka till uci');
+    moduleId = 'uci';
+    const fallback = document.getElementById('module-uci');
+    if (fallback) {
+      fallback.classList.remove('hidden');
+      fallback.hidden = false;
+    }
   }
 
   const navBtn = document.querySelector(`.nav-item[data-module="${moduleId}"]`);
@@ -126,6 +135,10 @@ function navigateTo(moduleId) {
   if (moduleId === 'account') {
     refreshAccountSection();
   }
+
+  if (moduleId === 'settings') {
+    initSettingsPanel();
+  }
 }
 
 function updatePanelHelp(moduleId) {
@@ -136,6 +149,7 @@ function updatePanelHelp(moduleId) {
     ucilab: '<h4>AestimAi Lab</h4><p>Forskning kring UCI-värderingsmotorn — agentisk, retrieval-grundad och kalibrerad värdering.</p><p>Under <strong>Shop · Amazon</strong> hittar du rekommenderad hårdvara.</p>',
     idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
     news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras högst en gång per timme.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
+    settings: '<h4>Inställningar</h4><p>Välj språk och visningsvaluta för UCI Marknadsdata. Språket sparas i webbläsaren och synkas till ditt konto när du är inloggad.</p>',
   };
   const el = document.getElementById('panelHelp');
   if (el) el.innerHTML = helpTexts[moduleId] || helpTexts.uci;
@@ -177,6 +191,7 @@ async function runUciValuation() {
         description: input,
         category,
         condition: cond,
+        language:  window.AestimI18n?.getLanguage?.() || 'sv',
         ..._valImageBase64 ? { imageBase64: _valImageBase64 } : {},
       }),
     });
@@ -499,6 +514,7 @@ function setupMobileNav() {
 function setupPanel() {
   const btn   = document.getElementById('btnTogglePanel');
   const close = document.getElementById('btnClosePanel');
+  if (!btn || !close) return;
 
   btn.addEventListener('click', () => {
     document.body.classList.toggle('panel-open');
@@ -525,6 +541,9 @@ function syncAuthState(user) {
   state.isLoggedIn = !!real;
   currentUser = real;
   updateAuthUI();
+  if (real?.user_metadata?.preferred_language) {
+    window.AestimI18n?.applyLanguageFromUserMeta?.(real.user_metadata.preferred_language);
+  }
 }
 
 function mapAuthError(msg) {
@@ -1105,7 +1124,40 @@ const CURRENCIES = {
 // FX mot SEK (för omräkning av cap-värden). UCI = 1 (basenhet — allt annat omräknas via SEK-kursen)
 const FX_TO_SEK = { UCI: null, SEK:1, EUR:11.28, USD:10.44, GBP:13.20, NOK:5.89, DKK:1.51, CHF:12.15, JPY:0.069 };
 
-let activeCurrency = 'SEK'; // Stats-sektionen visas alltid i SEK
+let activeCurrency = 'SEK'; // Diagramkort & nyckeltal (caps använder inställning separat)
+
+function capFxRate(stats, currency) {
+  const isUCI = currency === 'UCI';
+  const uciRate = stats.current.SEK;
+  return isUCI ? uciRate : (FX_TO_SEK[currency] || 1);
+}
+
+function formatCapAmount(sek, stats, currency) {
+  const cur = CURRENCIES[currency] || CURRENCIES.SEK;
+  const fxRate = capFxRate(stats, currency);
+  const val = sek / fxRate;
+  if (val >= 1_000_000) return (val / 1_000_000).toFixed(2) + ' M' + cur.label;
+  if (val >= 1_000)     return (val / 1_000).toFixed(1)     + ' t' + cur.label;
+  return val.toFixed(cur.decimals) + ' ' + cur.label;
+}
+
+function renderDashboardCaps(stats) {
+  const i18n = window.AestimI18n;
+  const capCur = i18n?.getCapDisplayCurrency?.() || 'SEK';
+  const tag = i18n?.localeTag?.() || 'sv-SE';
+  const t = (k) => i18n?.t?.(k) || k;
+
+  setEl('dsSearchCapSEK',   formatCapAmount(stats.searchCap || 0, stats, capCur));
+  setEl('dsVerifiedCapSEK', formatCapAmount(stats.verifiedCap || 0, stats, capCur));
+  setEl('dsSearchCapCount',  (stats.totalSearches || 0).toLocaleString(tag) + ' ' + t('dash.valuations'));
+  setEl('dsVerifiedCapCount', (stats.totalVerified || 0).toLocaleString(tag) + ' ' + t('dash.transactions'));
+  i18n?.applyTranslations?.();
+}
+
+function refreshDashboardCaps() {
+  if (!dashData?.stats) return;
+  renderDashboardCaps(dashData.stats);
+}
 
 function renderDashboard({ history, stats }, days) {
   // Stats-korten använder alltid SEK
@@ -1165,17 +1217,8 @@ function renderDashboard({ history, stats }, days) {
   setEl('dsVolumeTotal',  stats.volumeTotal + ' st');
   setEl('dsSurveys',    stats.activeSurveys + ' aktiva');
 
-  // Search Cap & Verified Cap — omräknat till vald valuta
-  const capFmt = (sek) => {
-    const val = sek / fxRate;
-    if (val >= 1_000_000) return (val / 1_000_000).toFixed(2) + ' M' + cur.label;
-    if (val >= 1_000)     return (val / 1_000).toFixed(1)     + ' t' + cur.label;
-    return val.toFixed(cur.decimals) + ' ' + cur.label;
-  };
-  setEl('dsSearchCapSEK',    capFmt(stats.searchCap || 0));
-  setEl('dsSearchCapCount',  (stats.totalSearches || 0).toLocaleString('sv-SE') + ' värderingar');
-  setEl('dsVerifiedCapSEK',  capFmt(stats.verifiedCap || 0));
-  setEl('dsVerifiedCapCount',(stats.totalVerified  || 0).toLocaleString('sv-SE') + ' transaktioner');
+  // Search Cap & Verified Cap — visningsvaluta från Inställningar (ej diagrammet)
+  renderDashboardCaps(stats);
 
   setEl('dashLastUpdate', 'Uppdaterad: ' + new Date().toLocaleString('sv-SE'));
 
@@ -1194,9 +1237,7 @@ function renderDashboard({ history, stats }, days) {
   const tbody = document.getElementById('dashFxTable');
   if (tbody) {
     tbody.innerHTML = currencies.map(c => `
-      <tr class="${c.code === activeCurrency ? 'fx-row-active' : ''}"
-          onclick="document.getElementById('dashCurrencySelect').value='${c.code}';onDashCurrencyChange()"
-          style="cursor:pointer">
+      <tr class="${c.code === activeCurrency ? 'fx-row-active' : ''}">
         <td class="fx-pair">${c.pair}</td>
         <td class="fx-val">${c.val.toFixed(c.pair.includes('JPY') ? 1 : 2)}</td>
         <td class="fx-chg ${c.c24 >= 0 ? 'pos' : 'neg'}">${sign(c.c24)}${c.c24.toFixed(2)}%</td>
@@ -1440,7 +1481,10 @@ async function fetchValuation(input) {
     const res = await fetch(`${UCI_SERVER}/api/uci/value`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
+      body: JSON.stringify({
+        ...input,
+        language: window.AestimI18n?.getLanguage?.() || 'sv',
+      }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'API-fel');
@@ -2052,8 +2096,86 @@ function setupMarketplace() {
   });
 }
 
+// ── Inställningar (språk + cap-valuta) ───────────────────────────
+let settingsBound = false;
+
+async function syncLanguageToSupabase(lang) {
+  if (!isRealUser(currentUser)) return;
+  try {
+    const sb = await getSb();
+    await sb.auth.updateUser({ data: { preferred_language: lang } });
+  } catch (_) {}
+}
+
+function initSettingsPanel() {
+  const i18n = window.AestimI18n;
+  if (!i18n) return;
+  i18n.renderLanguageButtons(document.getElementById('settingsLangGrid'));
+  const capSel = document.getElementById('settingsCapCurrency');
+  if (capSel) capSel.value = i18n.getCapDisplayCurrency();
+  i18n.applyTranslations();
+}
+
+function setupSettings() {
+  const i18n = window.AestimI18n;
+  if (!i18n || settingsBound) return;
+  settingsBound = true;
+
+  i18n.hydrate();
+
+  i18n.onSettingsChange = (kind, value) => {
+    if (kind === 'language') {
+      showToast(i18n.t('settings.language.saved'));
+      syncLanguageToSupabase(value);
+      i18n.renderLanguageButtons(document.getElementById('settingsLangGrid'));
+      refreshDashboardCaps();
+    } else if (kind === 'currency') {
+      showToast(i18n.t('settings.currency.saved'));
+      refreshDashboardCaps();
+    }
+  };
+
+  document.getElementById('settingsCapCurrency')?.addEventListener('change', e => {
+    i18n.setCapDisplayCurrency(e.target.value);
+  });
+
+  refreshAuth().catch(() => {});
+}
+
+/** Endast hash-länkar som ska öppnas vid sidladdning (inte sparad nav-state som #ucilab). */
+const STARTUP_HASH_MODULES = new Set(['pricing']);
+
+function resolveStartupModule() {
+  const hash = location.hash.replace(/^#/, '');
+  if (STARTUP_HASH_MODULES.has(hash)) return hash;
+  return 'uci';
+}
+
+function applyStartupNavigation() {
+  const params = new URLSearchParams(location.search);
+  const hash = location.hash.replace(/^#/, '');
+
+  // Stripe shop — avbruten checkout (cancel_url pekar hit)
+  if (params.get('checkout') === 'cancel' && hash === 'ucilab-shop') {
+    state.labTab = 'shop';
+    navigateTo('ucilab');
+    cleanCheckoutQuery('#ucilab-shop');
+    return;
+  }
+
+  const module = resolveStartupModule();
+  navigateTo(module);
+  if (module === 'uci') {
+    history.replaceState(null, '', location.pathname + location.search + '#uci');
+  }
+}
+
 // ── Init ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Visa rätt modul direkt — innan övrig init som kan kasta fel
+  applyStartupNavigation();
+
+  setupSettings();
   // Sidebar-navigation
   document.querySelectorAll('.nav-item').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2063,8 +2185,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // UCI Värdering
-  document.getElementById('btnUciValue').addEventListener('click', runUciValuation);
-  document.getElementById('uciInput').addEventListener('keydown', e => {
+  document.getElementById('btnUciValue')?.addEventListener('click', runUciValuation);
+  document.getElementById('uciInput')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') runUciValuation();
   });
 
@@ -2090,19 +2212,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial hjälptext
   updatePanelHelp('uci');
 
-  // Navigering från URL-hash, annars default = UCI Värdering
+  // Navigering från URL-hash hanteras redan i applyStartupNavigation()
   handleListingCheckoutReturn();
   handleProCheckoutReturn();
-
-  const hash = location.hash.replace('#', '');
-  if (hash === 'ucilab-shop') {
-    state.labTab = 'shop';
-    navigateTo('ucilab');
-  } else if (hash && document.getElementById('module-' + hash)) {
-    navigateTo(hash);
-  } else {
-    navigateTo('uci');
-  }
 });
 
 // Exponera globalt (används av inline oninput)
@@ -2632,6 +2744,7 @@ window.selectPlan         = selectPlan;
 window.openBillingPortal  = openBillingPortal;
 window.openEditAccount    = openEditAccount;
 window.doEditAccount      = doEditAccount;
+window.navigateTo         = navigateTo;
 
 // ── Kontaktformulär ───────────────────────────────────────────────────────────
 async function submitContact() {

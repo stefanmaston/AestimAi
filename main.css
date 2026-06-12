@@ -2514,6 +2514,47 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 .acct-action-btn { margin: auto 0 0; width: 100%; box-sizing: border-box; }
 .account-card { display: flex; flex-direction: column; }
 
+/* ── Inställningar ── */
+.settings-grid { max-width: 720px; }
+.settings-card-desc {
+  font-size: .84rem;
+  color: var(--gray-500,#888780);
+  line-height: 1.55;
+  margin: 0 0 1.1rem;
+}
+.settings-lang-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+}
+.settings-lang-btn {
+  padding: .45rem .85rem;
+  border: 1px solid var(--border,#e6e5e1);
+  border-radius: 999px;
+  background: #fff;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #111210;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.settings-lang-btn:hover { border-color: #1D6B4E; }
+.settings-lang-btn.active {
+  background: #1D6B4E;
+  border-color: #1D6B4E;
+  color: #fff;
+}
+.settings-select {
+  width: 100%;
+  max-width: 320px;
+  padding: .55rem .75rem;
+  border: 1px solid var(--border,#e6e5e1);
+  border-radius: 8px;
+  font-size: .88rem;
+  background: #fff;
+  color: #111210;
+}
+
 /* ── Fara-zon ── */
 .acct-danger-zone {
   border: 1px solid #fecaca;

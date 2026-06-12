@@ -99,6 +99,10 @@
         <span class="nav-icon">○</span>
         <span class="nav-label">Om AestimAi</span>
       </button>
+      <button class="nav-item" data-module="settings">
+        <span class="nav-icon">⚙</span>
+        <span class="nav-label" data-i18n="nav.settings">Inställningar</span>
+      </button>
       <button class="nav-item" data-module="contact">
         <span class="nav-icon">✉</span>
         <span class="nav-label">Kontakt</span>
@@ -450,14 +454,14 @@
           <span class="dash-stat-val">1 jan 2026</span>
         </div>
         <div class="dash-stat-card dash-stat-card--cap">
-          <span class="dash-stat-label">Search Cap</span>
-          <span class="dash-stat-sublabel">Totalt antal värderingar</span>
+          <span class="dash-stat-label" id="dsSearchCapLabel" data-i18n="dash.searchCap">Search Cap</span>
+          <span class="dash-stat-sublabel" id="dsSearchCapSubLabel" data-i18n="dash.searchCapSub">Totalt antal värderingar</span>
           <span class="dash-stat-val" id="dsSearchCapSEK">—</span>
           <span class="dash-stat-sub" id="dsSearchCapCount">—</span>
         </div>
         <div class="dash-stat-card dash-stat-card--cap">
-          <span class="dash-stat-label">Verified Cap</span>
-          <span class="dash-stat-sublabel">Genomförda byten / köp</span>
+          <span class="dash-stat-label" id="dsVerifiedCapLabel" data-i18n="dash.verifiedCap">Verified Cap</span>
+          <span class="dash-stat-sublabel" id="dsVerifiedCapSubLabel" data-i18n="dash.verifiedCapSub">Genomförda byten / köp</span>
           <span class="dash-stat-val" id="dsVerifiedCapSEK">—</span>
           <span class="dash-stat-sub" id="dsVerifiedCapCount">—</span>
         </div>
@@ -1321,6 +1325,36 @@
 
     </section>
 
+    <!-- ===== INSTÄLLNINGAR ===== -->
+    <section class="module hidden" id="module-settings" hidden>
+      <div class="module-header">
+        <h1 data-i18n="settings.title">Inställningar</h1>
+        <p class="module-desc" data-i18n="settings.desc">Språk och visningsvaluta för UCI Marknadsdata.</p>
+      </div>
+      <div class="settings-grid account-grid">
+        <div class="account-card">
+          <div class="acct-card-header">
+            <span class="acct-card-icon">🌐</span>
+            <h3 data-i18n="settings.language.title">Språk</h3>
+          </div>
+          <p class="settings-card-desc" data-i18n="settings.language.desc">Samma språk som i mobilappen. Påverkar AI-värderingar och gränssnittet.</p>
+          <div class="settings-lang-grid" id="settingsLangGrid"></div>
+        </div>
+        <div class="account-card">
+          <div class="acct-card-header">
+            <span class="acct-card-icon">💱</span>
+            <h3 data-i18n="settings.currency.title">Visningsvaluta (Marknadsdata)</h3>
+          </div>
+          <p class="settings-card-desc" data-i18n="settings.currency.desc">Gäller Search Cap, Verified Cap och liknande summeringar — inte diagrammet.</p>
+          <select id="settingsCapCurrency" class="settings-select" aria-label="Visningsvaluta">
+            <option value="SEK">SEK — Svenska kronor</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="USD">USD — US-dollar</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== MITT KONTO (visas bara när inloggad) ===== -->
     <section class="module hidden" id="module-account">
 
@@ -1762,6 +1796,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="i18n.js"></script>
   <!-- Auth-modal -->
   <div class="auth-overlay hidden" id="authOverlay" onclick="closeAuthModal(event)">
     <div class="auth-modal" id="authModal">
