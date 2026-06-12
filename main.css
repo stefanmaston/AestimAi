@@ -1863,22 +1863,145 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .listing-quota-hint strong { color: var(--green); }
 
-/* Mina objekt */
-.my-items-header { margin-bottom: 1.25rem; }
-.my-items-header h2 { margin: 0 0 0.25rem; }
-.my-items-header p  { font-size: 0.85rem; color: var(--gray-500); margin: 0; }
-.my-items-list { display: flex; flex-direction: column; gap: 0.75rem; }
-.my-item {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  flex-wrap: wrap;
-  border: 1px solid var(--gray-200, #e6e5e0); border-radius: 12px;
-  padding: 0.9rem 1.1rem; background: var(--white);
+/* Mina objekt — kompakt rutnät */
+.my-items-header { margin-bottom: 1rem; }
+.my-items-header h2 { margin: 0 0 0.25rem; font-size: 1.05rem; }
+.my-items-header p  { font-size: 0.82rem; color: var(--gray-500); margin: 0; }
+
+.my-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 0.5rem;
+  align-items: stretch;
 }
-.my-item-info h3 { margin: 0 0 0.2rem; font-size: 0.98rem; }
-.my-item-info .card-cat { margin: 0 0 0.2rem; font-size: 0.82rem; color: var(--gray-500); }
-.my-item-date { margin: 0 0 0.4rem; font-size: 0.74rem; color: var(--gray-500); }
-.my-item-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.my-item-actions .mi-kind { padding: 0.4rem 0.5rem; border-radius: 8px; border: 1px solid var(--gray-200, #e6e5e0); }
+@media (min-width: 480px) {
+  .my-items-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 0.55rem; }
+}
+@media (min-width: 768px) {
+  .my-items-grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .my-items-grid { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); }
+}
+
+.my-item-tile {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-200, #e6e5e0);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--white);
+  min-width: 0;
+  transition: box-shadow var(--t), border-color var(--t);
+}
+.my-item-tile:hover {
+  border-color: var(--gray-300);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.my-item-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--gray-100);
+  flex-shrink: 0;
+}
+.my-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.my-item-img--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: var(--gray-300);
+  background: var(--gray-100);
+}
+.my-item-thumb .status-pill {
+  position: absolute;
+  top: 0.28rem;
+  right: 0.28rem;
+  max-width: calc(100% - 0.56rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.52rem;
+  padding: 0.1rem 0.35rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.my-item-body {
+  padding: 0.38rem 0.45rem 0;
+  flex: 1;
+  min-height: 0;
+}
+.my-item-title {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.my-item-meta {
+  margin: 0.18rem 0 0;
+  font-size: 0.58rem;
+  color: var(--gray-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.my-item-date {
+  margin: 0.12rem 0 0;
+  font-size: 0.52rem;
+  color: var(--gray-400);
+}
+
+.my-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  padding: 0.38rem 0.45rem 0.45rem;
+}
+.my-item-actions .mi-kind {
+  width: 100%;
+  padding: 0.22rem 0.3rem;
+  border-radius: 6px;
+  border: 1px solid var(--gray-200, #e6e5e0);
+  font-size: 0.6rem;
+  background: var(--white);
+}
+.my-item-actions .mi-toggle {
+  width: 100%;
+  justify-content: center;
+  font-size: 0.6rem;
+  padding: 0.28rem 0.35rem;
+  line-height: 1.25;
+  white-space: normal;
+  text-align: center;
+  min-height: 2.1em;
+}
+.my-item-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  min-height: 1.1rem;
+}
+.my-item-links .btn-text,
+.my-item-links .mi-link {
+  font-size: 0.58rem;
+  padding: 0;
+  line-height: 1.2;
+}
+.my-item-links .mi-delete:only-child {
+  margin-left: auto;
+}
 
 .status-pill {
   display: inline-block; font-size: 0.68rem; font-weight: 700;
@@ -1887,11 +2010,6 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .pill-public  { background: var(--green-light); color: var(--green); }
 .pill-private { background: #f0efea; color: var(--gray-500); }
-
-@media (max-width: 560px) {
-  .my-item { flex-direction: column; align-items: stretch; }
-  .my-item-actions { justify-content: space-between; }
-}
 
 /* ── UCI Marknadsdata — kategoritabbar ─────────────────────── */
 .dash-chart-controls { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; }

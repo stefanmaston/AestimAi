@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="main.css?v=20260611-2">
   <style data-module-boot>
     /* Visa UCI Värdering direkt — innan main.css (undviker blink) */
     .module { display: none; }
@@ -52,7 +52,7 @@
   <div class="sidebar-backdrop hidden" id="sidebarBackdrop" aria-hidden="true"></div>
 
   <header class="mobile-header" id="mobileHeader">
-    <button type="button" class="mobile-menu-btn" id="btnMobileMenu" aria-label="Öppna meny" aria-expanded="false" aria-controls="sidebar">☰</button>
+    <button type="button" class="mobile-menu-btn" id="btnMobileMenu" data-i18n-aria-label="common.openMenu" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">☰</button>
     <div class="mobile-header-brand">
       <img src="assets/logo.png" alt="" class="mobile-header-logo" width="28" height="28">
       <span class="mobile-header-title">AestimAi</span>
@@ -676,83 +676,8 @@
         <p class="module-desc" data-i18n="module.pro.desc">Professional subscriptions, white-label and OEM integrations</p>
       </div>
 
-      <!-- Intro -->
-      <div class="pro-intro">
-        <p>AestimAi:s värderingsmodeller är byggda för att fungera både som en konsumenttjänst och som en underliggande motor i andra system. Nedan beskriver vi hur white-label fungerar och vilka möjligheter som finns för partners som vill integrera UCI-värdering i sina egna produkter.</p>
-      </div>
-
-      <!-- White-label -->
-      <div class="pro-section">
-        <h2>White-label</h2>
-        <p>Enterprise-abonnemanget inkluderar möjligheten att använda AestimAi:s gränssnitt och värderingsmotor under eget varumärke. Lämpligt för:</p>
-        <div class="pro-usecase-grid">
-          <div class="pro-usecase">
-            <h4>Fastighetsmäklare &amp; banker</h4>
-            <p>Erbjud UCI-baserad värdering direkt i din befintliga kundportal eller app under eget namn och logotype.</p>
-          </div>
-          <div class="pro-usecase">
-            <h4>Försäkringsbolag</h4>
-            <p>Integrera neutral objektvärdering i skadehantering och försäkringsteckning utan att bygga egna modeller.</p>
-          </div>
-          <div class="pro-usecase">
-            <h4>Marknadsplatser</h4>
-            <p>Lägg till en "Vad är det värt?"-funktion på din köp- och säljtjänst med automatisk UCI-värdering per annons.</p>
-          </div>
-          <div class="pro-usecase">
-            <h4>Revisionsbyråer</h4>
-            <p>Komplettera balansräkningsvärdering med ett neutralt, maskinläsbart UCI-index som referensram i rapporter.</p>
-          </div>
-        </div>
-        <p class="pro-contact-note">White-label kräver Enterprise-abonnemang. Kontakta oss för anpassad konfiguration av domän, logotype och färger.</p>
-      </div>
-
-      <!-- OEM / Specialistlösningar -->
-      <div class="pro-section">
-        <h2>OEM &amp; specialistintegrationer</h2>
-        <p>Utöver abonnemangen erbjuder vi djupare tekniska integrationer för partners som vill bädda in AestimAi:s värderingsmodeller direkt i sina egna produkter — utan att exponera AestimAi-varumärket alls.</p>
-        <div class="pro-oem-grid">
-
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">API-first integration</div>
-            <p>Anropa våra värderingsmodeller direkt via REST API från vilket system som helst. Resultaten returneras som strukturerad JSON med UCI-värde, konfidensintervall och källhänvisningar. Ingen UI krävs.</p>
-            <div class="pro-oem-tags">
-              <span>REST API</span><span>JSON</span><span>Webhook</span>
-            </div>
-          </div>
-
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">Inbäddad värderingsmotor</div>
-            <p>Licensiera AestimAi:s Bayesianska värderingsmodell för lokal körning i din infrastruktur. Passar regulatoriska miljöer där data inte får lämna organisationen.</p>
-            <div class="pro-oem-tags">
-              <span>On-premise</span><span>Docker</span><span>Dataskydd</span>
-            </div>
-          </div>
-
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">Branschspecifik kalibrering</div>
-            <p>Vi kalibrerar värderingsmodellen mot din branschs specifika data — exempelvis jordbruksfastigheter, marina tillgångar, industriutrustning eller immateriella rättigheter.</p>
-            <div class="pro-oem-tags">
-              <span>Anpassad modell</span><span>Träningsdata</span><span>Validering</span>
-            </div>
-          </div>
-
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">UCI-index som referens i IoT</div>
-            <p>Koppla mätdata från energimätare, sensorer och spårningssystem direkt till UCI-indexet för automatisk realtidsvärdering av fysiska tillgångar.</p>
-            <div class="pro-oem-tags">
-              <span>IoT</span><span>MQTT</span><span>Realtid</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Kontakt-CTA -->
-      <div class="pro-cta">
-        <h3>Intresserad av white-label eller OEM?</h3>
-        <p>Kontakta oss för en teknisk genomgång och prisförslag anpassat efter er volym och integration.</p>
-        <a class="btn-plan btn-plan-enterprise" href="mailto:kontakt@aestimai.org?subject=White-label%20%2F%20OEM-förfrågan">Kontakta oss →</a>
-      </div>
+      <!-- Intro + sections via i18n -->
+      <div class="pro-content" data-i18n-html="pro.body"></div>
 
     </section>
 
@@ -762,7 +687,7 @@
 
       <div class="lab-header">
         <div class="lab-header-left">
-          <h1>⚗ AestimAi Lab</h1>
+          <h1 data-i18n="lab.title">⚗ AestimAi Lab</h1>
           <p data-i18n="lab.desc">Research, valuation engine and hardware for measuring real value</p>
         </div>
         <div class="lab-header-right">
@@ -824,14 +749,14 @@
           <p class="news-subtitle" data-i18n="module.news.subtitle">Valuation · Trade · Energy · Cooperative economics</p>
         </div>
         <div class="news-categories">
-          <button class="news-cat-btn active" data-cat="all">Allt</button>
-          <button class="news-cat-btn" data-cat="valuation">Värdering</button>
-          <button class="news-cat-btn" data-cat="energy">Energi</button>
-          <button class="news-cat-btn" data-cat="coop">Kooperativ</button>
-          <button class="news-cat-btn" data-cat="market">Marknad</button>
-          <button class="news-cat-btn" data-cat="tech">Fintech</button>
-          <button class="news-cat-btn" data-cat="sustainability">Hållbarhet</button>
-          <button class="news-cat-btn" data-cat="resources">Resurser</button>
+          <button class="news-cat-btn active" data-cat="all" data-i18n="news.cat.all">All</button>
+          <button class="news-cat-btn" data-cat="valuation" data-i18n="news.cat.valuation">Valuation</button>
+          <button class="news-cat-btn" data-cat="energy" data-i18n="news.cat.energy">Energy</button>
+          <button class="news-cat-btn" data-cat="coop" data-i18n="news.cat.coop">Cooperative</button>
+          <button class="news-cat-btn" data-cat="market" data-i18n="news.cat.market">Market</button>
+          <button class="news-cat-btn" data-cat="tech" data-i18n="news.cat.tech">Fintech</button>
+          <button class="news-cat-btn" data-cat="sustainability" data-i18n="news.cat.sustainability">Sustainability</button>
+          <button class="news-cat-btn" data-cat="resources" data-i18n="news.cat.resources">Resources</button>
         </div>
       </div>
 
@@ -1013,7 +938,7 @@
         <aside class="news-sidebar">
 
           <div class="news-uci-ticker">
-            <h4>UCI-index live</h4>
+            <h4 data-i18n="news.sidebar.live">UCI index live</h4>
             <div class="ticker-row">
               <span class="ticker-name">UCI/SEK</span>
               <span class="ticker-price green">62,40</span>
@@ -1030,7 +955,7 @@
               <span class="ticker-change red">−0,2%</span>
             </div>
             <div class="ticker-row">
-              <span class="ticker-name">Byten/dag</span>
+              <span class="ticker-name" data-i18n="news.sidebar.tradesPerDay">Trades/day</span>
               <span class="ticker-price green">1 248</span>
               <span class="ticker-change green">+12%</span>
             </div>
@@ -1038,7 +963,7 @@
 
           <!-- Annons 1 — Sunthetics (pinnad, alltid överst) -->
           <div class="news-ad ad-pinned">
-            <span class="ad-label">Samarbetspartner</span>
+            <span class="ad-label" data-i18n="news.partnerLabel">Partner</span>
             <a class="news-ad-card news-ad-card--featured" href="https://www.sunthetics.se" target="_blank" rel="noopener sponsored">
               <div class="ad-img-sunthetics">
                 <img src="sunthetics-logo.png" alt="Sunthetics" class="sunthetics-logo-img">
@@ -1053,7 +978,7 @@
 
           <!-- Annons 2 — Google AdSense (byt data-ad-slot mot ditt slot-ID) -->
           <div class="news-ad news-ad--adsense">
-            <span class="ad-label">Annons</span>
+            <span class="ad-label" data-i18n="news.adLabel">Ad</span>
             <ins class="adsbygoogle adsense-sidebar"
                  style="display:block"
                  data-ad-client="ca-pub-5179380778835238"
@@ -1064,7 +989,7 @@
 
           <!-- Mest läst -->
           <div class="news-mostread">
-            <h4>Mest läst</h4>
+            <h4 data-i18n="news.sidebar.mostRead">Most read</h4>
             <ol class="mostread-list">
               <li>
                 <span class="mostread-num">1</span>
@@ -1091,7 +1016,7 @@
 
           <!-- Annons 3 — Google AdSense -->
           <div class="news-ad news-ad--adsense">
-            <span class="ad-label">Annons</span>
+            <span class="ad-label" data-i18n="news.adLabel">Ad</span>
             <ins class="adsbygoogle adsense-sidebar"
                  style="display:block"
                  data-ad-client="ca-pub-5179380778835238"
@@ -1102,7 +1027,7 @@
 
           <!-- Annons 4 — Google AdSense -->
           <div class="news-ad news-ad--adsense">
-            <span class="ad-label">Annons</span>
+            <span class="ad-label" data-i18n="news.adLabel">Ad</span>
             <ins class="adsbygoogle adsense-sidebar"
                  style="display:block"
                  data-ad-client="ca-pub-5179380778835238"
@@ -1114,8 +1039,8 @@
           <!-- Prenumerations-CTA -->
           <div class="news-subscribe">
             <h4>AestimAi Pro</h4>
-            <p>Få signerade marknadsrapporter och tillgång till UCI-data via API.</p>
-            <button class="btn-primary" style="width:100%;justify-content:center;" data-module="pro">Aktivera Pro →</button>
+            <p data-i18n="news.sidebar.proDesc">Get signed market reports and UCI data via API.</p>
+            <button class="btn-primary" style="width:100%;justify-content:center;" data-module="pro" data-i18n="news.sidebar.activatePro">Activate Pro →</button>
           </div>
 
         </aside>
@@ -1141,15 +1066,15 @@
             <div class="plan-tagline" data-i18n="pricing.taglineFree">Try without a credit card</div>
           </div>
           <ul class="plan-features">
-            <li class="feat-yes">UCI Värdering — <strong>100/dag</strong></li>
-            <li class="feat-yes">UCI Marknadsdata — <strong>alla kategorier</strong></li>
-            <li class="feat-yes">Nyheter — <strong>full access</strong></li>
-            <li class="feat-yes">Bytesmarknad — bläddra fritt</li>
-            <li class="feat-yes">1 aktiv annons <span class="feat-note">(extra €1/st)</span></li>
-            <li class="feat-yes">AestimAi Lab</li>
-            <li class="feat-no">Värderingshistorik</li>
-            <li class="feat-no">API-access</li>
-            <li class="feat-no">CSV-export</li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.valuation100">UCI Valuation — <strong>100/day</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.marketAll">UCI Market Data — <strong>all categories</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.newsFull">News — <strong>full access</strong></li>
+            <li class="feat-yes" data-i18n="pricing.feat.marketBrowse">Marketplace — browse freely</li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.listing1">1 active listing <span class="feat-note">(extra €1 each)</span></li>
+            <li class="feat-yes" data-i18n="pricing.feat.lab">AestimAi Lab</li>
+            <li class="feat-no" data-i18n="pricing.feat.historyNone">Valuation history</li>
+            <li class="feat-no" data-i18n="pricing.feat.apiNone">API access</li>
+            <li class="feat-no" data-i18n="pricing.feat.csvNone">CSV export</li>
           </ul>
           <button class="btn-plan btn-plan-free" onclick="selectPlan('free')" data-i18n="pricing.btnFree">Get started free</button>
         </div>
@@ -1163,15 +1088,15 @@
             <div class="plan-tagline" data-i18n="pricing.taglinePro">For individuals and small businesses</div>
           </div>
           <ul class="plan-features">
-            <li class="feat-yes">UCI Värdering — <strong>500/dag</strong></li>
-            <li class="feat-yes">UCI Marknadsdata — <strong>alla kategorier + export</strong></li>
-            <li class="feat-yes">Nyheter — <strong>full access</strong></li>
-            <li class="feat-yes">Bytesmarknad — <strong>50 aktiva annonser</strong></li>
-            <li class="feat-yes">Prioriterad annonsvisning</li>
-            <li class="feat-yes">AestimAi Lab</li>
-            <li class="feat-yes">Värderingshistorik — <strong>12 månader</strong></li>
-            <li class="feat-yes">API-access — <strong>1 000 req/dag</strong></li>
-            <li class="feat-yes">CSV-export</li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.valuation500">UCI Valuation — <strong>500/day</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.marketExport">UCI Market Data — <strong>all categories + export</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.newsFull">News — <strong>full access</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.market50">Marketplace — <strong>50 active listings</strong></li>
+            <li class="feat-yes" data-i18n="pricing.feat.priorityListing">Priority listing visibility</li>
+            <li class="feat-yes" data-i18n="pricing.feat.lab">AestimAi Lab</li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.history12">Valuation history — <strong>12 months</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.api1000">API access — <strong>1,000 req/day</strong></li>
+            <li class="feat-yes" data-i18n="pricing.feat.csvYes">CSV export</li>
           </ul>
           <button class="btn-plan btn-plan-pro" onclick="selectPlan('pro')" data-i18n="pricing.btnPro">Choose Pro</button>
         </div>
@@ -1184,17 +1109,17 @@
             <div class="plan-tagline" data-i18n="pricing.taglineEnterprise">For organisations and teams</div>
           </div>
           <ul class="plan-features">
-            <li class="feat-yes">UCI Värdering — <strong>obegränsat</strong></li>
-            <li class="feat-yes">UCI Marknadsdata — <strong>realtid + webhooks</strong></li>
-            <li class="feat-yes">Nyheter — <strong>full access</strong></li>
-            <li class="feat-yes">Bytesmarknad — <strong>obegränsade annonser</strong></li>
-            <li class="feat-yes">Featured-placering</li>
-            <li class="feat-yes">AestimAi Lab</li>
-            <li class="feat-yes">Värderingshistorik — <strong>obegränsat</strong></li>
-            <li class="feat-yes">API-access — <strong>10 000 req/dag</strong></li>
-            <li class="feat-yes">5 teammedlemmar</li>
-            <li class="feat-yes">White-label möjlighet</li>
-            <li class="feat-yes">Dedikerad support + SLA 99,9%</li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.valuationUnlimited">UCI Valuation — <strong>unlimited</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.marketRealtime">UCI Market Data — <strong>real-time + webhooks</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.newsFull">News — <strong>full access</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.marketUnlimited">Marketplace — <strong>unlimited listings</strong></li>
+            <li class="feat-yes" data-i18n="pricing.feat.featuredListing">Featured placement</li>
+            <li class="feat-yes" data-i18n="pricing.feat.lab">AestimAi Lab</li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.historyUnlimited">Valuation history — <strong>unlimited</strong></li>
+            <li class="feat-yes" data-i18n-html="pricing.feat.api10000">API access — <strong>10,000 req/day</strong></li>
+            <li class="feat-yes" data-i18n="pricing.feat.team5">5 team members</li>
+            <li class="feat-yes" data-i18n="pricing.feat.whitelabel">White-label option</li>
+            <li class="feat-yes" data-i18n="pricing.feat.supportSla">Dedicated support + 99.9% SLA</li>
           </ul>
           <button class="btn-plan btn-plan-enterprise" onclick="selectPlan('enterprise')" data-i18n="pricing.btnEnterprise">Contact us</button>
         </div>
@@ -1203,38 +1128,38 @@
 
       <!-- Jämförelsetabell -->
       <div class="pricing-compare">
-        <h2>Detaljerad jämförelse</h2>
+        <h2 data-i18n="pricing.compareTitle">Detailed comparison</h2>
         <table class="compare-table">
           <thead>
             <tr>
-              <th>Funktion</th>
-              <th>Freemium</th>
-              <th class="col-featured">Pro</th>
-              <th>Enterprise</th>
+              <th data-i18n="pricing.compareFeature">Feature</th>
+              <th data-i18n="pricing.planFree">Freemium</th>
+              <th class="col-featured" data-i18n="pricing.planPro">Pro</th>
+              <th data-i18n="pricing.planEnterprise">Enterprise</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="4" class="compare-section">UCI Värdering</td></tr>
-            <tr><td>Värderingar per dag</td><td>100</td><td class="col-featured">500</td><td>Obegränsat</td></tr>
-            <tr><td>Värderingshistorik</td><td>—</td><td class="col-featured">12 månader</td><td>Obegränsat</td></tr>
-            <tr><td>CSV-export</td><td>—</td><td class="col-featured">✓</td><td>✓</td></tr>
+            <tr><td colspan="4" class="compare-section" data-i18n="pricing.compareSectionValuation">UCI Valuation</td></tr>
+            <tr><td data-i18n="pricing.compareValuationsDay">Valuations per day</td><td>100</td><td class="col-featured">500</td><td data-i18n="pricing.valUnlimited">Unlimited</td></tr>
+            <tr><td data-i18n="pricing.compareHistory">Valuation history</td><td data-i18n="pricing.valDash">—</td><td class="col-featured" data-i18n="pricing.val12months">12 months</td><td data-i18n="pricing.valUnlimited">Unlimited</td></tr>
+            <tr><td data-i18n="pricing.compareCsv">CSV export</td><td data-i18n="pricing.valDash">—</td><td class="col-featured" data-i18n="pricing.valCheck">✓</td><td data-i18n="pricing.valCheck">✓</td></tr>
 
-            <tr><td colspan="4" class="compare-section">Bytesmarknad</td></tr>
-            <tr><td>Bläddra annonser</td><td>✓</td><td class="col-featured">✓</td><td>✓</td></tr>
-            <tr><td>Aktiva annonser</td><td>1 <span class="feat-note">(+€1/extra)</span></td><td class="col-featured">50</td><td>Obegränsat</td></tr>
-            <tr><td>Prioriterad visning</td><td>—</td><td class="col-featured">✓</td><td>✓ Featured</td></tr>
+            <tr><td colspan="4" class="compare-section" data-i18n="pricing.compareSectionMarket">Marketplace</td></tr>
+            <tr><td data-i18n="pricing.compareBrowse">Browse listings</td><td data-i18n="pricing.valCheck">✓</td><td class="col-featured" data-i18n="pricing.valCheck">✓</td><td data-i18n="pricing.valCheck">✓</td></tr>
+            <tr><td data-i18n="pricing.compareActiveListings">Active listings</td><td data-i18n-html="pricing.valExtraListing">1 <span class="feat-note">(+€1/extra)</span></td><td class="col-featured">50</td><td data-i18n="pricing.valUnlimited">Unlimited</td></tr>
+            <tr><td data-i18n="pricing.comparePriority">Priority visibility</td><td data-i18n="pricing.valDash">—</td><td class="col-featured" data-i18n="pricing.valCheck">✓</td><td data-i18n="pricing.valFeatured">✓ Featured</td></tr>
 
-            <tr><td colspan="4" class="compare-section">UCI Marknadsdata</td></tr>
-            <tr><td>Kategorier</td><td>Alla</td><td class="col-featured">Alla</td><td>Alla + realtid</td></tr>
-            <tr><td>Tidsperioder</td><td>Alla</td><td class="col-featured">Alla</td><td>Alla + webhooks</td></tr>
+            <tr><td colspan="4" class="compare-section" data-i18n="pricing.compareSectionData">UCI Market Data</td></tr>
+            <tr><td data-i18n="pricing.compareCategories">Categories</td><td data-i18n="pricing.valAll">All</td><td class="col-featured" data-i18n="pricing.valAll">All</td><td data-i18n="pricing.valAllRealtime">All + real-time</td></tr>
+            <tr><td data-i18n="pricing.comparePeriods">Time periods</td><td data-i18n="pricing.valAll">All</td><td class="col-featured" data-i18n="pricing.valAll">All</td><td data-i18n="pricing.valAllWebhooks">All + webhooks</td></tr>
 
-            <tr><td colspan="4" class="compare-section">API</td></tr>
-            <tr><td>API-access</td><td>—</td><td class="col-featured">1 000 req/dag</td><td>10 000 req/dag</td></tr>
+            <tr><td colspan="4" class="compare-section" data-i18n="pricing.compareSectionApi">API</td></tr>
+            <tr><td data-i18n="pricing.compareApiAccess">API access</td><td data-i18n="pricing.valDash">—</td><td class="col-featured" data-i18n="pricing.valApi1000">1,000 req/day</td><td data-i18n="pricing.valApi10000">10,000 req/day</td></tr>
 
-            <tr><td colspan="4" class="compare-section">Övrigt</td></tr>
-            <tr><td>Teammedlemmar</td><td>1</td><td class="col-featured">1</td><td>5</td></tr>
-            <tr><td>Support</td><td>Community</td><td class="col-featured">E-post</td><td>Dedikerad + SLA</td></tr>
-            <tr><td>White-label</td><td>—</td><td class="col-featured">—</td><td>✓</td></tr>
+            <tr><td colspan="4" class="compare-section" data-i18n="pricing.compareSectionOther">Other</td></tr>
+            <tr><td data-i18n="pricing.compareTeam">Team members</td><td>1</td><td class="col-featured">1</td><td>5</td></tr>
+            <tr><td data-i18n="pricing.compareSupport">Support</td><td data-i18n="pricing.valCommunity">Community</td><td class="col-featured" data-i18n="pricing.valEmail">Email</td><td data-i18n="pricing.valDedicatedSla">Dedicated + SLA</td></tr>
+            <tr><td data-i18n="pricing.compareWhitelabel">White-label</td><td data-i18n="pricing.valDash">—</td><td class="col-featured" data-i18n="pricing.valDash">—</td><td data-i18n="pricing.valCheck">✓</td></tr>
           </tbody>
         </table>
       </div>
@@ -1616,57 +1541,53 @@
   <!-- ===== HÖGER PANEL ===== -->
   <aside class="right-panel" id="rightPanel">
     <div class="panel-header">
-      <h3>Kontext</h3>
+      <h3 data-i18n="panel.contextTitle">Context</h3>
       <button class="btn-close-panel" id="btnClosePanel">×</button>
     </div>
 
     <div class="panel-uci-ticker" id="panelTicker">
-      <span class="ticker-label">UCI-index idag</span>
+      <span class="ticker-label" data-i18n="panel.tickerToday">UCI index today</span>
       <span class="ticker-value" id="panelTickerValue">1 UCI = 62.40 SEK</span>
       <span class="ticker-sub" id="panelTickerSub">≈ €5.52 / $5.98</span>
       <div class="ticker-onchain hidden" id="tickerOnchain">
         <span class="ticker-chain-dot">⬡</span>
-        <span class="ticker-chain-label" id="tickerChainLabel">On-chain</span>
+        <span class="ticker-chain-label" id="tickerChainLabel" data-i18n="panel.onChain">On-chain</span>
       </div>
     </div>
 
-    <div class="panel-help" id="panelHelp">
-      <h4>Om UCI-värdering</h4>
-      <p>UCI (Universal Coin Index) är ett valuta-oberoende värderingsindex som mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata.</p>
-      <p>Värderingen är gratis och kräver ingen inloggning.</p>
-    </div>
+    <div class="panel-help" id="panelHelp" data-i18n-html="panel.uci"></div>
 
     <div class="panel-ad" id="panelAd">
       <div class="ad-placeholder">
-        <span>Annonsplats</span>
-        <small>Relevanta erbjudanden baserade på din sökning</small>
+        <span data-i18n="panel.adSlot">Ad slot</span>
+        <small data-i18n="panel.adSub">Relevant offers based on your search</small>
       </div>
     </div>
   </aside>
 
   <!-- Toggle-knapp för höger panel -->
-  <button class="btn-toggle-panel" id="btnTogglePanel" title="Öppna kontextpanel">›</button>
+  <button class="btn-toggle-panel" id="btnTogglePanel" data-i18n-title="common.openPanel" title="Open context panel">›</button>
 
   <!-- Modal: Föreslå byte -->
   <div class="modal-overlay hidden" id="modalOverlay">
     <div class="modal" id="modalPropose">
       <div class="modal-header">
-        <h2>Föreslå byte</h2>
+        <h2 data-i18n="modal.propose.title">Propose trade</h2>
         <button class="btn-close-modal" id="btnCloseModal">×</button>
       </div>
       <div class="modal-body">
-        <p>Du föreslår byte av <strong id="proposedItem">—</strong></p>
+        <p><span data-i18n="modal.propose.intro">You propose a trade for</span> <strong id="proposedItem">—</strong></p>
         <div class="form-group">
-          <label>Välj ditt objekt att byta mot</label>
+          <label data-i18n="modal.propose.selectLabel">Choose your item to trade</label>
           <select id="myItemSelect">
-            <option value="">— Välj ett av dina objekt —</option>
+            <option value="" data-i18n="modal.propose.selectPlaceholder">— Select one of your items —</option>
           </select>
         </div>
         <div class="uci-match-check" id="uciMatchCheck"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" id="btnCancelPropose">Avbryt</button>
-        <button class="btn-primary" id="btnConfirmPropose">Föreslå byte</button>
+        <button class="btn-secondary" id="btnCancelPropose" data-i18n="modal.propose.cancel">Cancel</button>
+        <button class="btn-primary" id="btnConfirmPropose" data-i18n="modal.propose.confirm">Propose trade</button>
       </div>
     </div>
   </div>
@@ -1675,24 +1596,24 @@
   <div class="modal-overlay hidden" id="authModalOverlay">
     <div class="modal" id="modalAuth">
       <div class="modal-header">
-        <h2 id="authTitle">Logga in</h2>
+        <h2 id="authTitle" data-i18n="auth.loginTitle">Log in</h2>
         <button class="btn-close-modal" id="btnCloseAuth">×</button>
       </div>
       <div class="modal-body">
-        <p class="auth-intro" id="authIntro">Logga in för att registrera och publicera i Bytesmarknaden.</p>
+        <p class="auth-intro" id="authIntro" data-i18n="auth.requireLoginMarketRegister">Log in to register and publish in the Marketplace.</p>
         <div class="form-group">
-          <label>E-post</label>
-          <input type="email" id="authEmail" autocomplete="email" placeholder="namn@exempel.se">
+          <label data-i18n="auth.labelEmail">Email</label>
+          <input type="email" id="authEmail" autocomplete="email" data-i18n-placeholder="auth.placeholderEmail" placeholder="name@example.com">
         </div>
         <div class="form-group">
-          <label>Lösenord</label>
-          <input type="password" id="authPassword" autocomplete="current-password" placeholder="Minst 6 tecken">
+          <label data-i18n="auth.labelPassword">Password</label>
+          <input type="password" id="authPassword" autocomplete="current-password" data-i18n-placeholder="auth.placeholderPassword" placeholder="••••••••">
         </div>
         <p class="auth-error hidden" id="authError"></p>
       </div>
       <div class="modal-footer auth-footer">
-        <button class="btn-primary" id="btnAuthSubmit">Logga in</button>
-        <button class="btn-text" id="btnAuthToggle">Inget konto? Skapa ett</button>
+        <button class="btn-primary" id="btnAuthSubmit" data-i18n="auth.btnLogin">Log in</button>
+        <button class="btn-text" id="btnAuthToggle" data-i18n="auth.linkRegister">Create account →</button>
       </div>
     </div>
   </div>
@@ -1734,6 +1655,7 @@
   <script src="market-i18n.js"></script>
   <script src="site-i18n.js"></script>
   <script src="about-i18n.js"></script>
+  <script src="pro-i18n.js"></script>
   <script src="i18n.js"></script>
   <!-- Auth-modal -->
   <div class="auth-overlay hidden" id="authOverlay" onclick="closeAuthModal(event)">

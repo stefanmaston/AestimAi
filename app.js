@@ -1150,7 +1150,11 @@ async function loadChartForCat() {
     renderChartLegend(data.series);
     // Visa datakälla i footern
     const src = document.getElementById('dashLastUpdate');
-    if (src) src.textContent = data.source ? `Källa: ${data.source}` : 'Simulerad data';
+    if (src) {
+      src.textContent = data.source
+        ? str('dash.source', { source: data.source }, `Source: ${data.source}`)
+        : str('dash.simulatedData', null, 'Simulated data');
+    }
   } catch (e) {
     console.warn('[Assets] Kunde inte ladda:', e.message);
   }
@@ -2040,7 +2044,7 @@ async function loadMyItems() {
 
     const header = `<div class="my-items-header"><h2>${mtr('market.myItemsHeaderTitle', null, 'My items')}</h2>
       <p>${mtr('market.myItemsHeaderDesc', null, '')}</p></div>`;
-    container.innerHTML = header + '<div class="my-items-list">' + data.map(myItemRowHTML).join('') + '</div>';
+    container.innerHTML = header + '<div class="my-items-grid">' + data.map(myItemRowHTML).join('') + '</div>';
   } catch (e) {
     container.innerHTML = `<div class="market-error">${mtr('market.myItemsError', { msg: escHtml(e?.message || mtr('market.unknownError', null, 'unknown error')) }, 'Could not load items.')}</div>`;
   }
@@ -2054,23 +2058,36 @@ function myItemRowHTML(row) {
     ? new Date(row.created_at).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })
     : '';
   const catLabel = translateMarketCategory(v.category);
-  return `<div class="my-item" data-id="${escHtml(row.id)}">
-    <div class="my-item-info">
-      <h3>${escHtml(v.title)}</h3>
-      <p class="card-cat">${escHtml(catLabel)}${v.uci != null ? ' · ' + v.uci.toLocaleString(locale) + ' UCI' : ''}</p>
-      ${dateStr ? `<p class="my-item-date">${mtr('market.valuedOn', { date: escHtml(dateStr) }, `Valued ${dateStr}`)}</p>` : ''}
+  const uciStr = v.uci != null ? `${v.uci.toLocaleString(locale)} UCI` : '';
+  const metaParts = [catLabel, uciStr].filter(Boolean);
+  const thumb = v.image
+    ? `<img class="my-item-img" src="${escHtml(v.image)}" alt="${escHtml(v.title)}" loading="lazy">`
+    : '<div class="my-item-img my-item-img--empty" aria-hidden="true">📷</div>';
+  const viewLink = pub
+    ? `<a class="btn-text mi-link" href="/m/${escHtml(row.id)}" target="_blank" rel="noopener">${mtr('market.btnViewPage', null, 'View page')}</a>`
+    : '';
+  return `<article class="my-item-tile" data-id="${escHtml(row.id)}">
+    <div class="my-item-thumb">
+      ${thumb}
       <span class="status-pill ${pub ? 'pill-public' : 'pill-private'}">${pub ? mtr('market.statusPublic', null, 'Public') : mtr('market.statusPrivate', null, 'Not public')}</span>
+    </div>
+    <div class="my-item-body">
+      <h3 class="my-item-title" title="${escHtml(v.title)}">${escHtml(v.title)}</h3>
+      ${metaParts.length ? `<p class="my-item-meta">${escHtml(metaParts.join(' · '))}</p>` : ''}
+      ${dateStr ? `<p class="my-item-date">${mtr('market.valuedOn', { date: escHtml(dateStr) }, `Valued ${dateStr}`)}</p>` : ''}
     </div>
     <div class="my-item-actions">
       <select class="mi-kind" data-id="${escHtml(row.id)}">
         <option value="offer"${v.kind === 'offer' ? ' selected' : ''}>${mtr('market.kindOffer', null, 'Offered')}</option>
         <option value="wanted"${v.kind === 'wanted' ? ' selected' : ''}>${mtr('market.kindWanted', null, 'Wanted')}</option>
       </select>
-      <button class="btn-primary mi-toggle" data-id="${escHtml(row.id)}" data-public="${pub ? '1' : '0'}">${pub ? mtr('market.btnHide', null, 'Hide') : mtr('market.btnShow', null, 'Show on marketplace')}</button>
-      ${pub ? `<a class="btn-text" href="/m/${escHtml(row.id)}" target="_blank" rel="noopener">${mtr('market.btnViewPage', null, 'View page')}</a>` : ''}
-      <button class="btn-text mi-delete" data-id="${escHtml(row.id)}">${mtr('market.btnDelete', null, 'Delete')}</button>
+      <button type="button" class="btn-primary mi-toggle" data-id="${escHtml(row.id)}" data-public="${pub ? '1' : '0'}">${pub ? mtr('market.btnHide', null, 'Hide') : mtr('market.btnShow', null, 'Show on marketplace')}</button>
+      <div class="my-item-links">
+        ${viewLink}
+        <button type="button" class="btn-text mi-delete" data-id="${escHtml(row.id)}">${mtr('market.btnDelete', null, 'Delete')}</button>
+      </div>
     </div>
-  </div>`;
+  </article>`;
 }
 
 async function toggleMyItem(id, makePublic) {
@@ -2243,7 +2260,6 @@ function setupSettings() {
     if (kind === 'language') {
       showToast(i18n.t('settings.language.saved'));
       syncLanguageToSupabase(value);
-      updatePanelHelp(state.currentModule);
       refreshDashboardCaps();
       if (labShopLoaded) renderLabProducts();
       if (marketLoaded) searchMarket();
@@ -2253,7 +2269,9 @@ function setupSettings() {
         const active = document.querySelector('.news-cat-btn.active');
         if (active) loadNews(active.dataset.cat);
       }
+      if (state.currentModule === 'dashboard') loadChartForCat();
       i18n.applyTranslations();
+      updatePanelHelp(state.currentModule);
     } else if (kind === 'currency') {
       showToast(i18n.t('settings.currency.saved'));
       refreshDashboardCaps();
