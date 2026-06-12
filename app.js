@@ -16,6 +16,7 @@ const state = {
   user:              null,   // Supabase-användare (när inloggad)
   listingFiles:      [],     // valda bildfiler i registrera-formuläret
   listingValuation:  null,   // senaste AI-värdering i registrera-formuläret
+  labTab:            'engine', // ucilab: engine | shop
 };
 
 let marketLoaded = false;    // har Bytesmarknaden laddats första gången?
@@ -115,9 +116,10 @@ function navigateTo(moduleId) {
     searchMarket();
   }
 
-  // Ladda AestimAi Lab första gången
-  if (moduleId === 'ucilab' && !labProducts.length) {
-    loadLabProducts();
+  // Ladda AestimAi Lab shop första gången shop-fliken öppnas
+  if (moduleId === 'ucilab') {
+    const tab = state.labTab || 'engine';
+    switchLabTab(tab, { skipHash: true });
   }
 
   // Uppdatera konto-sidan när den öppnas
@@ -131,6 +133,7 @@ function updatePanelHelp(moduleId) {
     uci: '<h4>Om UCI-värdering</h4><p>UCI (Universal Coin Index) mäter verkligt bytevärde baserat på nyttighet, skick och marknadsdata — oberoende av valuta.</p><p>Ingen inloggning behövs. Värderingen är alltid gratis.</p>',
     market: '<h4>Om UCI Bytesmarknaden</h4><p>Byt varor, tjänster och tillgångar direkt med andra — utan valuta. Bytet bekräftas kryptografiskt med AE ID barter or pay-kort.</p><p>Kräver AE ID barter or pay-kort (engångskostnad €15–25).</p>',
     pro: '<h4>AestimAi Pro</h4><p>Professionell värdering för fastigheter, energianläggningar och portföljer. Rapporter signeras med AE ID barter or pay DS-certifikat.</p><p>€75/mån — kräver AE ID barter or pay-kort.</p>',
+    ucilab: '<h4>AestimAi Lab</h4><p>Forskning kring UCI-värderingsmotorn — agentisk, retrieval-grundad och kalibrerad värdering.</p><p>Under <strong>Shop · Amazon</strong> hittar du rekommenderad hårdvara.</p>',
     idcoop: '<h4>Om AE ID barter or pay</h4><p>AE ID barter or pay-kortet är en fysisk NFC/USB-smartkort som fungerar som din identitet och signatur — oberoende av telefon eller internet.</p>',
     news: '<h4>AestimAi Nyheter</h4><p>Nyheter om värdering, byteshandel, energi och kooperativ ekonomi. Uppdateras högst en gång per timme.</p><p>Annonsplatser i höger kolumn är reserverade för relevanta aktörer inom cirkulär ekonomi och fintech.</p>',
   };
@@ -2053,7 +2056,10 @@ function setupMarketplace() {
 document.addEventListener('DOMContentLoaded', () => {
   // Sidebar-navigation
   document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => navigateTo(btn.dataset.module));
+    btn.addEventListener('click', () => {
+      if (btn.dataset.module === 'ucilab') state.labTab = 'engine';
+      navigateTo(btn.dataset.module);
+    });
   });
 
   // UCI Värdering
@@ -2089,7 +2095,10 @@ document.addEventListener('DOMContentLoaded', () => {
   handleProCheckoutReturn();
 
   const hash = location.hash.replace('#', '');
-  if (hash && document.getElementById('module-' + hash)) {
+  if (hash === 'ucilab-shop') {
+    state.labTab = 'shop';
+    navigateTo('ucilab');
+  } else if (hash && document.getElementById('module-' + hash)) {
     navigateTo(hash);
   } else {
     navigateTo('uci');
@@ -2111,6 +2120,28 @@ const BADGE_CLASS = {
 
 let labProducts   = [];
 let labActiveCat  = 'all';
+let labShopLoaded = false;
+
+function switchLabTab(tab, opts = {}) {
+  state.labTab = tab;
+  document.querySelectorAll('.lab-subnav .tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.labTab === tab);
+  });
+  document.getElementById('lab-panel-engine')?.classList.toggle('hidden', tab !== 'engine');
+  document.getElementById('lab-panel-shop')?.classList.toggle('hidden', tab !== 'shop');
+
+  if (tab === 'shop' && !labShopLoaded) {
+    labShopLoaded = true;
+    loadLabProducts();
+  }
+
+  if (!opts.skipHash) {
+    const hash = tab === 'shop' ? '#ucilab-shop' : '#ucilab';
+    if (location.hash !== hash) {
+      history.replaceState(null, '', location.pathname + location.search + hash);
+    }
+  }
+}
 
 async function loadLabProducts() {
   const area = document.getElementById('labShopArea');
@@ -2177,6 +2208,7 @@ function filterLab(cat) {
 }
 
 window.filterLab = filterLab;
+window.switchLabTab = switchLabTab;
 
 // ─── Auth & Konto ─────────────────────────────────────────────────────────────
 

@@ -36,6 +36,29 @@
   --shadow:       0 2px 14px rgba(0,0,0,0.08);
   --shadow-lg:    0 8px 40px rgba(0,0,0,0.13);
   --t:            0.18s ease;
+
+  /* Mörk nav-yta — sidebar + mobil header (samma färg och herringbone) */
+  --nav-dark-bg: #0b0c15;
+  --nav-dark-pattern:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 7px,
+      rgba(255, 252, 220, 0.026) 7px,
+      rgba(255, 252, 220, 0.026) 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 7px,
+      rgba(255, 252, 220, 0.026) 7px,
+      rgba(255, 252, 220, 0.026) 8px
+    ),
+    linear-gradient(180deg,
+      rgba(29, 107, 78, 0.10) 0%,
+      rgba(29, 107, 78, 0.03) 35%,
+      transparent 70%
+    );
 }
 
 /* ===== RESET ===== */
@@ -85,30 +108,8 @@ textarea { resize: vertical; }
 /* ===== SIDEBAR ===== */
 .sidebar {
   grid-column: 1;
-  /* Deep charcoal-indigo bas */
-  background-color: #0b0c15;
-  /* Herringbone — klassisk lyxtextil, inte störande för text */
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      transparent 0,
-      transparent 7px,
-      rgba(255, 252, 220, 0.026) 7px,
-      rgba(255, 252, 220, 0.026) 8px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      transparent 0,
-      transparent 7px,
-      rgba(255, 252, 220, 0.026) 7px,
-      rgba(255, 252, 220, 0.026) 8px
-    ),
-    /* Subtil brand-ton uppifrån — kopplar till primärfärgen */
-    linear-gradient(180deg,
-      rgba(29, 107, 78, 0.10) 0%,
-      rgba(29, 107, 78, 0.03) 35%,
-      transparent 70%
-    );
+  background-color: var(--nav-dark-bg);
+  background-image: var(--nav-dark-pattern);
   color: var(--white);
   height: 100vh;
   display: flex;
@@ -1554,7 +1555,8 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   box-sizing: border-box;
   min-height: var(--mobile-header-h);
   padding: env(safe-area-inset-top, 0px) 0.85rem 0;
-  background-color: #0b0c15;
+  background-color: var(--nav-dark-bg);
+  background-image: var(--nav-dark-pattern);
   color: var(--white);
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
@@ -1688,6 +1690,7 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   .module-header { margin-bottom: 1.25rem; }
 
   .market-tabs,
+  .lab-subnav,
   .pro-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -2031,6 +2034,99 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   font-size: .8rem;
   color: rgba(255,255,255,.9);
   white-space: nowrap;
+}
+
+.lab-subnav {
+  margin-bottom: 1.75rem;
+}
+
+.lab-panel.hidden {
+  display: none !important;
+}
+
+/* UCI Värderingsmotor — Lab-innehåll */
+.lab-engine-intro {
+  max-width: 820px;
+  margin-bottom: 2rem;
+}
+.lab-engine-lead {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--gray-700);
+  margin-bottom: 1rem;
+}
+.lab-engine-intro p:last-child {
+  color: var(--gray-500);
+  line-height: 1.65;
+}
+.lab-engine-section {
+  margin-bottom: 2.5rem;
+}
+.lab-engine-section > h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+  color: var(--gray-900);
+}
+.lab-layer {
+  background: var(--white);
+  border: 1px solid var(--border, #e6e5e1);
+  border-radius: 14px;
+  padding: 1.35rem 1.5rem;
+  margin-bottom: 1rem;
+}
+.lab-layer h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary, #1D6B4E);
+  margin-bottom: .75rem;
+}
+.lab-layer ul {
+  margin: 0 0 .85rem 1.1rem;
+  padding: 0;
+  color: var(--gray-700);
+  font-size: .92rem;
+  line-height: 1.6;
+}
+.lab-layer li { margin-bottom: .45rem; }
+.lab-layer li:last-child { margin-bottom: 0; }
+.lab-layer code {
+  font-size: .82rem;
+  background: var(--gray-100);
+  padding: .1rem .35rem;
+  border-radius: 4px;
+}
+.lab-layer-desc {
+  font-size: .88rem;
+  line-height: 1.65;
+  color: var(--gray-500);
+  margin: 0;
+  padding-top: .75rem;
+  border-top: 1px solid var(--border-light, #f0efec);
+}
+.lab-engine-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  background: var(--green-faint);
+  border: 1px solid var(--green-light);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  margin-top: .5rem;
+}
+.lab-engine-cta p {
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+  color: var(--gray-700);
+  font-size: .95rem;
+}
+.lab-shop-intro {
+  color: var(--gray-500);
+  font-size: .95rem;
+  margin: 0 0 1.25rem;
+  line-height: 1.55;
 }
 
 /* Category filter */

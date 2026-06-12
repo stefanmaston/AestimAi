@@ -16,3 +16,4 @@ blockchain/update-log.json
 
 # macOS
 .DS_Store
+.vercel

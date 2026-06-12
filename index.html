@@ -753,42 +753,143 @@
     </section>
 
 
-    <!-- Modul 5: AE ID barter or pay -->
+    <!-- Modul 5: AestimAi Lab -->
     <section class="module hidden" id="module-ucilab">
 
-      <!-- AestimAi Lab — rubrik (vår design) -->
       <div class="lab-header">
         <div class="lab-header-left">
           <h1>⚗ AestimAi Lab</h1>
-          <p>Hårdvara för mätning, handel och spårning av verkligt värde</p>
+          <p>Forskning, värderingsmotor och hårdvara för mätning av verkligt värde</p>
         </div>
         <div class="lab-header-right">
           <span class="lab-uci-badge">⊙ UCI-kompatibel</span>
-          <span class="lab-amazon-badge">Köp via Amazon</span>
         </div>
       </div>
 
-      <!-- Kategorifilter -->
-      <div class="lab-categories" id="labCatFilter">
-        <button class="lab-cat-btn active" data-cat="all" onclick="filterLab('all')">Alla</button>
-        <button class="lab-cat-btn" data-cat="energy" onclick="filterLab('energy')">Energi</button>
-        <button class="lab-cat-btn" data-cat="nfc" onclick="filterLab('nfc')">NFC &amp; Handel</button>
-        <button class="lab-cat-btn" data-cat="iot" onclick="filterLab('iot')">IoT &amp; Sensorer</button>
-        <button class="lab-cat-btn" data-cat="compute" onclick="filterLab('compute')">Datorkraft</button>
-        <button class="lab-cat-btn" data-cat="security" onclick="filterLab('security')">Säkerhet</button>
+      <div class="lab-subnav market-tabs">
+        <button type="button" class="tab-btn active" data-lab-tab="engine" onclick="switchLabTab('engine')">UCI Värderingsmotor</button>
+        <button type="button" class="tab-btn" data-lab-tab="shop" onclick="switchLabTab('shop')">Shop · Amazon</button>
       </div>
 
-      <!-- Produktlista — fylls av loadLabProducts() i app.js -->
-      <div class="lab-shop-area" id="labShopArea">
-        <div class="lab-loading">Laddar produkter…</div>
+      <!-- Lab: UCI Värderingsmotor (PDF-innehåll) -->
+      <div class="lab-panel" id="lab-panel-engine">
+
+        <div class="lab-engine-intro">
+          <p class="lab-engine-lead">AestimAi Lab baseras på en kontinuerlig utveckling av en avancerad AI-arkitektur för agentisk, retrieval-grundad och kalibrerad värdering med gradvis självförbättrande (autodidaktisk) precision.</p>
+          <p>Inom AestimAi Lab har vi avsikten att uppnå ett universellt giltigt värdeindex (UCI) som kan användas i många olika tillämpningar, både privat och publikt.</p>
+        </div>
+
+        <div class="lab-engine-section">
+          <h2>Kärnskifte</h2>
+          <p>Dagens lösning bygger på att AestimAi-modellen själv ”gissar” ett pris utifrån en beskrivning och eventuella bilder, men den gör detta med ”Big-Data”-inferens i bakgrunden och ett slags adaptivt regelsystem. Målet är att ersätta de traditionella värderingsmodellerna med en agentisk, retrieval-grundad och kalibrerad värderingsmotor, där modellen resonerar över verkliga marknadsdata snarare än att estimera med olika fördefinierade antaganden och uppskattningar.</p>
+          <p>Detta höjer precisionen, ger trovärdiga osäkerhetsintervall och gör systemet granskningsbart — vilket är centralt för UCI som ett juridiskt definierat värderingsindexmått.</p>
+        </div>
+
+        <div class="lab-engine-section">
+          <h2>Arkitektur — lager för lager</h2>
+
+          <article class="lab-layer">
+            <h3>1. Multimodal perception</h3>
+            <ul>
+              <li>AestimAi vision analysis module stödjer högupplösta bilder (upp till 2576 px), vilket markant förbättrar objektidentifiering och skickbedömning från foto.</li>
+              <li>Bilder laddas upp via Files API — en gång, och kan sedan återanvändas i flera anrop utan ny uppladdning, vilket minskar latens och kostnad.</li>
+            </ul>
+            <p class="lab-layer-desc">Detta lager hanterar all visuell indata från användaren (foton på objekt, dokumentation, skick) och omvandlar den till strukturerad information som senare lager kan resonera kring.</p>
+          </article>
+
+          <article class="lab-layer">
+            <h3>2. Retrieval-Augmented Valuation (RAG)</h3>
+            <ul>
+              <li>Värderingen grundas i faktiska jämförbara försäljningar (Tradera, Blocket, auktioner, eBay) via en vektordatabas i kombination med strukturerade comparables (“comps”).</li>
+              <li><code>web_search_20260209</code> med dynamisk filtrering (inbyggt i AestimAi) används för att hämta färska marknadspriser utan att förorena kontextfönstret med onödigt brus.</li>
+            </ul>
+            <p class="lab-layer-desc">Genom att modellen aktivt hämtar och resonerar över verkliga, färska prisdata från jämförbara objekt, övergår systemet från ren språkmodell-gissning till en evidensbaserad värdering — analogt med hur en mänsklig värderingsman använder marknadsdata och jämförelseobjekt.</p>
+          </article>
+
+          <article class="lab-layer">
+            <h3>3. Agentisk orkestrering (tool use)</h3>
+            <ul>
+              <li>En agent-loop planerar och exekverar stegen: identifiera objekt → hämta comps → köra hedonisk ML-modell → ställa kontrollfrågor → fusionera resultat → motivera värderingen.</li>
+              <li>Kan implementeras som en egen tool-use-loop i UCI-servern, eller via Managed Agents i AestimAi som sköter loopen och sandlådan.</li>
+            </ul>
+            <p class="lab-layer-desc">Detta lager gör värderingen till en process snarare än ett enskilt anrop. Genom att bryta upp uppgiften i delsteg som kan verifieras och loggas separat, blir hela flödet både mer robust och mer transparent — en förutsättning för UCI:s krav på verifierad motprestation och spårbarhet.</p>
+          </article>
+
+          <article class="lab-layer">
+            <h3>4. Ensemble + Bayesiansk fusion</h3>
+            <ul>
+              <li>Flera skattare kombineras till en posterior-fördelning: (a) LLM-estimatet, (b) en gradient-boosted hedonisk modell (XGBoost/LightGBM) för datatäta kategorier, (c) hämtade comps, (d) respondent-/crowd-röster.</li>
+            </ul>
+            <p class="lab-layer-desc">Genom att kombinera flera oberoende värderingskällor med Bayesiansk viktning minskar systemets känslighet för enskilda felkällor. Detta är ”Bayesian voting” gjort på ett statistiskt korrekt sätt, i stället för en enkel medelvärdesbildning.</p>
+          </article>
+
+          <article class="lab-layer">
+            <h3>5. Kalibrerad osäkerhet — conformal prediction</h3>
+            <ul>
+              <li>Det nuvarande heuristiska 90&nbsp;%-intervallet ersätts med conformal prediction, vilket ger ett konfidensintervall med garanterad täckningsgrad.</li>
+            </ul>
+            <p class="lab-layer-desc">Conformal prediction är en statistiskt välgrundad metod för prediktionsintervall vars täckningsgrad (t.ex. 90&nbsp;%) håller över tid. För UCI innebär det att osäkerhetsintervallen får en verifierbar, snarare än godtycklig, statistisk grund.</p>
+          </article>
+
+          <article class="lab-layer">
+            <h3>6. Adaptiv intelligens (kostnad/kvalitet)</h3>
+            <ul>
+              <li>Adaptive thinking tillsammans med effort-parametern gör att modellen tänker hårdare på svåra eller tvetydiga objekt, och billigare på enkla.</li>
+              <li>Prompt caching på den stora värderingssystemprompten och kategoritaxonomin ger cirka 90&nbsp;% lägre kostnad och snabbare svarstider per anrop.</li>
+              <li>Structured outputs gör att JSON-schemat för värderingsresultatet (<code>uci_value</code>, intervall, <code>reasoning</code>, <code>key_factors</code>) alltid blir giltigt och maskinläsbart.</li>
+            </ul>
+            <p class="lab-layer-desc">Detta lager optimerar resursanvändningen dynamiskt utifrån hur svårt värderingsfallet är, samtidigt som strukturerade utdata garanterar att resultaten alltid kan konsumeras av nedströmssystem utan parsningsfel.</p>
+          </article>
+
+          <article class="lab-layer">
+            <h3>7. Federated / continual learning</h3>
+            <ul>
+              <li>Systemet lär av användarnas värderingar utan att centralisera rådata — federated learning-pelaren i arkitekturen.</li>
+            </ul>
+            <p class="lab-layer-desc">Genom att träna lokalt på användardata och endast dela modelluppdateringar (inte rå användardata) bibehålls integriteten samtidigt som värderingsmotorn blir bättre över tid.</p>
+          </article>
+
+          <article class="lab-layer">
+            <h3>8. Eval, drift &amp; förtroende</h3>
+            <ul>
+              <li>LLM-as-judge och backtesting mot kända slutpriser används för kontinuerlig kvalitetskontroll, tillsammans med övervakning av modelldrift över tid.</li>
+              <li>Batches API (50&nbsp;% lägre kostnad) används för massvärdering eller omvärdering av större bestånd.</li>
+              <li>On-chain-förankring av indexvärdena (UCIIndex på Base Sepolia) ger granskningsbarhet och transparens i linje med UCI:s hash-anchoring-arkitektur.</li>
+            </ul>
+            <p class="lab-layer-desc">Detta lager säkerställer att systemets prestanda kan mätas objektivt över tid, att kostnaderna hålls nere vid storskalig drift, och att värderingar förblir spårbara och manipulationssäkra — i linje med UCI:s status som ett icke-tokeniserat mätinstrument utanför MiCA-scope.</p>
+          </article>
+        </div>
+
+        <div class="lab-engine-cta">
+          <p>Vill du testa värderingsmotorn i praktiken?</p>
+          <button type="button" class="btn-primary" onclick="navigateTo('uci')">Starta UCI Värdering →</button>
+        </div>
       </div>
 
-      <!-- AestimAi Lab — sidfot (vår design) -->
-      <div class="lab-footer">
-        <div class="lab-footer-item">🚚 Fri frakt över 500 kr</div>
-        <div class="lab-footer-item">↩️ 30 dagars öppet köp</div>
-        <div class="lab-footer-item">⊙ Pris i SEK och UCI</div>
-        <div class="lab-footer-item">🔒 Säker betalning via Stripe</div>
+      <!-- Lab: Amazon-shop -->
+      <div class="lab-panel hidden" id="lab-panel-shop">
+
+        <p class="lab-shop-intro">Hårdvara för mätning, handel och spårning av verkligt värde — köp via Amazon.</p>
+
+        <div class="lab-categories" id="labCatFilter">
+          <button class="lab-cat-btn active" data-cat="all" onclick="filterLab('all')">Alla</button>
+          <button class="lab-cat-btn" data-cat="energy" onclick="filterLab('energy')">Energi</button>
+          <button class="lab-cat-btn" data-cat="nfc" onclick="filterLab('nfc')">NFC &amp; Handel</button>
+          <button class="lab-cat-btn" data-cat="iot" onclick="filterLab('iot')">IoT &amp; Sensorer</button>
+          <button class="lab-cat-btn" data-cat="compute" onclick="filterLab('compute')">Datorkraft</button>
+          <button class="lab-cat-btn" data-cat="security" onclick="filterLab('security')">Säkerhet</button>
+        </div>
+
+        <div class="lab-shop-area" id="labShopArea">
+          <div class="lab-loading">Ladda shop-fliken för att se produkter…</div>
+        </div>
+
+        <div class="lab-footer">
+          <div class="lab-footer-item">🚚 Fri frakt över 500 kr</div>
+          <div class="lab-footer-item">↩️ 30 dagars öppet köp</div>
+          <div class="lab-footer-item">⊙ Pris i SEK och UCI</div>
+          <div class="lab-footer-item">🔗 Köp via Amazon</div>
+        </div>
       </div>
 
     </section>

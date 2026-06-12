@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
       mode: 'payment',
       line_items: [{ price: priceId, quantity: Math.max(1, Math.min(10, Number(quantity))) }],
       success_url: `${origin}/?checkout=success&product=${productId}`,
-      cancel_url:  `${origin}/?checkout=cancel#ucilab`,
+      cancel_url:  `${origin}/?checkout=cancel#ucilab-shop`,
       locale: 'sv',
       shipping_address_collection: {
         allowed_countries: ['SE', 'NO', 'DK', 'FI', 'DE', 'NL', 'FR', 'GB'],
