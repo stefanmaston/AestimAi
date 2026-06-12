@@ -727,6 +727,15 @@
     });
   }
 
+  function updateProMailLink() {
+    const a = document.getElementById('proCtaMail');
+    if (!a) return;
+    const subject = t('pro.mailSubject');
+    if (subject && subject !== 'pro.mailSubject') {
+      a.href = `mailto:kontakt@aestimai.org?subject=${subject}`;
+    }
+  }
+
   function updateWalletStaticLabels() {
     const connect = document.getElementById('btnConnectWallet');
     if (connect && !connect.disabled) {
@@ -775,6 +784,7 @@
     updateMarketDynamicLabels();
     updateDashSelectLabels();
     updateWalletStaticLabels();
+    updateProMailLink();
   }
 
   function hydrate() {

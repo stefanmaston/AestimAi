@@ -1,16 +1,16 @@
-/* AestimAi Pro — full page copy (merged into i18n.js STRINGS) */
+/* AestimAi Pro — page copy (merged into i18n.js STRINGS) */
 (function (global) {
   const C = {
     sv: {
       intro: 'AestimAi:s värderingsmodeller är byggda för att fungera både som en konsumenttjänst och som en underliggande motor i andra system. Nedan beskriver vi hur white-label fungerar och vilka möjligheter som finns för partners som vill integrera UCI-värdering i sina egna produkter.',
       wlTitle: 'White-label',
       wlLead: 'Enterprise-abonnemanget inkluderar möjligheten att använda AestimAi:s gränssnitt och värderingsmotor under eget varumärke. Lämpligt för:',
-      u1t: 'Fastighetsmäklare &amp; banker', u1b: 'Erbjud UCI-baserad värdering direkt i din befintliga kundportal eller app under eget namn och logotype.',
+      u1t: 'Fastighetsmäklare & banker', u1b: 'Erbjud UCI-baserad värdering direkt i din befintliga kundportal eller app under eget namn och logotype.',
       u2t: 'Försäkringsbolag', u2b: 'Integrera neutral objektvärdering i skadehantering och försäkringsteckning utan att bygga egna modeller.',
-      u3t: 'Marknadsplatser', u3b: 'Lägg till en &quot;Vad är det värt?&quot;-funktion på din köp- och säljtjänst med automatisk UCI-värdering per annons.',
+      u3t: 'Marknadsplatser', u3b: 'Lägg till en "Vad är det värt?"-funktion på din köp- och säljtjänst med automatisk UCI-värdering per annons.',
       u4t: 'Revisionsbyråer', u4b: 'Komplettera balansräkningsvärdering med ett neutralt, maskinläsbart UCI-index som referensram i rapporter.',
       wlNote: 'White-label kräver Enterprise-abonnemang. Kontakta oss för anpassad konfiguration av domän, logotype och färger.',
-      oemTitle: 'OEM &amp; specialistintegrationer',
+      oemTitle: 'OEM & specialistintegrationer',
       oemLead: 'Utöver abonnemangen erbjuder vi djupare tekniska integrationer för partners som vill bädda in AestimAi:s värderingsmodeller direkt i sina egna produkter — utan att exponera AestimAi-varumärket alls.',
       o1t: 'API-first integration', o1b: 'Anropa våra värderingsmodeller direkt via REST API från vilket system som helst. Resultaten returneras som strukturerad JSON med UCI-värde, konfidensintervall och källhänvisningar. Ingen UI krävs.',
       o2t: 'Inbäddad värderingsmotor', o2b: 'Licensiera AestimAi:s Bayesianska värderingsmodell för lokal körning i din infrastruktur. Passar regulatoriska miljöer där data inte får lämna organisationen.',
@@ -28,12 +28,12 @@
       intro: 'AestimAi\'s valuation models are built to work both as a consumer service and as an underlying engine in other systems. Below we describe how white-label works and what options exist for partners who want to integrate UCI valuation into their own products.',
       wlTitle: 'White-label',
       wlLead: 'The Enterprise plan includes the ability to use AestimAi\'s interface and valuation engine under your own brand. Suitable for:',
-      u1t: 'Real estate agents &amp; banks', u1b: 'Offer UCI-based valuation directly in your existing customer portal or app under your own name and logo.',
+      u1t: 'Real estate agents & banks', u1b: 'Offer UCI-based valuation directly in your existing customer portal or app under your own name and logo.',
       u2t: 'Insurance companies', u2b: 'Integrate neutral object valuation into claims handling and underwriting without building your own models.',
-      u3t: 'Marketplaces', u3b: 'Add a &quot;What\'s it worth?&quot; feature to your buy-and-sell service with automatic UCI valuation per listing.',
+      u3t: 'Marketplaces', u3b: 'Add a "What\'s it worth?" feature to your buy-and-sell service with automatic UCI valuation per listing.',
       u4t: 'Audit firms', u4b: 'Complement balance-sheet valuation with a neutral, machine-readable UCI index as a reference framework in reports.',
       wlNote: 'White-label requires an Enterprise subscription. Contact us for custom domain, logo and colour configuration.',
-      oemTitle: 'OEM &amp; specialist integrations',
+      oemTitle: 'OEM & specialist integrations',
       oemLead: 'Beyond subscriptions we offer deeper technical integrations for partners who want to embed AestimAi\'s valuation models directly in their own products — without exposing the AestimAi brand at all.',
       o1t: 'API-first integration', o1b: 'Call our valuation models directly via REST API from any system. Results return as structured JSON with UCI value, confidence intervals and source references. No UI required.',
       o2t: 'Embedded valuation engine', o2b: 'License AestimAi\'s Bayesian valuation model for local execution in your infrastructure. Suitable for regulated environments where data must not leave the organisation.',
@@ -51,12 +51,12 @@
       intro: 'AestimAi-Bewertungsmodelle funktionieren sowohl als Verbraucherdienst als auch als Engine in anderen Systemen. Unten beschreiben wir White-Label und Integrationsmöglichkeiten für Partner, die UCI-Bewertung in eigene Produkte einbinden möchten.',
       wlTitle: 'White-Label',
       wlLead: 'Der Enterprise-Plan ermöglicht AestimAi-Oberfläche und Bewertungsengine unter Ihrer Marke. Geeignet für:',
-      u1t: 'Immobilienmakler &amp; Banken', u1b: 'UCI-Bewertung direkt in Ihrem Kundenportal oder Ihrer App unter eigenem Namen und Logo.',
+      u1t: 'Immobilienmakler & Banken', u1b: 'UCI-Bewertung direkt in Ihrem Kundenportal oder Ihrer App unter eigenem Namen und Logo.',
       u2t: 'Versicherungen', u2b: 'Neutrale Objektbewertung in Schaden- und Underwriting-Prozessen ohne eigene Modelle.',
-      u3t: 'Marktplätze', u3b: '&quot;Was ist es wert?&quot; mit automatischer UCI-Bewertung pro Anzeige.',
+      u3t: 'Marktplätze', u3b: '"Was ist es wert?" mit automatischer UCI-Bewertung pro Anzeige.',
       u4t: 'Wirtschaftsprüfer', u4b: 'Ergänzen Sie Bilanzbewertung mit einem neutralen, maschinenlesbaren UCI-Index.',
       wlNote: 'White-Label erfordert Enterprise. Kontaktieren Sie uns für Domain-, Logo- und Farbanpassung.',
-      oemTitle: 'OEM &amp; Spezialintegrationen',
+      oemTitle: 'OEM & Spezialintegrationen',
       oemLead: 'Tiefere technische Integrationen für Partner, die AestimAi-Modelle ohne sichtbare AestimAi-Marke einbetten möchten.',
       o1t: 'API-first Integration', o1b: 'REST-API-Aufrufe mit strukturiertem JSON inkl. UCI-Wert, Konfidenzintervallen und Quellenangaben. Keine UI nötig.',
       o2t: 'Eingebettete Bewertungsengine', o2b: 'Bayesisches Modell on-premise — für regulierte Umgebungen, in denen Daten die Organisation nicht verlassen dürfen.',
@@ -74,12 +74,12 @@
       intro: 'Les modèles AestimAi fonctionnent comme service grand public et comme moteur intégré dans d\'autres systèmes. Voici le white-label et les options d\'intégration UCI pour les partenaires.',
       wlTitle: 'White-label',
       wlLead: 'L\'offre Enterprise permet d\'utiliser l\'interface et le moteur AestimAi sous votre marque. Idéal pour :',
-      u1t: 'Agents immobiliers &amp; banques', u1b: 'Valorisation UCI dans votre portail client sous votre nom et logo.',
+      u1t: 'Agents immobiliers & banques', u1b: 'Valorisation UCI dans votre portail client sous votre nom et logo.',
       u2t: 'Assurances', u2b: 'Valorisation neutre des objets dans les sinistres et souscriptions sans modèles internes.',
       u3t: 'Places de marché', u3b: 'Fonction « Combien ça vaut ? » avec valorisation UCI automatique par annonce.',
       u4t: 'Cabinets d\'audit', u4b: 'Complétez la valorisation comptable avec un indice UCI neutre et lisible par machine.',
       wlNote: 'White-label nécessite Enterprise. Contactez-nous pour domaine, logo et couleurs.',
-      oemTitle: 'OEM &amp; intégrations spécialisées',
+      oemTitle: 'OEM & intégrations spécialisées',
       oemLead: 'Intégrations techniques profondes pour intégrer les modèles AestimAi sans exposer la marque.',
       o1t: 'Intégration API-first', o1b: 'Appels REST avec JSON structuré, valeur UCI, intervalles de confiance et sources. Aucune UI requise.',
       o2t: 'Moteur embarqué', o2b: 'Modèle bayésien en local pour environnements réglementés où les données ne peuvent quitter l\'organisation.',
@@ -97,12 +97,12 @@
       intro: 'I modelli AestimAi funzionano come servizio consumer e come motore in altri sistemi. Di seguito white-label e integrazioni UCI per i partner.',
       wlTitle: 'White-label',
       wlLead: 'Enterprise consente interfaccia e motore AestimAi con il vostro marchio. Adatto a:',
-      u1t: 'Agenti immobiliari &amp; banche', u1b: 'Valutazione UCI nel portale clienti con nome e logo propri.',
+      u1t: 'Agenti immobiliari & banche', u1b: 'Valutazione UCI nel portale clienti con nome e logo propri.',
       u2t: 'Assicurazioni', u2b: 'Valutazione neutra degli oggetti in sinistri e polizze senza modelli propri.',
       u3t: 'Marketplace', u3b: 'Funzione « Quanto vale? » con valutazione UCI automatica per annuncio.',
       u4t: 'Studi di revisione', u4b: 'Integrate un indice UCI neutro e machine-readable nei report.',
       wlNote: 'White-label richiede Enterprise. Contattateci per dominio, logo e colori.',
-      oemTitle: 'OEM &amp; integrazioni specialistiche',
+      oemTitle: 'OEM & integrazioni specialistiche',
       oemLead: 'Integrazioni tecniche profonde per incorporare i modelli AestimAi senza esporre il brand.',
       o1t: 'Integrazione API-first', o1b: 'REST API con JSON strutturato, valore UCI, intervalli di confidenza e fonti. Nessuna UI richiesta.',
       o2t: 'Motore embedded', o2b: 'Modello bayesiano on-premise per ambienti regolamentati dove i dati non possono uscire dall\'organizzazione.',
@@ -120,7 +120,7 @@
       intro: 'Los modelos AestimAi funcionan como servicio al consumidor y como motor en otros sistemas. A continuación, white-label e integraciones UCI para socios.',
       wlTitle: 'White-label',
       wlLead: 'Enterprise permite usar la interfaz y el motor AestimAi bajo su marca. Adecuado para:',
-      u1t: 'Inmobiliarias &amp; bancos', u1b: 'Valoración UCI en su portal de clientes con su nombre y logo.',
+      u1t: 'Inmobiliarias & bancos', u1b: 'Valoración UCI en su portal de clientes con su nombre y logo.',
       u2t: 'Seguros', u2b: 'Valoración neutra de objetos en siniestros y suscripciones sin modelos propios.',
       u3t: 'Marketplaces', u3b: 'Función « ¿Cuánto vale? » con valoración UCI automática por anuncio.',
       u4t: 'Auditoría', u4b: 'Complemente la valoración contable con un índice UCI neutro y legible por máquina.',
@@ -141,64 +141,53 @@
     },
   };
 
-  function tagsHtml(arr) {
-    return arr.map(t => `<span>${t}</span>`).join('');
-  }
-
-  function proBody(lang) {
+  function proKeys(lang) {
     const c = C[lang] || C.en;
-    return `
-      <div class="pro-intro"><p>${c.intro}</p></div>
-      <div class="pro-section">
-        <h2>${c.wlTitle}</h2>
-        <p>${c.wlLead}</p>
-        <div class="pro-usecase-grid">
-          <div class="pro-usecase"><h4>${c.u1t}</h4><p>${c.u1b}</p></div>
-          <div class="pro-usecase"><h4>${c.u2t}</h4><p>${c.u2b}</p></div>
-          <div class="pro-usecase"><h4>${c.u3t}</h4><p>${c.u3b}</p></div>
-          <div class="pro-usecase"><h4>${c.u4t}</h4><p>${c.u4b}</p></div>
-        </div>
-        <p class="pro-contact-note">${c.wlNote}</p>
-      </div>
-      <div class="pro-section">
-        <h2>${c.oemTitle}</h2>
-        <p>${c.oemLead}</p>
-        <div class="pro-oem-grid">
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">${c.o1t}</div>
-            <p>${c.o1b}</p>
-            <div class="pro-oem-tags"><span>REST API</span><span>JSON</span><span>Webhook</span></div>
-          </div>
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">${c.o2t}</div>
-            <p>${c.o2b}</p>
-            <div class="pro-oem-tags">${tagsHtml(c.o2tags)}</div>
-          </div>
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">${c.o3t}</div>
-            <p>${c.o3b}</p>
-            <div class="pro-oem-tags">${tagsHtml(c.o3tags)}</div>
-          </div>
-          <div class="pro-oem-card">
-            <div class="pro-oem-title">${c.o4t}</div>
-            <p>${c.o4b}</p>
-            <div class="pro-oem-tags">${tagsHtml(c.o4tags)}</div>
-          </div>
-        </div>
-      </div>
-      <div class="pro-cta">
-        <h3>${c.ctaTitle}</h3>
-        <p>${c.ctaLead}</p>
-        <a class="btn-plan btn-plan-enterprise" href="mailto:kontakt@aestimai.org?subject=${c.mailSubject}">${c.ctaBtn}</a>
-      </div>`;
+    return {
+      'pro.intro': c.intro,
+      'pro.wlTitle': c.wlTitle,
+      'pro.wlLead': c.wlLead,
+      'pro.u1t': c.u1t,
+      'pro.u1b': c.u1b,
+      'pro.u2t': c.u2t,
+      'pro.u2b': c.u2b,
+      'pro.u3t': c.u3t,
+      'pro.u3b': c.u3b,
+      'pro.u4t': c.u4t,
+      'pro.u4b': c.u4b,
+      'pro.wlNote': c.wlNote,
+      'pro.oemTitle': c.oemTitle,
+      'pro.oemLead': c.oemLead,
+      'pro.o1t': c.o1t,
+      'pro.o1b': c.o1b,
+      'pro.o2t': c.o2t,
+      'pro.o2b': c.o2b,
+      'pro.o2tag1': c.o2tags[0],
+      'pro.o2tag2': c.o2tags[1],
+      'pro.o2tag3': c.o2tags[2],
+      'pro.o3t': c.o3t,
+      'pro.o3b': c.o3b,
+      'pro.o3tag1': c.o3tags[0],
+      'pro.o3tag2': c.o3tags[1],
+      'pro.o3tag3': c.o3tags[2],
+      'pro.o4t': c.o4t,
+      'pro.o4b': c.o4b,
+      'pro.o4tag1': c.o4tags[0],
+      'pro.o4tag2': c.o4tags[1],
+      'pro.o4tag3': c.o4tags[2],
+      'pro.ctaTitle': c.ctaTitle,
+      'pro.ctaLead': c.ctaLead,
+      'pro.ctaBtn': c.ctaBtn,
+      'pro.mailSubject': c.mailSubject,
+    };
   }
 
   global.PRO_I18N = {
-    sv: { 'pro.body': proBody('sv') },
-    en: { 'pro.body': proBody('en') },
-    de: { 'pro.body': proBody('de') },
-    fr: { 'pro.body': proBody('fr') },
-    it: { 'pro.body': proBody('it') },
-    es: { 'pro.body': proBody('es') },
+    sv: proKeys('sv'),
+    en: proKeys('en'),
+    de: proKeys('de'),
+    fr: proKeys('fr'),
+    it: proKeys('it'),
+    es: proKeys('es'),
   };
 })(window);

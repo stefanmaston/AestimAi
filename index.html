@@ -676,7 +676,74 @@
         <p class="module-desc" data-i18n="module.pro.desc">Professional subscriptions, white-label and OEM integrations</p>
       </div>
 
-      <div data-i18n-html="pro.body"></div>
+      <div class="pro-intro">
+        <p data-i18n="pro.intro">AestimAi's valuation models are built to work both as a consumer service and as an underlying engine in other systems. Below we describe how white-label works and what options exist for partners who want to integrate UCI valuation into their own products.</p>
+      </div>
+
+      <div class="pro-section">
+        <h2 data-i18n="pro.wlTitle">White-label</h2>
+        <p data-i18n="pro.wlLead">The Enterprise plan includes the ability to use AestimAi's interface and valuation engine under your own brand. Suitable for:</p>
+        <div class="pro-usecase-grid">
+          <div class="pro-usecase">
+            <h4 data-i18n="pro.u1t">Real estate agents & banks</h4>
+            <p data-i18n="pro.u1b">Offer UCI-based valuation directly in your existing customer portal or app under your own name and logo.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4 data-i18n="pro.u2t">Insurance companies</h4>
+            <p data-i18n="pro.u2b">Integrate neutral object valuation into claims handling and underwriting without building your own models.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4 data-i18n="pro.u3t">Marketplaces</h4>
+            <p data-i18n="pro.u3b">Add a "What's it worth?" feature to your buy-and-sell service with automatic UCI valuation per listing.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4 data-i18n="pro.u4t">Audit firms</h4>
+            <p data-i18n="pro.u4b">Complement balance-sheet valuation with a neutral, machine-readable UCI index as a reference framework in reports.</p>
+          </div>
+        </div>
+        <p class="pro-contact-note" data-i18n="pro.wlNote">White-label requires an Enterprise subscription. Contact us for custom domain, logo and colour configuration.</p>
+      </div>
+
+      <div class="pro-section">
+        <h2 data-i18n="pro.oemTitle">OEM & specialist integrations</h2>
+        <p data-i18n="pro.oemLead">Beyond subscriptions we offer deeper technical integrations for partners who want to embed AestimAi's valuation models directly in their own products — without exposing the AestimAi brand at all.</p>
+        <div class="pro-oem-grid">
+          <div class="pro-oem-card">
+            <div class="pro-oem-title" data-i18n="pro.o1t">API-first integration</div>
+            <p data-i18n="pro.o1b">Call our valuation models directly via REST API from any system. Results return as structured JSON with UCI value, confidence intervals and source references. No UI required.</p>
+            <div class="pro-oem-tags">
+              <span>REST API</span><span>JSON</span><span>Webhook</span>
+            </div>
+          </div>
+          <div class="pro-oem-card">
+            <div class="pro-oem-title" data-i18n="pro.o2t">Embedded valuation engine</div>
+            <p data-i18n="pro.o2b">License AestimAi's Bayesian valuation model for local execution in your infrastructure. Suitable for regulated environments where data must not leave the organisation.</p>
+            <div class="pro-oem-tags">
+              <span data-i18n="pro.o2tag1">On-premise</span><span data-i18n="pro.o2tag2">Docker</span><span data-i18n="pro.o2tag3">Data protection</span>
+            </div>
+          </div>
+          <div class="pro-oem-card">
+            <div class="pro-oem-title" data-i18n="pro.o3t">Industry-specific calibration</div>
+            <p data-i18n="pro.o3b">We calibrate the valuation model against your industry's specific data — e.g. agricultural property, marine assets, industrial equipment or intellectual property.</p>
+            <div class="pro-oem-tags">
+              <span data-i18n="pro.o3tag1">Custom model</span><span data-i18n="pro.o3tag2">Training data</span><span data-i18n="pro.o3tag3">Validation</span>
+            </div>
+          </div>
+          <div class="pro-oem-card">
+            <div class="pro-oem-title" data-i18n="pro.o4t">UCI index as IoT reference</div>
+            <p data-i18n="pro.o4b">Connect meter data from energy meters, sensors and tracking systems directly to the UCI index for automatic real-time valuation of physical assets.</p>
+            <div class="pro-oem-tags">
+              <span data-i18n="pro.o4tag1">IoT</span><span data-i18n="pro.o4tag2">MQTT</span><span data-i18n="pro.o4tag3">Real-time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pro-cta">
+        <h3 data-i18n="pro.ctaTitle">Interested in white-label or OEM?</h3>
+        <p data-i18n="pro.ctaLead">Contact us for a technical walkthrough and pricing tailored to your volume and integration.</p>
+        <a class="btn-plan btn-plan-enterprise" id="proCtaMail" href="mailto:kontakt@aestimai.org?subject=White-label%20%2F%20OEM%20inquiry" data-i18n="pro.ctaBtn">Contact us →</a>
+      </div>
 
     </section>
 
@@ -1650,12 +1717,12 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <script src="lab-i18n.js"></script>
-  <script src="market-i18n.js"></script>
-  <script src="site-i18n.js"></script>
-  <script src="about-i18n.js"></script>
-  <script src="pro-i18n.js"></script>
-  <script src="i18n.js"></script>
+  <script src="lab-i18n.js?v=20260612-4"></script>
+  <script src="market-i18n.js?v=20260612-4"></script>
+  <script src="site-i18n.js?v=20260612-4"></script>
+  <script src="about-i18n.js?v=20260612-4"></script>
+  <script src="pro-i18n.js?v=20260612-4"></script>
+  <script src="i18n.js?v=20260612-4"></script>
   <!-- Auth-modal -->
   <div class="auth-overlay hidden" id="authOverlay" onclick="closeAuthModal(event)">
     <div class="auth-modal" id="authModal">
@@ -1773,7 +1840,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260612-2"></script>
+  <script src="app.js?v=20260612-4"></script>
   <script type="module" src="wallet-ui.js"></script>
 
   <!-- Aktivera AdSense-annonser -->
