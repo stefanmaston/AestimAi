@@ -2143,6 +2143,7 @@ function setupSettings() {
       syncLanguageToSupabase(value);
       updatePanelHelp(state.currentModule);
       refreshDashboardCaps();
+      if (labShopLoaded) renderLabProducts();
       i18n.applyTranslations();
     } else if (kind === 'currency') {
       showToast(i18n.t('settings.currency.saved'));
@@ -2273,6 +2274,7 @@ function switchLabTab(tab, opts = {}) {
 async function loadLabProducts() {
   const area = document.getElementById('labShopArea');
   if (!area) return;
+  const tr = (k, fb) => window.AestimI18n?.t?.(k) || fb;
 
   try {
     const res  = await fetch('/api/shop/products');
@@ -2280,26 +2282,31 @@ async function loadLabProducts() {
     labProducts = data.products || [];
     renderLabProducts();
   } catch (err) {
-    area.innerHTML = '<div class="lab-error">Kunde inte ladda produkter. Försök igen senare.</div>';
+    area.innerHTML = `<div class="lab-error">${tr('lab.shop.error', 'Could not load products. Try again later.')}</div>`;
   }
 }
 
 function renderLabProducts() {
   const area = document.getElementById('labShopArea');
   if (!area || !labProducts.length) return;
+  const tr = (k, fb) => window.AestimI18n?.t?.(k) || fb;
 
   const visible = labActiveCat === 'all'
     ? labProducts
     : labProducts.filter(p => p.category === labActiveCat);
 
   if (!visible.length) {
-    area.innerHTML = '<div class="lab-empty">Inga produkter i den här kategorin.</div>';
+    area.innerHTML = `<div class="lab-empty">${tr('lab.shop.empty', 'No products in this category.')}</div>`;
     return;
   }
+
+  const buyLabel = tr('lab.shop.buyAmazon', 'Buy on Amazon →');
+  const buyTitleTpl = tr('lab.shop.buyTitle', 'Buy {name} on Amazon');
 
   area.innerHTML = visible.map(p => {
     const badgeCls = BADGE_CLASS[p.category] || '';
     const specs    = (p.specs || []).map(s => `<li>${s}</li>`).join('');
+    const buyTitle = buyTitleTpl.replace('{name}', p.name);
     return `
       <div class="lab-product-row" data-cat="${p.category}">
         <div class="lab-product-thumb">${p.icon || '📦'}</div>
@@ -2318,8 +2325,8 @@ function renderLabProducts() {
              href="${p.buyUrl}"
              target="_blank"
              rel="noopener sponsored"
-             title="Köp ${p.name} på Amazon">
-            Köp på Amazon →
+             title="${buyTitle}">
+            ${buyLabel}
           </a>
         </div>
       </div>`;

@@ -572,6 +572,10 @@
     },
   };
 
+  APP_LANGUAGES.forEach(lang => {
+    if (global.LAB_I18N?.[lang]) Object.assign(STRINGS[lang], global.LAB_I18N[lang]);
+  });
+
   let currentLang = DEFAULT_LANGUAGE;
   let capDisplayCurrency = DEFAULT_CAP_CURRENCY;
   let onChange = null;

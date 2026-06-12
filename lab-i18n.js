@@ -1,0 +1,269 @@
+/* AestimAi Lab — page copy (merged into i18n.js STRINGS) */
+(function (global) {
+  const ENGINE = {
+    sv: `<div class="lab-engine-intro">
+          <p class="lab-engine-lead">AestimAi Lab baseras på en kontinuerlig utveckling av en avancerad AI-arkitektur för agentisk, retrieval-grundad och kalibrerad värdering med gradvis självförbättrande (autodidaktisk) precision.</p>
+          <p>Inom AestimAi Lab har vi avsikten att uppnå ett universellt giltigt värdeindex (UCI) som kan användas i många olika tillämpningar, både privat och publikt.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Kärnskifte</h2>
+          <p>Dagens lösning bygger på att AestimAi-modellen själv ”gissar” ett pris utifrån en beskrivning och eventuella bilder, men den gör detta med ”Big-Data”-inferens i bakgrunden och ett slags adaptivt regelsystem. Målet är att ersätta de traditionella värderingsmodellerna med en agentisk, retrieval-grundad och kalibrerad värderingsmotor, där modellen resonerar över verkliga marknadsdata snarare än att estimera med olika fördefinierade antaganden och uppskattningar.</p>
+          <p>Detta höjer precisionen, ger trovärdiga osäkerhetsintervall och gör systemet granskningsbart — vilket är centralt för UCI som ett juridiskt definierat värderingsindexmått.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Arkitektur — lager för lager</h2>
+          <article class="lab-layer"><h3>1. Multimodal perception</h3><ul><li>AestimAi vision analysis module stödjer högupplösta bilder (upp till 2576 px), vilket markant förbättrar objektidentifiering och skickbedömning från foto.</li><li>Bilder laddas upp via Files API — en gång, och kan sedan återanvändas i flera anrop utan ny uppladdning, vilket minskar latens och kostnad.</li></ul><p class="lab-layer-desc">Detta lager hanterar all visuell indata från användaren (foton på objekt, dokumentation, skick) och omvandlar den till strukturerad information som senare lager kan resonera kring.</p></article>
+          <article class="lab-layer"><h3>2. Retrieval-Augmented Valuation (RAG)</h3><ul><li>Värderingen grundas i faktiska jämförbara försäljningar (Tradera, Blocket, auktioner, eBay) via en vektordatabas i kombination med strukturerade comparables (“comps”).</li><li><code>web_search_20260209</code> med dynamisk filtrering (inbyggt i AestimAi) används för att hämta färska marknadspriser utan att förorena kontextfönstret med onödigt brus.</li></ul><p class="lab-layer-desc">Genom att modellen aktivt hämtar och resonerar över verkliga, färska prisdata från jämförbara objekt, övergår systemet från ren språkmodell-gissning till en evidensbaserad värdering — analogt med hur en mänsklig värderingsman använder marknadsdata och jämförelseobjekt.</p></article>
+          <article class="lab-layer"><h3>3. Agentisk orkestrering (tool use)</h3><ul><li>En agent-loop planerar och exekverar stegen: identifiera objekt → hämta comps → köra hedonisk ML-modell → ställa kontrollfrågor → fusionera resultat → motivera värderingen.</li><li>Kan implementeras som en egen tool-use-loop i UCI-servern, eller via Managed Agents i AestimAi som sköter loopen och sandlådan.</li></ul><p class="lab-layer-desc">Detta lager gör värderingen till en process snarare än ett enskilt anrop. Genom att bryta upp uppgiften i delsteg som kan verifieras och loggas separat, blir hela flödet både mer robust och mer transparent — en förutsättning för UCI:s krav på verifierad motprestation och spårbarhet.</p></article>
+          <article class="lab-layer"><h3>4. Ensemble + Bayesiansk fusion</h3><ul><li>Flera skattare kombineras till en posterior-fördelning: (a) LLM-estimatet, (b) en gradient-boosted hedonisk modell (XGBoost/LightGBM) för datatäta kategorier, (c) hämtade comps, (d) respondent-/crowd-röster.</li></ul><p class="lab-layer-desc">Genom att kombinera flera oberoende värderingskällor med Bayesiansk viktning minskar systemets känslighet för enskilda felkällor. Detta är ”Bayesian voting” gjort på ett statistiskt korrekt sätt, i stället för en enkel medelvärdesbildning.</p></article>
+          <article class="lab-layer"><h3>5. Kalibrerad osäkerhet — conformal prediction</h3><ul><li>Det nuvarande heuristiska 90&nbsp;%-intervallet ersätts med conformal prediction, vilket ger ett konfidensintervall med garanterad täckningsgrad.</li></ul><p class="lab-layer-desc">Conformal prediction är en statistiskt välgrundad metod för prediktionsintervall vars täckningsgrad (t.ex. 90&nbsp;%) håller över tid. För UCI innebär det att osäkerhetsintervallen får en verifierbar, snarare än godtycklig, statistisk grund.</p></article>
+          <article class="lab-layer"><h3>6. Adaptiv intelligens (kostnad/kvalitet)</h3><ul><li>Adaptive thinking tillsammans med effort-parametern gör att modellen tänker hårdare på svåra eller tvetydiga objekt, och billigare på enkla.</li><li>Prompt caching på den stora värderingssystemprompten och kategoritaxonomin ger cirka 90&nbsp;% lägre kostnad och snabbare svarstider per anrop.</li><li>Structured outputs gör att JSON-schemat för värderingsresultatet (<code>uci_value</code>, intervall, <code>reasoning</code>, <code>key_factors</code>) alltid blir giltigt och maskinläsbart.</li></ul><p class="lab-layer-desc">Detta lager optimerar resursanvändningen dynamiskt utifrån hur svårt värderingsfallet är, samtidigt som strukturerade utdata garanterar att resultaten alltid kan konsumeras av nedströmssystem utan parsningsfel.</p></article>
+          <article class="lab-layer"><h3>7. Federated / continual learning</h3><ul><li>Systemet lär av användarnas värderingar utan att centralisera rådata — federated learning-pelaren i arkitekturen.</li></ul><p class="lab-layer-desc">Genom att träna lokalt på användardata och endast dela modelluppdateringar (inte rå användardata) bibehålls integriteten samtidigt som värderingsmotorn blir bättre över tid.</p></article>
+          <article class="lab-layer"><h3>8. Eval, drift &amp; förtroende</h3><ul><li>LLM-as-judge och backtesting mot kända slutpriser används för kontinuerlig kvalitetskontroll, tillsammans med övervakning av modelldrift över tid.</li><li>Batches API (50&nbsp;% lägre kostnad) används för massvärdering eller omvärdering av större bestånd.</li><li>On-chain-förankring av indexvärdena (UCIIndex på Base Sepolia) ger granskningsbarhet och transparens i linje med UCI:s hash-anchoring-arkitektur.</li></ul><p class="lab-layer-desc">Detta lager säkerställer att systemets prestanda kan mätas objektivt över tid, att kostnaderna hålls nere vid storskalig drift, och att värderingar förblir spårbara och manipulationssäkra — i linje med UCI:s status som ett icke-tokeniserat mätinstrument utanför MiCA-scope.</p></article>
+        </div>
+        <div class="lab-engine-cta"><p>Vill du testa värderingsmotorn i praktiken?</p><button type="button" class="btn-primary" onclick="navigateTo(\'uci\')">Starta UCI Värdering →</button></div>`,
+
+    en: `<div class="lab-engine-intro">
+          <p class="lab-engine-lead">AestimAi Lab is built on continuous development of an advanced AI architecture for agentic, retrieval-grounded and calibrated valuation with gradually self-improving (autodidactic) precision.</p>
+          <p>Within AestimAi Lab we aim to achieve a universally valid value index (UCI) that can be used in many different applications, both private and public.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Core shift</h2>
+          <p>Today’s approach relies on the AestimAi model “guessing” a price from a description and optional images, backed by big-data inference and an adaptive rule system. The goal is to replace traditional valuation models with an agentic, retrieval-grounded and calibrated valuation engine where the model reasons over real market data rather than estimating from predefined assumptions.</p>
+          <p>This raises precision, provides credible uncertainty intervals and makes the system auditable — central to UCI as a legally defined valuation index measure.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Architecture — layer by layer</h2>
+          <article class="lab-layer"><h3>1. Multimodal perception</h3><ul><li>The AestimAi vision analysis module supports high-resolution images (up to 2576 px), greatly improving object identification and condition assessment from photos.</li><li>Images are uploaded via the Files API once and can be reused across calls without re-upload, reducing latency and cost.</li></ul><p class="lab-layer-desc">This layer handles all visual input from the user (object photos, documentation, condition) and converts it into structured information for later layers to reason over.</p></article>
+          <article class="lab-layer"><h3>2. Retrieval-Augmented Valuation (RAG)</h3><ul><li>Valuation is grounded in actual comparable sales (Tradera, Blocket, auctions, eBay) via a vector database combined with structured comparables (“comps”).</li><li><code>web_search_20260209</code> with dynamic filtering (built into AestimAi) fetches fresh market prices without polluting the context window with noise.</li></ul><p class="lab-layer-desc">By actively retrieving and reasoning over real, fresh price data from comparable items, the system moves from pure language-model guessing to evidence-based valuation — similar to how a human appraiser uses market data and comps.</p></article>
+          <article class="lab-layer"><h3>3. Agentic orchestration (tool use)</h3><ul><li>An agent loop plans and executes steps: identify object → fetch comps → run hedonic ML model → ask clarifying questions → fuse results → justify the valuation.</li><li>Can be implemented as a dedicated tool-use loop in the UCI server, or via Managed Agents in AestimAi that handle the loop and sandbox.</li></ul><p class="lab-layer-desc">This layer turns valuation into a process rather than a single call. Breaking the task into verifiable, logged sub-steps makes the flow more robust and transparent — required for UCI’s verified consideration and traceability.</p></article>
+          <article class="lab-layer"><h3>4. Ensemble + Bayesian fusion</h3><ul><li>Multiple estimators are combined into a posterior distribution: (a) LLM estimate, (b) gradient-boosted hedonic model (XGBoost/LightGBM) for data-rich categories, (c) retrieved comps, (d) respondent/crowd votes.</li></ul><p class="lab-layer-desc">Combining independent valuation sources with Bayesian weighting reduces sensitivity to single points of failure. This is statistically correct “Bayesian voting”, not simple averaging.</p></article>
+          <article class="lab-layer"><h3>5. Calibrated uncertainty — conformal prediction</h3><ul><li>The current heuristic 90&nbsp;% interval is replaced with conformal prediction, providing confidence intervals with guaranteed coverage.</li></ul><p class="lab-layer-desc">Conformal prediction is a statistically grounded method for prediction intervals whose coverage (e.g. 90&nbsp;%) holds over time. For UCI, uncertainty intervals gain a verifiable rather than arbitrary statistical basis.</p></article>
+          <article class="lab-layer"><h3>6. Adaptive intelligence (cost/quality)</h3><ul><li>Adaptive thinking with the effort parameter makes the model think harder on difficult or ambiguous items, and cheaper on simple ones.</li><li>Prompt caching on the large valuation system prompt and category taxonomy gives ~90&nbsp;% lower cost and faster response times per call.</li><li>Structured outputs ensure the JSON schema for valuation results (<code>uci_value</code>, interval, <code>reasoning</code>, <code>key_factors</code>) is always valid and machine-readable.</li></ul><p class="lab-layer-desc">This layer optimizes resource use dynamically based on case difficulty while structured outputs guarantee downstream systems can consume results without parsing errors.</p></article>
+          <article class="lab-layer"><h3>7. Federated / continual learning</h3><ul><li>The system learns from user valuations without centralizing raw data — the federated learning pillar of the architecture.</li></ul><p class="lab-layer-desc">Training locally on user data and sharing only model updates (not raw user data) preserves privacy while the valuation engine improves over time.</p></article>
+          <article class="lab-layer"><h3>8. Eval, drift &amp; trust</h3><ul><li>LLM-as-judge and backtesting against known final prices provide continuous quality control, with model drift monitoring over time.</li><li>Batches API (50&nbsp;% lower cost) is used for bulk valuation or revaluation of large portfolios.</li><li>On-chain anchoring of index values (UCIIndex on Base Sepolia) provides auditability and transparency aligned with UCI’s hash-anchoring architecture.</li></ul><p class="lab-layer-desc">This layer ensures performance can be measured objectively over time, costs stay low at scale, and valuations remain traceable and tamper-resistant — aligned with UCI as a non-tokenised measurement instrument outside MiCA scope.</p></article>
+        </div>
+        <div class="lab-engine-cta"><p>Want to try the valuation engine in practice?</p><button type="button" class="btn-primary" onclick="navigateTo(\'uci\')">Start UCI Valuation →</button></div>`,
+
+    de: `<div class="lab-engine-intro">
+          <p class="lab-engine-lead">AestimAi Lab basiert auf der kontinuierlichen Entwicklung einer fortgeschrittenen KI-Architektur für agentische, retrieval-basierte und kalibrierte Bewertung mit schrittweise selbstverbessernder (autodidaktischer) Präzision.</p>
+          <p>In AestimAi Lab streben wir einen universell gültigen Werteindex (UCI) an, der in vielen Anwendungen — privat und öffentlich — genutzt werden kann.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Kernwandel</h2>
+          <p>Die heutige Lösung basiert darauf, dass das AestimAi-Modell einen Preis aus Beschreibung und optionalen Bildern „schätzt“, unterstützt durch Big-Data-Inferenz und ein adaptives Regelsystem. Ziel ist es, traditionelle Bewertungsmodelle durch eine agentische, retrieval-basierte und kalibrierte Bewertungsengine zu ersetzen, die über echte Marktdaten reasoniert statt vordefinierte Annahmen zu schätzen.</p>
+          <p>Das erhöht die Präzision, liefert glaubwürdige Unsicherheitsintervalle und macht das System prüfbar — zentral für UCI als rechtlich definiertes Bewertungsindex-Maß.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Architektur — Schicht für Schicht</h2>
+          <article class="lab-layer"><h3>1. Multimodale Wahrnehmung</h3><ul><li>Das AestimAi Vision-Analysemodul unterstützt hochauflösende Bilder (bis 2576 px) und verbessert Objekterkennung und Zustandsbeurteilung aus Fotos deutlich.</li><li>Bilder werden einmal über die Files API hochgeladen und in mehreren Aufrufen wiederverwendet — weniger Latenz und Kosten.</li></ul><p class="lab-layer-desc">Diese Schicht verarbeitet visuelle Eingaben (Objektfotos, Dokumentation, Zustand) und wandelt sie in strukturierte Information für nachfolgende Schichten um.</p></article>
+          <article class="lab-layer"><h3>2. Retrieval-Augmented Valuation (RAG)</h3><ul><li>Die Bewertung stützt sich auf vergleichbare Verkäufe (Tradera, Blocket, Auktionen, eBay) via Vektordatenbank und strukturierte Comparables („Comps“).</li><li><code>web_search_20260209</code> mit dynamischer Filterung (in AestimAi integriert) holt frische Marktpreise ohne Kontextfenster mit Rauschen zu belasten.</li></ul><p class="lab-layer-desc">Durch aktives Abrufen und Reasoning über frische Preisdaten vergleichbarer Objekte geht das System von reiner Sprachmodell-Schätzung zu evidenzbasierter Bewertung über.</p></article>
+          <article class="lab-layer"><h3>3. Agentische Orchestrierung (Tool Use)</h3><ul><li>Eine Agent-Schleife plant und führt aus: Objekt identifizieren → Comps holen → hedonic ML-Modell → Rückfragen → Ergebnisse fusionieren → Bewertung begründen.</li><li>Implementierbar als Tool-Use-Loop im UCI-Server oder via Managed Agents in AestimAi.</li></ul><p class="lab-layer-desc">Diese Schicht macht Bewertung zu einem Prozess statt einem einzelnen Aufruf — robuster und transparenter für UCI-Anforderungen an Nachweis und Nachverfolgbarkeit.</p></article>
+          <article class="lab-layer"><h3>4. Ensemble + Bayes'sche Fusion</h3><ul><li>Mehrere Schätzer werden zu einer Posterior-Verteilung kombiniert: (a) LLM-Schätzung, (b) gradient-boosted hedonic Modell, (c) Comps, (d) Respondent-/Crowd-Stimmen.</li></ul><p class="lab-layer-desc">Bayes'sche Gewichtung unabhängiger Quellen reduziert Abhängigkeit von Einzelfehlern — statistisch korrektes „Bayesian Voting“ statt einfachem Mittel.</p></article>
+          <article class="lab-layer"><h3>5. Kalibrierte Unsicherheit — Conformal Prediction</h3><ul><li>Das heuristische 90&nbsp;%-Intervall wird durch Conformal Prediction ersetzt — Konfidenzintervalle mit garantierter Abdeckung.</li></ul><p class="lab-layer-desc">Conformal Prediction liefert statistisch fundierte Intervalle deren Abdeckung (z. B. 90&nbsp;%) über die Zeit hält — verifizierbare Grundlage für UCI-Unsicherheitsintervalle.</p></article>
+          <article class="lab-layer"><h3>6. Adaptive Intelligenz (Kosten/Qualität)</h3><ul><li>Adaptive Thinking mit Effort-Parameter: mehr Denkarbeit bei schwierigen Objekten, günstiger bei einfachen.</li><li>Prompt Caching auf Systemprompt und Kategorietaxonomie: ~90&nbsp;% niedrigere Kosten und schnellere Antworten.</li><li>Structured Outputs garantieren gültiges, maschinenlesbares JSON (<code>uci_value</code>, Intervall, <code>reasoning</code>, <code>key_factors</code>).</li></ul><p class="lab-layer-desc">Dynamische Ressourcenoptimierung je nach Schwierigkeit bei garantiert parse-freien Downstream-Ergebnissen.</p></article>
+          <article class="lab-layer"><h3>7. Federated / Continual Learning</h3><ul><li>Das System lernt aus Nutzerbewertungen ohne Rohdaten zu zentralisieren — Federated-Learning-Säule der Architektur.</li></ul><p class="lab-layer-desc">Lokales Training und nur Modell-Updates (keine Rohdaten) schützen die Privatsphäre und verbessern die Engine über die Zeit.</p></article>
+          <article class="lab-layer"><h3>8. Eval, Drift &amp; Vertrauen</h3><ul><li>LLM-as-judge und Backtesting gegen bekannte Endpreise für kontinuierliche Qualitätskontrolle und Drift-Monitoring.</li><li>Batches API (50&nbsp;% günstiger) für Massenbewertung großer Bestände.</li><li>On-Chain-Verankerung (UCIIndex auf Base Sepolia) für Prüfbarkeit gemäß UCI Hash-Anchoring.</li></ul><p class="lab-layer-desc">Objektive Leistungsmessung, niedrige Skalenkosten und manipulationssichere, nachverfolgbare Bewertungen — UCI als nicht-tokenisiertes Messinstrument außerhalb MiCA.</p></article>
+        </div>
+        <div class="lab-engine-cta"><p>Möchten Sie die Bewertungsengine praktisch testen?</p><button type="button" class="btn-primary" onclick="navigateTo(\'uci\')">UCI-Bewertung starten →</button></div>`,
+
+    fr: `<div class="lab-engine-intro">
+          <p class="lab-engine-lead">AestimAi Lab repose sur le développement continu d'une architecture IA avancée pour une valorisation agentique, fondée sur la retrieval et calibrée, avec une précision auto-améliorante progressive.</p>
+          <p>Dans AestimAi Lab, nous visons un indice de valeur universel (UCI) utilisable dans de nombreuses applications, privées et publiques.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Changement de cap</h2>
+          <p>La solution actuelle repose sur une « estimation » du prix par le modèle AestimAi à partir d'une description et d'images, avec inférence big data et règles adaptatives. L'objectif est de remplacer les modèles traditionnels par un moteur agentique qui raisonne sur des données de marché réelles.</p>
+          <p>Cela améliore la précision, fournit des intervalles d'incertitude crédibles et rend le système auditable — essentiel pour l'UCI comme mesure d'index juridiquement définie.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Architecture — couche par couche</h2>
+          <article class="lab-layer"><h3>1. Perception multimodale</h3><ul><li>Le module d'analyse visuelle AestimAi prend en charge des images haute résolution (jusqu'à 2576 px) pour une meilleure identification et évaluation de l'état.</li><li>Images téléversées une fois via l'API Files, réutilisables sans nouveau upload — moins de latence et de coût.</li></ul><p class="lab-layer-desc">Cette couche transforme les entrées visuelles en informations structurées pour les couches suivantes.</p></article>
+          <article class="lab-layer"><h3>2. Retrieval-Augmented Valuation (RAG)</h3><ul><li>Valorisation fondée sur des ventes comparables (Tradera, Blocket, enchères, eBay) via base vectorielle et comparables structurés.</li><li><code>web_search_20260209</code> avec filtrage dynamique intégré à AestimAi pour des prix frais sans bruit dans le contexte.</li></ul><p class="lab-layer-desc">Récupération active de prix réels — passage de la pure estimation LLM à une valorisation fondée sur des preuves.</p></article>
+          <article class="lab-layer"><h3>3. Orchestration agentique (tool use)</h3><ul><li>Boucle agent : identifier → comps → modèle ML hédonique → questions → fusion → justification.</li><li>Implémentable en boucle tool-use sur le serveur UCI ou via Managed Agents AestimAi.</li></ul><p class="lab-layer-desc">La valorisation devient un processus vérifiable et traçable — requis par l'UCI.</p></article>
+          <article class="lab-layer"><h3>4. Ensemble + fusion bayésienne</h3><ul><li>Plusieurs estimateurs combinés : (a) LLM, (b) modèle hédonique gradient-boosted, (c) comps, (d) votes crowd/respondent.</li></ul><p class="lab-layer-desc">Pondération bayésienne de sources indépendantes — vote bayésien statistiquement correct, pas une simple moyenne.</p></article>
+          <article class="lab-layer"><h3>5. Incertitude calibrée — conformal prediction</h3><ul><li>L'intervalle heuristique 90&nbsp;% est remplacé par la conformal prediction — couverture garantie.</li></ul><p class="lab-layer-desc">Méthode statistiquement fondée pour des intervalles dont la couverture (ex. 90&nbsp;%) se maintient dans le temps.</p></article>
+          <article class="lab-layer"><h3>6. Intelligence adaptive (coût/qualité)</h3><ul><li>Adaptive thinking + paramètre effort : plus de réflexion sur les cas difficiles, moins cher sur les simples.</li><li>Prompt caching : ~90&nbsp;% de coût en moins et réponses plus rapides.</li><li>Structured outputs : JSON toujours valide (<code>uci_value</code>, intervalle, <code>reasoning</code>, <code>key_factors</code>).</li></ul><p class="lab-layer-desc">Optimisation dynamique des ressources selon la difficulté, avec sorties structurées sans erreur de parsing.</p></article>
+          <article class="lab-layer"><h3>7. Federated / continual learning</h3><ul><li>Apprentissage des valorisations utilisateur sans centraliser les données brutes.</li></ul><p class="lab-layer-desc">Entraînement local et partage de mises à jour de modèle uniquement — confidentialité préservée, moteur amélioré.</p></article>
+          <article class="lab-layer"><h3>8. Eval, drift &amp; confiance</h3><ul><li>LLM-as-judge et backtesting sur prix finaux connus ; surveillance de la dérive du modèle.</li><li>Batches API (50&nbsp;% moins cher) pour valorisation de masse.</li><li>Ancrage on-chain (UCIIndex sur Base Sepolia) aligné sur l'architecture hash-anchoring UCI.</li></ul><p class="lab-layer-desc">Mesure objective, coûts maîtrisés à l'échelle, valorisations traçables — UCI comme instrument de mesure non tokenisé hors MiCA.</p></article>
+        </div>
+        <div class="lab-engine-cta"><p>Vous voulez tester le moteur en pratique ?</p><button type="button" class="btn-primary" onclick="navigateTo(\'uci\')">Lancer l'évaluation UCI →</button></div>`,
+
+    it: `<div class="lab-engine-intro">
+          <p class="lab-engine-lead">AestimAi Lab si basa sullo sviluppo continuo di un'architettura IA avanzata per valutazioni agentiche, retrieval-based e calibrate, con precisione auto-migliorante progressiva.</p>
+          <p>In AestimAi Lab puntiamo a un indice di valore universalmente valido (UCI) utilizzabile in molte applicazioni, private e pubbliche.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Cambio di paradigma</h2>
+          <p>L'approccio attuale fa « indovinare » un prezzo al modello AestimAi da descrizione e immagini, con inferenza big data e regole adattive. L'obiettivo è sostituire i modelli tradizionali con un motore agentico che ragiona su dati di mercato reali.</p>
+          <p>Questo aumenta la precisione, fornisce intervalli di incertezza credibili e rende il sistema verificabile — centrale per l'UCI come misura di indice legalmente definita.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Architettura — strato per strato</h2>
+          <article class="lab-layer"><h3>1. Percezione multimodale</h3><ul><li>Il modulo vision AestimAi supporta immagini ad alta risoluzione (fino a 2576 px) per migliore identificazione e valutazione dello stato.</li><li>Immagini caricate una volta via Files API, riutilizzabili — meno latenza e costo.</li></ul><p class="lab-layer-desc">Gestisce l'input visivo e lo converte in informazioni strutturate per i layer successivi.</p></article>
+          <article class="lab-layer"><h3>2. Retrieval-Augmented Valuation (RAG)</h3><ul><li>Valutazione basata su vendite comparabili (Tradera, Blocket, aste, eBay) via database vettoriale e comps strutturati.</li><li><code>web_search_20260209</code> con filtraggio dinamico integrato in AestimAi per prezzi freschi senza rumore.</li></ul><p class="lab-layer-desc">Recupero attivo di prezzi reali — da pura stima LLM a valutazione basata su evidenze.</p></article>
+          <article class="lab-layer"><h3>3. Orchestrazione agentica (tool use)</h3><ul><li>Loop agente: identifica oggetto → comps → modello ML edonico → domande → fusione → motivazione.</li><li>Implementabile come loop tool-use nel server UCI o via Managed Agents AestimAi.</li></ul><p class="lab-layer-desc">La valutazione diventa un processo verificabile e tracciabile — richiesto dall'UCI.</p></article>
+          <article class="lab-layer"><h3>4. Ensemble + fusione bayesiana</h3><ul><li>Più stimatori combinati: (a) LLM, (b) modello edonico gradient-boosted, (c) comps, (d) voti crowd/respondent.</li></ul><p class="lab-layer-desc">Ponderazione bayesiana di fonti indipendenti — voto bayesiano statisticamente corretto.</p></article>
+          <article class="lab-layer"><h3>5. Incertezza calibrata — conformal prediction</h3><ul><li>L'intervallo euristico 90&nbsp;% è sostituito dalla conformal prediction — copertura garantita.</li></ul><p class="lab-layer-desc">Metodo statisticamente fondato per intervalli la cui copertura (es. 90&nbsp;%) si mantiene nel tempo.</p></article>
+          <article class="lab-layer"><h3>6. Intelligenza adattiva (costo/qualità)</h3><ul><li>Adaptive thinking + parametro effort: più ragionamento su casi difficili, più economico su quelli semplici.</li><li>Prompt caching: ~90&nbsp;% costo in meno e risposte più rapide.</li><li>Structured outputs: JSON sempre valido (<code>uci_value</code>, intervallo, <code>reasoning</code>, <code>key_factors</code>).</li></ul><p class="lab-layer-desc">Ottimizzazione dinamica delle risorse con output strutturati senza errori di parsing.</p></article>
+          <article class="lab-layer"><h3>7. Federated / continual learning</h3><ul><li>Apprendimento dalle valutazioni utente senza centralizzare dati grezzi.</li></ul><p class="lab-layer-desc">Training locale e solo aggiornamenti del modello — privacy preservata, motore migliorato nel tempo.</p></article>
+          <article class="lab-layer"><h3>8. Eval, drift &amp; fiducia</h3><ul><li>LLM-as-judge e backtesting su prezzi finali noti; monitoraggio drift del modello.</li><li>Batches API (50&nbsp;% meno costoso) per valutazioni di massa.</li><li>Ancoraggio on-chain (UCIIndex su Base Sepolia) allineato all'architettura hash-anchoring UCI.</li></ul><p class="lab-layer-desc">Misurazione oggettiva, costi contenuti su scala, valutazioni tracciabili — UCI come strumento di misura non tokenizzato fuori MiCA.</p></article>
+        </div>
+        <div class="lab-engine-cta"><p>Vuoi provare il motore di valutazione?</p><button type="button" class="btn-primary" onclick="navigateTo(\'uci\')">Avvia valutazione UCI →</button></div>`,
+
+    es: `<div class="lab-engine-intro">
+          <p class="lab-engine-lead">AestimAi Lab se basa en el desarrollo continuo de una arquitectura IA avanzada para valoración agéntica, basada en retrieval y calibrada, con precisión auto-mejorante gradual.</p>
+          <p>En AestimAi Lab buscamos un índice de valor universalmente válido (UCI) utilizable en muchas aplicaciones, privadas y públicas.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Cambio fundamental</h2>
+          <p>La solución actual hace que el modelo AestimAi « adivine » un precio a partir de descripción e imágenes, con inferencia big data y reglas adaptativas. El objetivo es sustituir modelos tradicionales por un motor agéntico que razona sobre datos de mercado reales.</p>
+          <p>Esto mejora la precisión, ofrece intervalos de incertidumbre creíbles y hace el sistema auditable — central para UCI como medida de índice legalmente definida.</p>
+        </div>
+        <div class="lab-engine-section">
+          <h2>Arquitectura — capa por capa</h2>
+          <article class="lab-layer"><h3>1. Percepción multimodal</h3><ul><li>El módulo de visión AestimAi admite imágenes de alta resolución (hasta 2576 px) para mejor identificación y evaluación del estado.</li><li>Imágenes subidas una vez vía Files API, reutilizables — menos latencia y coste.</li></ul><p class="lab-layer-desc">Procesa la entrada visual y la convierte en información estructurada para capas posteriores.</p></article>
+          <article class="lab-layer"><h3>2. Retrieval-Augmented Valuation (RAG)</h3><ul><li>Valoración basada en ventas comparables (Tradera, Blocket, subastas, eBay) vía base vectorial y comps estructurados.</li><li><code>web_search_20260209</code> con filtrado dinámico integrado en AestimAi para precios frescos sin ruido.</li></ul><p class="lab-layer-desc">Recuperación activa de precios reales — de pura estimación LLM a valoración basada en evidencia.</p></article>
+          <article class="lab-layer"><h3>3. Orquestación agéntica (tool use)</h3><ul><li>Bucle agente: identificar → comps → modelo ML hedónico → preguntas → fusión → justificación.</li><li>Implementable como bucle tool-use en el servidor UCI o vía Managed Agents AestimAi.</li></ul><p class="lab-layer-desc">La valoración se convierte en un proceso verificable y trazable — requerido por UCI.</p></article>
+          <article class="lab-layer"><h3>4. Ensemble + fusión bayesiana</h3><ul><li>Varios estimadores combinados: (a) LLM, (b) modelo hedónico gradient-boosted, (c) comps, (d) votos crowd/respondent.</li></ul><p class="lab-layer-desc">Ponderación bayesiana de fuentes independientes — voto bayesiano estadísticamente correcto.</p></article>
+          <article class="lab-layer"><h3>5. Incertidumbre calibrada — conformal prediction</h3><ul><li>El intervalo heurístico 90&nbsp;% se sustituye por conformal prediction — cobertura garantizada.</li></ul><p class="lab-layer-desc">Método estadísticamente fundamentado cuya cobertura (p. ej. 90&nbsp;%) se mantiene en el tiempo.</p></article>
+          <article class="lab-layer"><h3>6. Inteligencia adaptativa (coste/calidad)</h3><ul><li>Adaptive thinking + parámetro effort: más razonamiento en casos difíciles, más barato en simples.</li><li>Prompt caching: ~90&nbsp;% menos coste y respuestas más rápidas.</li><li>Structured outputs: JSON siempre válido (<code>uci_value</code>, intervalo, <code>reasoning</code>, <code>key_factors</code>).</li></ul><p class="lab-layer-desc">Optimización dinámica de recursos con salidas estructuradas sin errores de parsing.</p></article>
+          <article class="lab-layer"><h3>7. Federated / continual learning</h3><ul><li>Aprende de valoraciones de usuarios sin centralizar datos brutos.</li></ul><p class="lab-layer-desc">Entrenamiento local y solo actualizaciones del modelo — privacidad preservada, motor mejorado.</p></article>
+          <article class="lab-layer"><h3>8. Eval, drift &amp; confianza</h3><ul><li>LLM-as-judge y backtesting contra precios finales conocidos; monitorización de deriva del modelo.</li><li>Batches API (50&nbsp;% más barato) para valoración masiva.</li><li>Anclaje on-chain (UCIIndex en Base Sepolia) alineado con hash-anchoring UCI.</li></ul><p class="lab-layer-desc">Medición objetiva, costes bajos a escala, valoraciones trazables — UCI como instrumento de medida no tokenizado fuera de MiCA.</p></article>
+        </div>
+        <div class="lab-engine-cta"><p>¿Quieres probar el motor de valoración?</p><button type="button" class="btn-primary" onclick="navigateTo(\'uci\')">Iniciar valoración UCI →</button></div>`,
+  };
+
+  function labStrings(lang) {
+    return {
+      'lab.desc': {
+        sv: 'Forskning, värderingsmotor och hårdvara för mätning av verkligt värde',
+        en: 'Research, valuation engine and hardware for measuring real value',
+        de: 'Forschung, Bewertungsengine und Hardware zur Messung echten Werts',
+        fr: 'Recherche, moteur de valorisation et matériel pour mesurer la valeur réelle',
+        it: 'Ricerca, motore di valutazione e hardware per misurare il valore reale',
+        es: 'Investigación, motor de valoración y hardware para medir el valor real',
+      }[lang],
+      'lab.badge': {
+        sv: '⊙ UCI-kompatibel',
+        en: '⊙ UCI-compatible',
+        de: '⊙ UCI-kompatibel',
+        fr: '⊙ Compatible UCI',
+        it: '⊙ Compatibile UCI',
+        es: '⊙ Compatible con UCI',
+      }[lang],
+      'lab.tab.engine': {
+        sv: 'UCI Värderingsmotor', en: 'UCI Valuation Engine', de: 'UCI-Bewertungsengine',
+        fr: 'Moteur de valorisation UCI', it: 'Motore di valutazione UCI', es: 'Motor de valoración UCI',
+      }[lang],
+      'lab.tab.shop': {
+        sv: 'Shop · Amazon', en: 'Shop · Amazon', de: 'Shop · Amazon',
+        fr: 'Shop · Amazon', it: 'Shop · Amazon', es: 'Shop · Amazon',
+      }[lang],
+      'lab.engineBody': ENGINE[lang] || ENGINE.en,
+      'lab.shop.intro': {
+        sv: 'Hårdvara för mätning, handel och spårning av verkligt värde — köp via Amazon.',
+        en: 'Hardware for measuring, trading and tracking real value — buy via Amazon.',
+        de: 'Hardware zum Messen, Handeln und Verfolgen echten Werts — Kauf über Amazon.',
+        fr: 'Matériel pour mesurer, échanger et suivre la valeur réelle — achat via Amazon.',
+        it: 'Hardware per misurare, scambiare e tracciare il valore reale — acquisto via Amazon.',
+        es: 'Hardware para medir, comerciar y rastrear valor real — compra vía Amazon.',
+      }[lang],
+      'lab.cat.all': { sv: 'Alla', en: 'All', de: 'Alle', fr: 'Tout', it: 'Tutti', es: 'Todos' }[lang],
+      'lab.cat.energy': { sv: 'Energi', en: 'Energy', de: 'Energie', fr: 'Énergie', it: 'Energia', es: 'Energía' }[lang],
+      'lab.cat.nfc': { sv: 'NFC & Handel', en: 'NFC & Trade', de: 'NFC & Handel', fr: 'NFC & Commerce', it: 'NFC & Commercio', es: 'NFC y comercio' }[lang],
+      'lab.cat.iot': { sv: 'IoT & Sensorer', en: 'IoT & Sensors', de: 'IoT & Sensoren', fr: 'IoT & Capteurs', it: 'IoT & Sensori', es: 'IoT y sensores' }[lang],
+      'lab.cat.compute': { sv: 'Datorkraft', en: 'Compute', de: 'Rechenleistung', fr: 'Calcul', it: 'Potenza di calcolo', es: 'Computación' }[lang],
+      'lab.cat.security': { sv: 'Säkerhet', en: 'Security', de: 'Sicherheit', fr: 'Sécurité', it: 'Sicurezza', es: 'Seguridad' }[lang],
+      'lab.shop.loading': {
+        sv: 'Ladda shop-fliken för att se produkter…',
+        en: 'Open the shop tab to see products…',
+        de: 'Shop-Tab öffnen, um Produkte zu sehen…',
+        fr: 'Ouvrez l\'onglet shop pour voir les produits…',
+        it: 'Apri la scheda shop per vedere i prodotti…',
+        es: 'Abre la pestaña shop para ver productos…',
+      }[lang],
+      'lab.shop.error': {
+        sv: 'Kunde inte ladda produkter. Försök igen senare.',
+        en: 'Could not load products. Try again later.',
+        de: 'Produkte konnten nicht geladen werden. Bitte später erneut versuchen.',
+        fr: 'Impossible de charger les produits. Réessayez plus tard.',
+        it: 'Impossibile caricare i prodotti. Riprova più tardi.',
+        es: 'No se pudieron cargar los productos. Inténtalo más tarde.',
+      }[lang],
+      'lab.shop.empty': {
+        sv: 'Inga produkter i den här kategorin.',
+        en: 'No products in this category.',
+        de: 'Keine Produkte in dieser Kategorie.',
+        fr: 'Aucun produit dans cette catégorie.',
+        it: 'Nessun prodotto in questa categoria.',
+        es: 'No hay productos en esta categoría.',
+      }[lang],
+      'lab.shop.buyAmazon': {
+        sv: 'Köp på Amazon →',
+        en: 'Buy on Amazon →',
+        de: 'Bei Amazon kaufen →',
+        fr: 'Acheter sur Amazon →',
+        it: 'Acquista su Amazon →',
+        es: 'Comprar en Amazon →',
+      }[lang],
+      'lab.shop.buyTitle': {
+        sv: 'Köp {name} på Amazon',
+        en: 'Buy {name} on Amazon',
+        de: '{name} bei Amazon kaufen',
+        fr: 'Acheter {name} sur Amazon',
+        it: 'Acquista {name} su Amazon',
+        es: 'Comprar {name} en Amazon',
+      }[lang],
+      'lab.footer.shipping': {
+        sv: '🚚 Fri frakt över 500 kr',
+        en: '🚚 Free shipping over 500 SEK',
+        de: '🚚 Kostenloser Versand ab 500 SEK',
+        fr: '🚚 Livraison gratuite dès 500 SEK',
+        it: '🚚 Spedizione gratuita oltre 500 SEK',
+        es: '🚚 Envío gratis a partir de 500 SEK',
+      }[lang],
+      'lab.footer.returns': {
+        sv: '↩️ 30 dagars öppet köp',
+        en: '↩️ 30-day returns',
+        de: '↩️ 30 Tage Rückgaberecht',
+        fr: '↩️ Retours sous 30 jours',
+        it: '↩️ Reso entro 30 giorni',
+        es: '↩️ Devolución en 30 días',
+      }[lang],
+      'lab.footer.price': {
+        sv: '⊙ Pris i SEK och UCI',
+        en: '⊙ Price in SEK and UCI',
+        de: '⊙ Preis in SEK und UCI',
+        fr: '⊙ Prix en SEK et UCI',
+        it: '⊙ Prezzo in SEK e UCI',
+        es: '⊙ Precio en SEK y UCI',
+      }[lang],
+      'lab.footer.amazon': {
+        sv: '🔗 Köp via Amazon',
+        en: '🔗 Buy via Amazon',
+        de: '🔗 Kauf über Amazon',
+        fr: '🔗 Achat via Amazon',
+        it: '🔗 Acquisto via Amazon',
+        es: '🔗 Compra vía Amazon',
+      }[lang],
+      'panel.ucilab': {
+        sv: '<h4>AestimAi Lab</h4><p>Forskning kring UCI-värderingsmotorn — agentisk, retrieval-grundad och kalibrerad värdering.</p><p>Under <strong>Shop · Amazon</strong> hittar du rekommenderad hårdvara.</p>',
+        en: '<h4>AestimAi Lab</h4><p>Research on the UCI valuation engine — agentic, retrieval-grounded and calibrated valuation.</p><p>Under <strong>Shop · Amazon</strong> you will find recommended hardware.</p>',
+        de: '<h4>AestimAi Lab</h4><p>Forschung zur UCI-Bewertungsengine — agentische, retrieval-basierte und kalibrierte Bewertung.</p><p>Unter <strong>Shop · Amazon</strong> finden Sie empfohlene Hardware.</p>',
+        fr: '<h4>AestimAi Lab</h4><p>Recherche sur le moteur de valorisation UCI — valorisation agentique, fondée sur la retrieval et calibrée.</p><p>Sous <strong>Shop · Amazon</strong>, matériel recommandé.</p>',
+        it: '<h4>AestimAi Lab</h4><p>Ricerca sul motore di valutazione UCI — valutazione agentica, retrieval-based e calibrata.</p><p>Sotto <strong>Shop · Amazon</strong> trovi hardware consigliato.</p>',
+        es: '<h4>AestimAi Lab</h4><p>Investigación sobre el motor de valoración UCI — valoración agéntica, basada en retrieval y calibrada.</p><p>En <strong>Shop · Amazon</strong> encontrarás hardware recomendado.</p>',
+      }[lang],
+    };
+  }
+
+  global.LAB_I18N = {
+    sv: labStrings('sv'),
+    en: labStrings('en'),
+    de: labStrings('de'),
+    fr: labStrings('fr'),
+    it: labStrings('it'),
+    es: labStrings('es'),
+  };
+})(window);
