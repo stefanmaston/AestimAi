@@ -1485,15 +1485,31 @@ async function uploadListingImages(userId) {
   return urls;
 }
 
-// ── Bytesmarknad — annonsgränser & betalning (Freemium) ───────────
-const LISTING_LIMITS = { free: 1, pro: 10, enterprise: Infinity };
+// ── Bytesmarknad — annonsgränser & betalning ───────────
+const LISTING_LIMITS = { free: 1, pro: 50, enterprise: Infinity };
+
+const PLAN_LABELS = { free: 'Freemium', pro: 'Pro', enterprise: 'Enterprise' };
 
 function getUserPlan(user) {
   return user?.user_metadata?.plan || 'free';
 }
 
+function planDisplayName(plan) {
+  return PLAN_LABELS[plan] || PLAN_LABELS.free;
+}
+
 function listingLimitForPlan(plan) {
   return LISTING_LIMITS[plan] ?? LISTING_LIMITS.free;
+}
+
+function extraListingConfirmMessage(user) {
+  const plan = getUserPlan(user);
+  const limit = listingLimitForPlan(plan);
+  const label = planDisplayName(plan);
+  if (limit === 1) {
+    return `${label} inkluderar 1 aktiv annons. Publicera den här kostar €1.\n\nFortsätt till betalning?`;
+  }
+  return `${label} inkluderar ${limit} aktiva annonser. Publicera den här kostar €1.\n\nFortsätt till betalning?`;
 }
 
 async function countPublicListings(userId) {
@@ -1539,7 +1555,7 @@ async function refreshListingQuotaHint() {
     }
 
     if (used >= limit) {
-      hint.innerHTML = `Du har <strong>${used}/${limit}</strong> gratis aktiv${limit === 1 ? ' annons' : 'a annonser'}. ` +
+      hint.innerHTML = `Du har <strong>${used}/${limit}</strong> aktiv${limit === 1 ? ' annons' : 'a annonser'}. ` +
         'Nästa publicering kostar <strong>€1</strong> via Stripe.';
       hint.classList.remove('hidden');
       if (publishChecked) btn.textContent = 'Betala €1 och publicera';
@@ -1549,7 +1565,9 @@ async function refreshListingQuotaHint() {
       hint.classList.remove('hidden');
       btn.textContent = 'Betala €1 och publicera';
     } else {
-      hint.innerHTML = `Freemium: <strong>${used}/${limit}</strong> aktiv${limit === 1 ? ' annons' : 'a annonser'} ingår. Extra annonser: €1/st.`;
+      const label = planDisplayName(getUserPlan(state.user));
+      hint.innerHTML = `${label}: <strong>${used}/${limit}</strong> aktiv${limit === 1 ? ' annons' : 'a annonser'} ingår.` +
+        (limit === 1 ? ' Extra annonser: €1/st.' : '');
       hint.classList.remove('hidden');
       btn.textContent = publishChecked ? 'Spara och publicera' : 'Spara objekt';
     }
@@ -1611,6 +1629,15 @@ async function confirmListingPayment(sessionId, listingId) {
   }
 }
 
+function cleanCheckoutQuery(hash) {
+  const params = new URLSearchParams(window.location.search);
+  params.delete('checkout');
+  params.delete('listing');
+  params.delete('session_id');
+  const q = params.toString();
+  history.replaceState(null, '', window.location.pathname + (q ? `?${q}` : '') + hash);
+}
+
 async function handleListingCheckoutReturn() {
   const params = new URLSearchParams(window.location.search);
   const checkout = params.get('checkout');
@@ -1625,13 +1652,102 @@ async function handleListingCheckoutReturn() {
     switchMarketTab('my-items');
   }
 
-  params.delete('checkout');
-  params.delete('listing');
-  params.delete('session_id');
-  const q = params.toString();
-  const clean = window.location.pathname + (q ? `?${q}` : '') + '#market';
-  history.replaceState(null, '', clean);
+  cleanCheckoutQuery('#market');
   navigateTo('market');
+}
+
+async function startProCheckout() {
+  const sb = await getSb();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session?.access_token) {
+    showToast('Din session har gått ut. Logga in igen.');
+    openAuthModal('login');
+    return false;
+  }
+
+  const res = await fetch('/api/billing/checkout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({}),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.url) {
+    showToast(data.error || 'Kunde inte starta Pro-betalningen.');
+    return false;
+  }
+  window.location.href = data.url;
+  return true;
+}
+
+async function confirmProPayment(sessionId) {
+  const sb = await getSb();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session?.access_token) throw new Error('Inloggning krävs');
+
+  const res = await fetch('/api/billing/confirm-pro', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ sessionId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Bekräftelse misslyckades');
+
+  await sb.auth.refreshSession();
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) onSignIn(user);
+}
+
+async function openBillingPortal() {
+  const sb = await getSb();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session?.access_token) {
+    openAuthModal('login');
+    return;
+  }
+
+  const res = await fetch('/api/billing/portal', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({}),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.url) {
+    showToast(data.error || 'Kunde inte öppna faktureringsportalen.');
+    return;
+  }
+  window.location.href = data.url;
+}
+
+async function handleProCheckoutReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const checkout = params.get('checkout');
+  if (checkout !== 'pro-success' && checkout !== 'pro-cancel') return;
+
+  if (checkout === 'pro-success') {
+    const sessionId = params.get('session_id');
+    if (sessionId) {
+      try {
+        await confirmProPayment(sessionId);
+        showToast('Välkommen till AestimAi Pro!');
+      } catch (e) {
+        showToast(e?.message || 'Kunde inte aktivera Pro-abonnemanget.');
+      }
+    }
+  } else {
+    showToast('Pro-uppgradering avbruten.');
+  }
+
+  cleanCheckoutQuery('#pricing');
+  navigateTo('pricing');
 }
 
 async function submitListing() {
@@ -1808,9 +1924,7 @@ async function toggleMyItem(id, makePublic) {
     await refreshAuth();
     if (!isRealUser(state.user)) return;
     if (await needsExtraListingPayment(state.user, 1)) {
-      const ok = window.confirm(
-        'Freemium inkluderar 1 aktiv annons. Publicera den här kostar €1.\n\nFortsätt till betalning?'
-      );
+      const ok = window.confirm(extraListingConfirmMessage(state.user));
       if (!ok) return;
       await startListingCheckout(id);
       return;
@@ -1972,6 +2086,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Navigering från URL-hash, annars default = UCI Värdering
   handleListingCheckoutReturn();
+  handleProCheckoutReturn();
 
   const hash = location.hash.replace('#', '');
   if (hash && document.getElementById('module-' + hash)) {
@@ -2117,12 +2232,32 @@ function refreshAccountSection() {
   const idEl = document.getElementById('acctId');
   if (idEl) idEl.textContent = fullId;
 
+  const plan = getUserPlan(u);
+  const planLabel = planDisplayName(plan);
   const planBadge = document.getElementById('acctPlan');
-  if (planBadge) planBadge.textContent = 'Freemium';
+  if (planBadge) planBadge.textContent = planLabel;
   const activePlan = document.getElementById('acctActivePlan');
-  if (activePlan) activePlan.textContent = 'Freemium';
+  if (activePlan) activePlan.textContent = planLabel;
   const nextBill = document.getElementById('acctNextBill');
-  if (nextBill) nextBill.textContent = '—';
+  if (nextBill) {
+    const periodEnd = u.user_metadata?.plan_period_end;
+    nextBill.textContent = (plan === 'pro' && periodEnd)
+      ? new Date(periodEnd).toLocaleDateString('sv-SE')
+      : '—';
+  }
+  const upgradeBtn = document.getElementById('btnUpgradePlan');
+  if (upgradeBtn) {
+    if (plan === 'pro') {
+      upgradeBtn.textContent = 'Hantera abonnemang →';
+      upgradeBtn.onclick = () => openBillingPortal();
+    } else if (plan === 'enterprise') {
+      upgradeBtn.textContent = 'Kontakta support →';
+      upgradeBtn.onclick = () => { window.location.href = 'mailto:kontakt@aestimai.org?subject=Enterprise-abonnemang'; };
+    } else {
+      upgradeBtn.textContent = 'Uppgradera plan →';
+      upgradeBtn.onclick = () => navigateTo('pricing');
+    }
+  }
 }
 
 function openEditAccount() {
@@ -2398,17 +2533,27 @@ async function confirmDeleteAccount() {
   }
 }
 
-function selectPlan(plan) {
+async function selectPlan(plan) {
   if (plan === 'enterprise') {
     window.location.href = 'mailto:kontakt@aestimai.org?subject=Enterprise-abonnemang';
     return;
   }
-  if (!currentUser) {
-    openAuthModal('register');
+  if (plan === 'free') {
+    if (!currentUser) openAuthModal('register');
     return;
   }
   if (plan === 'pro') {
-    alert('Stripe-betalning för Pro aktiveras snart. Du kontaktas när det är klart.');
+    const user = await requireRealUser('Logga in eller skapa konto för att välja Pro.');
+    if (!user) return;
+    if (getUserPlan(user) === 'pro') {
+      await openBillingPortal();
+      return;
+    }
+    if (getUserPlan(user) === 'enterprise') {
+      showToast('Enterprise hanteras manuellt — kontakta support.');
+      return;
+    }
+    await startProCheckout();
   }
 }
 
@@ -2452,6 +2597,7 @@ window.doResetPassword    = doResetPassword;
 window.signOut            = signOut;
 window.confirmDeleteAccount = confirmDeleteAccount;
 window.selectPlan         = selectPlan;
+window.openBillingPortal  = openBillingPortal;
 window.openEditAccount    = openEditAccount;
 window.doEditAccount      = doEditAccount;
 
