@@ -509,123 +509,123 @@
 
     <section class="module hidden" id="module-market" hidden>
       <div class="module-header">
-        <h1>UCI Bytesmarknad</h1>
-        <p class="module-desc">Registrera och byt varor, tjänster och tillgångar via UCI</p>
+        <h1 data-i18n="market.title">UCI Marketplace</h1>
+        <p class="module-desc" data-i18n="market.desc">Register and trade goods, services and assets via UCI</p>
       </div>
 
       <div class="market-tabs">
-        <button class="tab-btn active" data-tab="search">Sök & Byt</button>
-        <button class="tab-btn" data-tab="register">Registrera objekt</button>
-        <button class="tab-btn" data-tab="my-items">Mina objekt</button>
+        <button class="tab-btn active" data-tab="search" data-i18n="market.tab.search">Search &amp; Trade</button>
+        <button class="tab-btn" data-tab="register" data-i18n="market.tab.register">Register item</button>
+        <button class="tab-btn" data-tab="my-items" data-i18n="market.tab.myItems">My items</button>
       </div>
 
-      <!-- Sökvyn -->
+      <!-- Search -->
       <div class="tab-content" id="tab-search">
         <div class="market-search-bar">
-          <input type="text" placeholder="Sök på kategori, nyckelord…" id="marketSearch">
+          <input type="text" data-i18n-placeholder="market.searchPlaceholder" placeholder="Search by category, keyword…" id="marketSearch">
           <select id="marketCatFilter">
-            <option value="">Alla kategorier</option>
-            <option value="vardagssaker">Vardagssaker</option>
-            <option value="verktyg">Verktyg</option>
-            <option value="elektronik">Elektronik</option>
-            <option value="kläder">Kläder</option>
-            <option value="möbler">Möbler</option>
-            <option value="fordon">Fordon</option>
-            <option value="fastigheter">Småfastigheter / Nyttjanderätter</option>
-            <option value="metaller">Värdemetaller</option>
-            <option value="juveler">Juveler</option>
-            <option value="energi">Energiutrustning</option>
-            <option value="ip">Immateriella rättigheter</option>
-            <option value="tjänster">Tjänster / Tid</option>
-            <option value="tokeniserade">Tokeniserade tillgångar</option>
+            <option value="" data-i18n="market.catAll">All categories</option>
+            <option value="vardagssaker" data-i18n="market.cat.vardagssaker">Everyday items</option>
+            <option value="verktyg" data-i18n="market.cat.verktyg">Tools</option>
+            <option value="elektronik" data-i18n="market.cat.elektronik">Electronics</option>
+            <option value="kläder" data-i18n="market.cat.klader">Clothing</option>
+            <option value="möbler" data-i18n="market.cat.mobler">Furniture</option>
+            <option value="fordon" data-i18n="market.cat.fordon">Vehicles</option>
+            <option value="fastigheter" data-i18n="market.cat.fastigheter">Small property / Usage rights</option>
+            <option value="metaller" data-i18n="market.cat.metaller">Precious metals</option>
+            <option value="juveler" data-i18n="market.cat.juveler">Jewellery</option>
+            <option value="energi" data-i18n="market.cat.energi">Energy equipment</option>
+            <option value="ip" data-i18n="market.cat.ip">Intellectual property</option>
+            <option value="tjänster" data-i18n="market.cat.tjanster">Services / Time</option>
+            <option value="tokeniserade" data-i18n="market.cat.tokeniserade">Tokenised assets</option>
           </select>
           <select id="marketKindFilter">
-            <option value="">Byten och efterlysningar</option>
-            <option value="offer">Endast byteserbjudanden</option>
-            <option value="wanted">Endast efterlysningar</option>
+            <option value="" data-i18n="market.kindAll">Trades and wanted ads</option>
+            <option value="offer" data-i18n="market.kindOfferOnly">Offers only</option>
+            <option value="wanted" data-i18n="market.kindWantedOnly">Wanted ads only</option>
           </select>
           <div class="uci-range-filter">
-            <label>UCI-värde:</label>
-            <input type="number" id="uciMin" placeholder="Min">
+            <label data-i18n="market.uciValue">UCI value:</label>
+            <input type="number" id="uciMin" data-i18n-placeholder="market.min" placeholder="Min">
             <span>–</span>
-            <input type="number" id="uciMax" placeholder="Max">
+            <input type="number" id="uciMax" data-i18n-placeholder="market.max" placeholder="Max">
           </div>
-          <button class="btn-primary" id="btnMarketSearch">Sök</button>
+          <button class="btn-primary" id="btnMarketSearch" data-i18n="market.btnSearch">Search</button>
         </div>
         <div class="filter-row">
           <label class="toggle-label">
             <input type="checkbox" id="filterVerified">
-            Visa bara AE ID-verifierade
+            <span data-i18n="market.filterVerified">Show AE ID verified only</span>
           </label>
           <span class="market-count" id="marketCount"></span>
         </div>
         <div class="market-grid" id="marketGrid">
-          <div class="market-loading">Laddar Bytesmarknaden…</div>
+          <div class="market-loading" data-i18n="market.loading">Loading marketplace…</div>
         </div>
       </div>
 
-      <!-- Registrera objekt -->
+      <!-- Register item -->
       <div class="tab-content hidden" id="tab-register">
         <div class="register-gate" id="registerGate">
           <div class="gate-icon">⊙</div>
-          <h2>Logga in för att registrera</h2>
-          <p>För att registrera och publicera objekt eller tjänster i Bytesmarknaden behöver du ett konto. Det är gratis, och din värderingshistorik följer med.</p>
-          <button class="btn-primary" id="btnRegisterLogin">Logga in / Skapa konto</button>
+          <h2 data-i18n="market.registerGateTitle">Log in to register</h2>
+          <p data-i18n="market.registerGateDesc">To register and publish items or services on the marketplace you need an account. It is free, and your valuation history comes with you.</p>
+          <button class="btn-primary" id="btnRegisterLogin" data-i18n="market.loginRegisterBtn">Log in / Create account</button>
         </div>
         <form class="register-form hidden" id="registerForm">
-          <h2>Registrera objekt eller tjänst</h2>
+          <h2 data-i18n="market.formTitle">Register item or service</h2>
           <div class="form-group">
-            <label>Typ av annons</label>
+            <label data-i18n="market.labelKind">Listing type</label>
             <select id="itemKind">
-              <option value="offer">Byteserbjudande — jag erbjuder detta</option>
-              <option value="wanted">Efterlysning — jag söker detta</option>
+              <option value="offer" data-i18n="market.kindOfferFull">Trade offer — I am offering this</option>
+              <option value="wanted" data-i18n="market.kindWantedFull">Wanted ad — I am looking for this</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Titel</label>
-            <input type="text" placeholder="Vad erbjuder eller söker du?" id="itemTitle">
+            <label data-i18n="market.labelTitle">Title</label>
+            <input type="text" data-i18n-placeholder="market.placeholderTitle" placeholder="What are you offering or looking for?" id="itemTitle">
           </div>
           <div class="form-group">
-            <label>Beskrivning</label>
-            <textarea placeholder="Beskriv objektet/tjänsten noggrant…" id="itemDesc" rows="4"></textarea>
+            <label data-i18n="market.labelDesc">Description</label>
+            <textarea data-i18n-placeholder="market.placeholderDesc" placeholder="Describe the item or service in detail…" id="itemDesc" rows="4"></textarea>
           </div>
           <div class="form-group">
-            <label>Plats (valfritt)</label>
-            <input type="text" placeholder="T.ex. Stockholm" id="itemLocation">
+            <label data-i18n="market.labelLocation">Location (optional)</label>
+            <input type="text" data-i18n-placeholder="market.placeholderLocation" placeholder="e.g. Stockholm" id="itemLocation">
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Kategori</label>
+              <label data-i18n="market.labelCategory">Category</label>
               <select id="itemCategory">
-                <option value="">Välj kategori…</option>
-                <option>Vardagssaker</option>
-                <option>Verktyg</option>
-                <option>Elektronik</option>
-                <option>Kläder</option>
-                <option>Möbler</option>
-                <option>Fordon</option>
-                <option>Småfastigheter / Nyttjanderätter</option>
-                <option>Värdemetaller</option>
-                <option>Juveler</option>
-                <option>Energiutrustning</option>
-                <option>Immateriella rättigheter</option>
-                <option>Tjänster / Tid</option>
-                <option>Tokeniserade tillgångar</option>
+                <option value="" data-i18n="market.categoryPlaceholder">Select category…</option>
+                <option value="Vardagssaker" data-i18n="market.cat.vardagssaker">Everyday items</option>
+                <option value="Verktyg" data-i18n="market.cat.verktyg">Tools</option>
+                <option value="Elektronik" data-i18n="market.cat.elektronik">Electronics</option>
+                <option value="Kläder" data-i18n="market.cat.klader">Clothing</option>
+                <option value="Möbler" data-i18n="market.cat.mobler">Furniture</option>
+                <option value="Fordon" data-i18n="market.cat.fordon">Vehicles</option>
+                <option value="Småfastigheter / Nyttjanderätter" data-i18n="market.cat.fastigheter">Small property / Usage rights</option>
+                <option value="Värdemetaller" data-i18n="market.cat.metaller">Precious metals</option>
+                <option value="Juveler" data-i18n="market.cat.juveler">Jewellery</option>
+                <option value="Energiutrustning" data-i18n="market.cat.energi">Energy equipment</option>
+                <option value="Immateriella rättigheter" data-i18n="market.cat.ip">Intellectual property</option>
+                <option value="Tjänster / Tid" data-i18n="market.cat.tjanster">Services / Time</option>
+                <option value="Tokeniserade tillgångar" data-i18n="market.cat.tokeniserade">Tokenised assets</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Skick (1–5)</label>
+              <label data-i18n="market.labelCondition">Condition (1–5)</label>
               <select id="itemCondition">
-                <option value="1">1 — Dåligt</option>
-                <option value="2">2 — Slitet</option>
-                <option value="3">3 — OK</option>
-                <option value="4">4 — Bra</option>
-                <option value="5">5 — Utmärkt</option>
+                <option value="1" data-i18n="uci.cond1">1 — Poor</option>
+                <option value="2" data-i18n="uci.cond2">2 — Worn</option>
+                <option value="3" data-i18n="uci.cond3">3 — OK</option>
+                <option value="4" data-i18n="uci.cond4">4 — Good</option>
+                <option value="5" data-i18n="uci.cond5">5 — Excellent</option>
               </select>
             </div>
           </div>
           <div class="form-group">
-            <label>Foton (upp till 8)</label>
+            <label data-i18n="market.labelPhotos">Photos (up to 8)</label>
             <div class="photo-upload-grid" id="photoGrid">
               <div class="photo-slot add-photo" id="addPhotoBtn">
                 <span>+</span>
@@ -634,36 +634,36 @@
             </div>
           </div>
           <div class="uci-auto-box" id="uciAutoBox">
-            <span class="uci-auto-label">AestimAi föreslår:</span>
+            <span class="uci-auto-label" data-i18n="market.aiSuggest">AestimAi suggests:</span>
             <span class="uci-auto-value" id="uciAutoValue">—</span>
             <span class="uci-auto-unit">UCI</span>
-            <button type="button" class="btn-text" id="btnValueListing">Värdera med AI</button>
-            <button type="button" class="btn-text" id="btnAdjustUci">Justera</button>
+            <button type="button" class="btn-text" id="btnValueListing" data-i18n="market.btnValue">Valuate with AI</button>
+            <button type="button" class="btn-text" id="btnAdjustUci" data-i18n="market.btnAdjust">Adjust</button>
           </div>
           <div class="form-group hidden" id="uciAdjustGroup">
-            <label>Ditt UCI-pris</label>
-            <input type="number" id="itemUciPrice" placeholder="UCI-värde">
+            <label data-i18n="market.labelUciPrice">Your UCI price</label>
+            <input type="number" id="itemUciPrice" data-i18n-placeholder="market.placeholderUci" placeholder="UCI value">
           </div>
           <label class="publish-toggle">
             <input type="checkbox" id="publishNow" checked>
-            <span>Publicera direkt i Bytesmarknad (kan ändras senare under Mina objekt)</span>
+            <span data-i18n="market.publishNow">Publish directly on the marketplace (can be changed later under My items)</span>
           </label>
           <p class="listing-quota-hint hidden" id="listingQuotaHint"></p>
           <div class="signing-box">
-            <p>Du intygar att objektet/tjänsten är lagligt och korrekt beskrivet. Själva affären görs upp direkt mellan dig och motparten — utanför AestimAi.</p>
-            <button type="button" class="btn-primary" id="btnPublishListing">Spara objekt</button>
+            <p data-i18n="market.signing">You confirm the item or service is legal and accurately described. The deal itself is arranged directly between you and the other party — outside AestimAi.</p>
+            <button type="button" class="btn-primary" id="btnPublishListing" data-i18n="market.btnSave">Save item</button>
           </div>
         </form>
       </div>
 
-      <!-- Mina objekt -->
+      <!-- My items -->
       <div class="tab-content hidden" id="tab-my-items">
         <div id="myItemsContent">
           <div class="empty-state">
             <div class="empty-icon">⇄</div>
-            <h2>Logga in för att se dina objekt</h2>
-            <p>Här samlas allt du har värderat — välj med en knapp vilka som ska visas och bli sökbara i Bytesmarknaden.</p>
-            <button class="btn-primary" id="btnMyItemsLogin">Logga in / Skapa konto</button>
+            <h2 data-i18n="market.myItemsLoginTitle">Log in to see your items</h2>
+            <p data-i18n="market.myItemsLoginDesc">Everything you have valued appears here — choose with one click which listings are public and searchable on the marketplace.</p>
+            <button class="btn-primary" id="btnMyItemsLogin" data-i18n="market.loginRegisterBtn">Log in / Create account</button>
           </div>
         </div>
       </div>
@@ -1727,6 +1727,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="lab-i18n.js"></script>
+  <script src="market-i18n.js"></script>
   <script src="i18n.js"></script>
   <!-- Auth-modal -->
   <div class="auth-overlay hidden" id="authOverlay" onclick="closeAuthModal(event)">

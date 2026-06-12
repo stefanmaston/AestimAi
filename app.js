@@ -1400,6 +1400,28 @@ function renderChartLegend(series) {
 //  UCI BYTESMARKNAD
 // ════════════════════════════════════════════════════
 
+function mtr(key, vars, fb) {
+  let s = window.AestimI18n?.t?.(key) || fb || key;
+  if (vars && s) {
+    Object.entries(vars).forEach(([k, v]) => { s = s.split(`{${k}}`).join(String(v)); });
+  }
+  return s;
+}
+
+function translateMarketCategory(cat) {
+  if (!cat) return '';
+  const key = window.MARKET_CAT_I18N_KEYS?.[cat];
+  return key ? mtr(key, null, cat) : cat;
+}
+
+function marketCondLabel(n) {
+  return mtr(`uci.cond${n}`, null, COND_LABELS[n]);
+}
+
+function marketLocaleTag() {
+  return window.AestimI18n?.localeTag?.() || 'en-US';
+}
+
 // Kategorifilter (sök) → synonymer i de fritextkategorier som sparas på objekt.
 const CAT_SYNONYMS = {
   vardagssaker: ['vardagssaker', 'vardag'],
@@ -1437,11 +1459,11 @@ function listingView(row) {
   return {
     id:        row.id,
     kind:      row.kind || 'offer',
-    title:     mk.title || od.title || (od.description ? String(od.description).slice(0, 60) : 'Objekt'),
+    title:     mk.title || od.title || (od.description ? String(od.description).slice(0, 60) : mtr('market.defaultTitle', null, 'Item')),
     category:  od.category || '',
     location:  mk.location || '',
     uci:       (uci !== null && !isNaN(uci)) ? uci : null,
-    condition: condRaw != null ? (COND_LABELS[condRaw] || condRaw) : '',
+    condition: condRaw != null ? (marketCondLabel(condRaw) || condRaw) : '',
     image:     (Array.isArray(mk.images) && mk.images[0]) || row.image_url || '',
     verified:  !!mk.is_verified,
     desc:      od.description || '',
@@ -1453,7 +1475,7 @@ async function searchMarket() {
   const grid = document.getElementById('marketGrid');
   const countEl = document.getElementById('marketCount');
   if (!grid) return;
-  grid.innerHTML = '<div class="market-loading">Laddar Bytesmarknaden…</div>';
+  grid.innerHTML = `<div class="market-loading">${mtr('market.loading', null, 'Loading marketplace…')}</div>`;
 
   const text     = document.getElementById('marketSearch')?.value.trim() || '';
   const cat      = document.getElementById('marketCatFilter')?.value || '';
@@ -1481,16 +1503,16 @@ async function searchMarket() {
     if (!isNaN(uciMax))    rows = rows.filter(v => v.uci != null && v.uci <= uciMax);
     if (verified)          rows = rows.filter(v => v.verified);
 
-    if (countEl) countEl.textContent = `${rows.length} ${rows.length === 1 ? 'objekt' : 'objekt'}`;
+    if (countEl) countEl.textContent = mtr('market.count', { n: rows.length }, `${rows.length} items`);
 
     if (!rows.length) {
-      grid.innerHTML = '<div class="market-empty">Inga publika objekt matchar. Var först — registrera och publicera ditt objekt!</div>';
+      grid.innerHTML = `<div class="market-empty">${mtr('market.empty', null, 'No public listings match.')}</div>`;
       return;
     }
     grid.innerHTML = rows.map(marketCardHTML).join('');
   } catch (e) {
     console.warn('[market] sök misslyckades:', e?.message);
-    grid.innerHTML = `<div class="market-error">Kunde inte ladda Bytesmarknaden: ${escHtml(e?.message || 'okänt fel')}</div>`;
+    grid.innerHTML = `<div class="market-error">${mtr('market.errorLoad', { msg: escHtml(e?.message || mtr('market.unknownError', null, 'unknown error')) }, 'Could not load marketplace.')}</div>`;
   }
 }
 
@@ -1498,19 +1520,23 @@ function marketCardHTML(v) {
   const img = v.image
     ? `<div class="card-image" style="background-image:url('${escHtml(v.image)}')"></div>`
     : '<div class="card-image placeholder-img">📷</div>';
-  const kindLabel = v.kind === 'wanted' ? 'Efterlyses' : 'Erbjuds';
+  const kindLabel = v.kind === 'wanted'
+    ? mtr('market.kindWanted', null, 'Wanted')
+    : mtr('market.kindOffer', null, 'Offered');
+  const catLabel = translateMarketCategory(v.category);
+  const locale = marketLocaleTag();
   return `<div class="market-card" data-id="${escHtml(v.id)}">
     <a class="card-image-link" href="/m/${escHtml(v.id)}">${img}</a>
     <div class="card-body">
       <span class="card-kind kind-${escHtml(v.kind)}">${kindLabel}</span>
       <h3><a href="/m/${escHtml(v.id)}">${escHtml(v.title)}</a></h3>
-      <p class="card-cat">${escHtml(v.category)}${v.location ? ' · ' + escHtml(v.location) : ''}</p>
+      <p class="card-cat">${escHtml(catLabel)}${v.location ? ' · ' + escHtml(v.location) : ''}</p>
       <div class="card-uci">
-        <span class="uci-badge">${v.uci != null ? v.uci.toLocaleString('sv-SE') + ' UCI' : '— UCI'}</span>
+        <span class="uci-badge">${v.uci != null ? v.uci.toLocaleString(locale) + ' UCI' : '— UCI'}</span>
         ${v.verified ? '<span class="card-verified">✓ AE ID</span>' : ''}
       </div>
-      ${v.condition ? `<p class="card-condition">Skick: ${escHtml(v.condition)}</p>` : ''}
-      <button class="btn-secondary btn-contact" data-id="${escHtml(v.id)}" data-title="${escHtml(v.title)}">Kontakta</button>
+      ${v.condition ? `<p class="card-condition">${mtr('market.condition', null, 'Condition:')} ${escHtml(v.condition)}</p>` : ''}
+      <button class="btn-secondary btn-contact" data-id="${escHtml(v.id)}" data-title="${escHtml(v.title)}">${mtr('market.contact', null, 'Contact')}</button>
     </div>
   </div>`;
 }
@@ -1539,19 +1565,19 @@ async function valueListing() {
   const desc      = document.getElementById('itemDesc').value.trim();
   const category  = document.getElementById('itemCategory').value;
   const condition = parseInt(document.getElementById('itemCondition').value) || 3;
-  if (!desc) { showToast('Skriv en beskrivning först.'); return; }
+  if (!desc) { showToast(mtr('market.toastNeedDesc', null, 'Write a description first.')); return; }
 
   const btn = document.getElementById('btnValueListing');
   const orig = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Värderar…';
+  btn.disabled = true; btn.textContent = mtr('market.toastValuating', null, 'Valuating…');
   const data = await fetchValuation({ description: desc, category, condition });
   btn.disabled = false; btn.textContent = orig;
 
   if (data && data.uci_value != null) {
     state.listingValuation = data;
-    document.getElementById('uciAutoValue').textContent = Number(data.uci_value).toLocaleString('sv-SE');
+    document.getElementById('uciAutoValue').textContent = Number(data.uci_value).toLocaleString(marketLocaleTag());
   } else {
-    showToast('AI-värdering misslyckades — du kan ange ett UCI-värde manuellt.');
+    showToast(mtr('market.toastValuationFailed', null, 'AI valuation failed.'));
   }
 }
 
@@ -1594,9 +1620,9 @@ function extraListingConfirmMessage(user) {
   const limit = listingLimitForPlan(plan);
   const label = planDisplayName(plan);
   if (limit === 1) {
-    return `${label} inkluderar 1 aktiv annons. Publicera den här kostar €1.\n\nFortsätt till betalning?`;
+    return mtr('market.confirmExtraListingOne', { plan: label }, `${label} includes 1 active listing. Publishing costs €1.`);
   }
-  return `${label} inkluderar ${limit} aktiva annonser. Publicera den här kostar €1.\n\nFortsätt till betalning?`;
+  return mtr('market.confirmExtraListingMany', { plan: label, limit }, `${label} includes ${limit} active listings. Publishing costs €1.`);
 }
 
 async function countPublicListings(userId) {
@@ -1626,7 +1652,7 @@ async function refreshListingQuotaHint() {
   await refreshAuth();
   if (!isRealUser(state.user)) {
     hint.classList.add('hidden');
-    btn.textContent = 'Spara objekt';
+    btn.textContent = mtr('market.btnSave', null, 'Save item');
     return;
   }
 
@@ -1634,35 +1660,41 @@ async function refreshListingQuotaHint() {
     const limit = listingLimitForPlan(getUserPlan(state.user));
     const used  = await countPublicListings(state.user.id);
     const publishChecked = publishNow?.checked !== false;
+    const suffix = limit === 1
+      ? mtr('market.quotaSuffixOne', null, '')
+      : mtr('market.quotaSuffixMany', null, 's');
 
     if (!Number.isFinite(limit)) {
       hint.classList.add('hidden');
-      btn.textContent = 'Spara objekt';
+      btn.textContent = mtr('market.btnSave', null, 'Save item');
       return;
     }
 
     if (used >= limit) {
-      hint.innerHTML = `Du har <strong>${used}/${limit}</strong> aktiv${limit === 1 ? ' annons' : 'a annonser'}. ` +
-        'Nästa publicering kostar <strong>€1</strong> via Stripe.';
+      hint.innerHTML = mtr('market.quotaAtLimit', { used, limit, suffix }, `You have ${used}/${limit} active listings. Next costs €1.`);
       hint.classList.remove('hidden');
-      if (publishChecked) btn.textContent = 'Betala €1 och publicera';
-      else btn.textContent = 'Spara objekt';
+      btn.textContent = publishChecked
+        ? mtr('market.btnPayPublish', null, 'Pay €1 and publish')
+        : mtr('market.btnSave', null, 'Save item');
     } else if (publishChecked && used + 1 > limit) {
-      hint.innerHTML = 'Den här annonsen blir din extra publicering — <strong>€1</strong> debiteras vid publicering.';
+      hint.innerHTML = mtr('market.quotaExtra', null, 'Extra publication — €1 on publish.');
       hint.classList.remove('hidden');
-      btn.textContent = 'Betala €1 och publicera';
+      btn.textContent = mtr('market.btnPayPublish', null, 'Pay €1 and publish');
     } else {
       const label = planDisplayName(getUserPlan(state.user));
-      hint.innerHTML = `${label}: <strong>${used}/${limit}</strong> aktiv${limit === 1 ? ' annons' : 'a annonser'} ingår.` +
-        (limit === 1 ? ' Extra annonser: €1/st.' : '');
+      const extra = limit === 1 ? mtr('market.quotaExtraNote', null, '') : '';
+      hint.innerHTML = mtr('market.quotaIncluded', { plan: label, used, limit, suffix, extra }, `${label}: ${used}/${limit} included.`);
       hint.classList.remove('hidden');
-      btn.textContent = publishChecked ? 'Spara och publicera' : 'Spara objekt';
+      btn.textContent = publishChecked
+        ? mtr('market.btnSavePublish', null, 'Save and publish')
+        : mtr('market.btnSave', null, 'Save item');
     }
   } catch (_) {
     hint.classList.add('hidden');
-    btn.textContent = 'Spara objekt';
+    btn.textContent = mtr('market.btnSave', null, 'Save item');
   }
 }
+window.refreshListingQuotaHint = refreshListingQuotaHint;
 
 async function startListingCheckout(listingId) {
   const sb = await getSb();
@@ -1850,12 +1882,12 @@ async function submitListing() {
   const manualUci = parseFloat(document.getElementById('itemUciPrice').value);
   const publishNow = document.getElementById('publishNow').checked;
 
-  if (!title) { showToast('Ange en titel.'); document.getElementById('itemTitle').focus(); return; }
-  if (!desc)  { showToast('Beskriv objektet eller tjänsten.'); document.getElementById('itemDesc').focus(); return; }
+  if (!title) { showToast(mtr('market.toastNeedTitle', null, 'Enter a title.')); document.getElementById('itemTitle').focus(); return; }
+  if (!desc)  { showToast(mtr('market.toastNeedDescFull', null, 'Describe the item or service.')); document.getElementById('itemDesc').focus(); return; }
 
   const btn = document.getElementById('btnPublishListing');
   const orig = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Sparar…';
+  btn.disabled = true; btn.textContent = mtr('market.toastSaving', null, 'Saving…');
 
   try {
     // Värdering: använd cachad AI-värdering, hämta ny, eller manuellt värde.
@@ -1896,17 +1928,19 @@ async function submitListing() {
     if (error) throw error;
 
     if (needsPay) {
-      showToast('Objekt sparat — du skickas till betalning…');
+      showToast(mtr('market.toastSavedPay', null, 'Item saved — redirecting to payment…'));
       resetRegisterForm();
       await startListingCheckout(inserted.id);
       return;
     }
 
-    showToast(publishNow ? 'Publicerat i Bytesmarknad!' : 'Sparat under Mina objekt.');
+    showToast(publishNow
+      ? mtr('market.toastPublished', null, 'Published on marketplace!')
+      : mtr('market.toastSaved', null, 'Saved under My items.'));
     resetRegisterForm();
     switchMarketTab('my-items');
   } catch (e) {
-    showToast('Kunde inte spara: ' + (e?.message || 'okänt fel'));
+    showToast(mtr('market.toastUpdateFailed', { msg: e?.message || mtr('market.unknownError', null, 'unknown error') }, 'Could not save.'));
   } finally {
     btn.disabled = false; btn.textContent = orig;
   }
@@ -1931,19 +1965,19 @@ function switchMarketTab(tab) {
 async function loadMyItems() {
   const container = document.getElementById('myItemsContent');
   if (!container) return;
-  container.innerHTML = '<div class="market-loading">Laddar dina objekt…</div>';
+  container.innerHTML = `<div class="market-loading">${mtr('market.myItemsLoading', null, 'Loading your items…')}</div>`;
 
   await refreshAuth();
   if (!isRealUser(state.user)) {
     container.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">⇄</div>
-        <h2>Logga in för att se dina objekt</h2>
-        <p>Här samlas allt du har värderat — välj med en knapp vilka som ska visas i Bytesmarknaden.</p>
-        <button class="btn-primary" id="btnMyItemsLogin2">Logga in / Skapa konto</button>
+        <h2>${mtr('market.myItemsLoginTitle', null, 'Log in to see your items')}</h2>
+        <p>${mtr('market.myItemsLoginDesc', null, '')}</p>
+        <button class="btn-primary" id="btnMyItemsLogin2">${mtr('market.loginRegisterBtn', null, 'Log in / Create account')}</button>
       </div>`;
     document.getElementById('btnMyItemsLogin2')?.addEventListener('click', async () => {
-      const ok = await openAuthModal({ intro: 'Logga in för att se och publicera dina objekt.' });
+      const ok = await openAuthModal({ intro: mtr('market.myItemsLoginDesc', null, '') });
       if (ok) loadMyItems();
     });
     return;
@@ -1962,43 +1996,45 @@ async function loadMyItems() {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">⇄</div>
-          <h2>Inga objekt än</h2>
-          <p>Registrera ditt första objekt eller gör en värdering — det dyker upp här.</p>
-          <button class="btn-primary" id="btnGoRegister">Registrera objekt</button>
+          <h2>${mtr('market.myItemsEmptyTitle', null, 'No items yet')}</h2>
+          <p>${mtr('market.myItemsEmptyDesc', null, '')}</p>
+          <button class="btn-primary" id="btnGoRegister">${mtr('market.btnRegisterItem', null, 'Register item')}</button>
         </div>`;
       document.getElementById('btnGoRegister')?.addEventListener('click', () => switchMarketTab('register'));
       return;
     }
 
-    const header = `<div class="my-items-header"><h2>Mina objekt</h2>
-      <p>Tryck <strong>Visa i Bytesmarknad</strong> för att göra ett objekt publikt och sökbart.</p></div>`;
+    const header = `<div class="my-items-header"><h2>${mtr('market.myItemsHeaderTitle', null, 'My items')}</h2>
+      <p>${mtr('market.myItemsHeaderDesc', null, '')}</p></div>`;
     container.innerHTML = header + '<div class="my-items-list">' + data.map(myItemRowHTML).join('') + '</div>';
   } catch (e) {
-    container.innerHTML = `<div class="market-error">Kunde inte hämta dina objekt: ${escHtml(e?.message || 'okänt fel')}</div>`;
+    container.innerHTML = `<div class="market-error">${mtr('market.myItemsError', { msg: escHtml(e?.message || mtr('market.unknownError', null, 'unknown error')) }, 'Could not load items.')}</div>`;
   }
 }
 
 function myItemRowHTML(row) {
   const v = listingView(row);
   const pub = !!row.is_public;
+  const locale = marketLocaleTag();
   const dateStr = row.created_at
-    ? new Date(row.created_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })
+    ? new Date(row.created_at).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })
     : '';
+  const catLabel = translateMarketCategory(v.category);
   return `<div class="my-item" data-id="${escHtml(row.id)}">
     <div class="my-item-info">
       <h3>${escHtml(v.title)}</h3>
-      <p class="card-cat">${escHtml(v.category)}${v.uci != null ? ' · ' + v.uci.toLocaleString('sv-SE') + ' UCI' : ''}</p>
-      ${dateStr ? `<p class="my-item-date">Värderad ${escHtml(dateStr)}</p>` : ''}
-      <span class="status-pill ${pub ? 'pill-public' : 'pill-private'}">${pub ? 'Publik i Bytesmarknad' : 'Ej publik'}</span>
+      <p class="card-cat">${escHtml(catLabel)}${v.uci != null ? ' · ' + v.uci.toLocaleString(locale) + ' UCI' : ''}</p>
+      ${dateStr ? `<p class="my-item-date">${mtr('market.valuedOn', { date: escHtml(dateStr) }, `Valued ${dateStr}`)}</p>` : ''}
+      <span class="status-pill ${pub ? 'pill-public' : 'pill-private'}">${pub ? mtr('market.statusPublic', null, 'Public') : mtr('market.statusPrivate', null, 'Not public')}</span>
     </div>
     <div class="my-item-actions">
       <select class="mi-kind" data-id="${escHtml(row.id)}">
-        <option value="offer"${v.kind === 'offer' ? ' selected' : ''}>Erbjuds</option>
-        <option value="wanted"${v.kind === 'wanted' ? ' selected' : ''}>Efterlyses</option>
+        <option value="offer"${v.kind === 'offer' ? ' selected' : ''}>${mtr('market.kindOffer', null, 'Offered')}</option>
+        <option value="wanted"${v.kind === 'wanted' ? ' selected' : ''}>${mtr('market.kindWanted', null, 'Wanted')}</option>
       </select>
-      <button class="btn-primary mi-toggle" data-id="${escHtml(row.id)}" data-public="${pub ? '1' : '0'}">${pub ? 'Dölj' : 'Visa i Bytesmarknad'}</button>
-      ${pub ? `<a class="btn-text" href="/m/${escHtml(row.id)}" target="_blank" rel="noopener">Visa sida</a>` : ''}
-      <button class="btn-text mi-delete" data-id="${escHtml(row.id)}">Radera</button>
+      <button class="btn-primary mi-toggle" data-id="${escHtml(row.id)}" data-public="${pub ? '1' : '0'}">${pub ? mtr('market.btnHide', null, 'Hide') : mtr('market.btnShow', null, 'Show on marketplace')}</button>
+      ${pub ? `<a class="btn-text" href="/m/${escHtml(row.id)}" target="_blank" rel="noopener">${mtr('market.btnViewPage', null, 'View page')}</a>` : ''}
+      <button class="btn-text mi-delete" data-id="${escHtml(row.id)}">${mtr('market.btnDelete', null, 'Delete')}</button>
     </div>
   </div>`;
 }
@@ -2024,24 +2060,26 @@ async function toggleMyItem(id, makePublic) {
     const sb = await getSb();
     const { error } = await sb.from('aestimai_valuations').update(patch).eq('id', id);
     if (error) throw error;
-    showToast(makePublic ? 'Publicerat i Bytesmarknad!' : 'Dolt från Bytesmarknad.');
-    marketLoaded = false; // tvinga ny laddning av söklistan nästa gång
+    showToast(makePublic
+      ? mtr('market.toastPublishedShort', null, 'Published on marketplace!')
+      : mtr('market.toastHidden', null, 'Hidden from marketplace.'));
+    marketLoaded = false;
     loadMyItems();
   } catch (e) {
-    showToast('Gick inte att uppdatera: ' + (e?.message || 'okänt fel'));
+    showToast(mtr('market.toastUpdateFailed', { msg: e?.message || mtr('market.unknownError', null, 'unknown error') }, 'Could not update.'));
   }
 }
 
 async function deleteMyItem(id) {
-  if (!window.confirm('Radera detta objekt permanent?')) return;
+  if (!window.confirm(mtr('market.confirmDelete', null, 'Delete this item permanently?'))) return;
   try {
     const sb = await getSb();
     const { error } = await sb.from('aestimai_valuations').delete().eq('id', id);
     if (error) throw error;
-    showToast('Objektet raderat.');
+    showToast(mtr('market.toastDeleted', null, 'Item deleted.'));
     loadMyItems();
   } catch (e) {
-    showToast('Gick inte att radera: ' + (e?.message || 'okänt fel'));
+    showToast(mtr('market.toastDeleteFailed', { msg: e?.message || mtr('market.unknownError', null, 'unknown error') }, 'Could not delete.'));
   }
 }
 
@@ -2174,6 +2212,8 @@ function setupSettings() {
       updatePanelHelp(state.currentModule);
       refreshDashboardCaps();
       if (labShopLoaded) renderLabProducts();
+      if (marketLoaded) searchMarket();
+      if (state.currentModule === 'market') loadMyItems();
       i18n.applyTranslations();
     } else if (kind === 'currency') {
       showToast(i18n.t('settings.currency.saved'));

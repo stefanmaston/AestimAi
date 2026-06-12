@@ -617,6 +617,9 @@
   APP_LANGUAGES.forEach(lang => {
     if (global.LAB_I18N?.[lang]) Object.assign(STRINGS[lang], global.LAB_I18N[lang]);
   });
+  APP_LANGUAGES.forEach(lang => {
+    if (global.MARKET_I18N?.[lang]) Object.assign(STRINGS[lang], global.MARKET_I18N[lang]);
+  });
 
   let currentLang = DEFAULT_LANGUAGE;
   let capDisplayCurrency = DEFAULT_CAP_CURRENCY;
@@ -685,6 +688,25 @@
     if (btnTxt && btn && !btn.disabled) btnTxt.textContent = t('contact.btnSubmit');
   }
 
+  function updateMarketSelectLabels() {
+    document.querySelectorAll('#marketCatFilter option[data-i18n], #itemCategory option[data-i18n]').forEach(opt => {
+      const key = opt.getAttribute('data-i18n');
+      if (key) opt.textContent = t(key);
+    });
+    document.querySelectorAll('#marketKindFilter option[data-i18n], #itemKind option[data-i18n]').forEach(opt => {
+      const key = opt.getAttribute('data-i18n');
+      if (key) opt.textContent = t(key);
+    });
+    document.querySelectorAll('#itemCondition option[data-i18n]').forEach(opt => {
+      const key = opt.getAttribute('data-i18n');
+      if (key) opt.textContent = t(key);
+    });
+  }
+
+  function updateMarketDynamicLabels() {
+    if (typeof window.refreshListingQuotaHint === 'function') window.refreshListingQuotaHint();
+  }
+
   function applyTranslations() {
     document.documentElement.lang = localeTag();
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -708,6 +730,8 @@
     updateContactSubjectOptions();
     updateUciDynamicLabels();
     updateContactDynamicLabels();
+    updateMarketSelectLabels();
+    updateMarketDynamicLabels();
   }
 
   function hydrate() {
