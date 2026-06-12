@@ -4,7 +4,7 @@
 
 // ── State ──────────────────────────────────────────
 const state = {
-  currentModule:     'dashboard',
+  currentModule:     'uci',
   isLoggedIn:        false,
   selectedCondition: 3,
   uciRateToSEK:      62.40,
@@ -72,18 +72,26 @@ async function saveWebValuation(objectData, result) {
 
 // ── Navigation ─────────────────────────────────────
 function navigateTo(moduleId) {
+  document.querySelector('style[data-module-boot]')?.remove();
+
   if (moduleId === 'account' && !isRealUser(currentUser)) {
     openAuthModal('login');
-    moduleId = 'dashboard';
+    moduleId = 'uci';
   }
 
   closeMobileSidebar?.();
 
-  document.querySelectorAll('.module').forEach(m => m.classList.add('hidden'));
+  document.querySelectorAll('.module').forEach(m => {
+    m.classList.add('hidden');
+    m.hidden = true;
+  });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
   const mod = document.getElementById('module-' + moduleId);
-  if (mod) mod.classList.remove('hidden');
+  if (mod) {
+    mod.classList.remove('hidden');
+    mod.hidden = false;
+  }
 
   const navBtn = document.querySelector(`.nav-item[data-module="${moduleId}"]`);
   if (navBtn) navBtn.classList.add('active');
@@ -1743,14 +1751,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Dashboard range-tabs hanteras nu av delegering i loadMarketDashboard()
 
   // Initial hjälptext
-  updatePanelHelp('dashboard');
+  updatePanelHelp('uci');
 
-  // Navigering från URL-hash, annars default = dashboard
+  // Navigering från URL-hash, annars default = UCI Värdering
   const hash = location.hash.replace('#', '');
   if (hash && document.getElementById('module-' + hash)) {
     navigateTo(hash);
   } else {
-    navigateTo('dashboard');
+    navigateTo('uci');
   }
 });
 
@@ -1860,7 +1868,7 @@ function onSignOut() {
   syncAuthState(null);
   document.getElementById('topbarGuest')?.classList.remove('hidden');
   document.getElementById('topbarAccount')?.classList.add('hidden');
-  if (state.currentModule === 'account') navigateTo('dashboard');
+  if (state.currentModule === 'account') navigateTo('uci');
   afterAuthChange();
 }
 

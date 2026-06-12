@@ -289,7 +289,7 @@ textarea { resize: vertical; }
 .topbar-signout-link:hover { color: var(--gray-600, #555); }
 
 .module { display: block; }
-.module.hidden { display: none; }
+.module.hidden { display: none !important; }
 
 .module-header {
   margin-bottom: 2.25rem;
