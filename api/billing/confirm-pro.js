@@ -5,7 +5,7 @@
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
-const { PLAN_PRO, setUserPlan, subscriptionIsActive } = require('./plan');
+const { PLAN_PRO, setUserPlan, subscriptionIsActive } = require('./_plan');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vaxtylcqnscnflsucyiv.supabase.co';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_EJWkHcLuQmbEnwAGkaEANg_6rue2HsZ';

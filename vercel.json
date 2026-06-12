@@ -1,4 +1,5 @@
 {
+  "installCommand": "npm install && npm install --prefix api",
   "rewrites": [
     {
       "source": "/api/uci/:path*",

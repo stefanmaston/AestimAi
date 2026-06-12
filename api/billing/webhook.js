@@ -10,7 +10,7 @@ const {
   setUserPlan,
   subscriptionIsActive,
   resolveUserIdFromSubscription,
-} = require('./plan');
+} = require('./_plan');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vaxtylcqnscnflsucyiv.supabase.co';
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;

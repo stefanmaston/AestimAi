@@ -12,11 +12,13 @@
   "type": "commonjs",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.102.0",
+    "@supabase/supabase-js": "^2.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
+    "stripe": "^17.0.0",
     "viem": "^2.52.2"
   }
 }

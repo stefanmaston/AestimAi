@@ -1,4 +1,5 @@
 // Delad logik för att uppdatera användarplan i Supabase Auth metadata.
+// Prefix _ = Vercel skapar ingen serverless-endpoint för denna fil.
 
 const PLAN_FREE = 'free';
 const PLAN_PRO = 'pro';
