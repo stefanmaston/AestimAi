@@ -1554,28 +1554,34 @@ async function searchMarket() {
 }
 
 function marketCardHTML(v) {
-  const img = v.image
-    ? `<div class="card-image" style="background-image:url('${escHtml(v.image)}')"></div>`
-    : '<div class="card-image placeholder-img">📷</div>';
+  const locale = marketLocaleTag();
   const kindLabel = v.kind === 'wanted'
     ? mtr('market.kindWanted', null, 'Wanted')
     : mtr('market.kindOffer', null, 'Offered');
   const catLabel = translateMarketCategory(v.category);
-  const locale = marketLocaleTag();
-  return `<div class="market-card" data-id="${escHtml(v.id)}">
-    <a class="card-image-link" href="/m/${escHtml(v.id)}">${img}</a>
-    <div class="card-body">
+  const metaParts = [
+    catLabel,
+    v.location || '',
+    v.uci != null ? `${v.uci.toLocaleString(locale)} UCI` : null,
+  ].filter(Boolean);
+  const thumbInner = v.image
+    ? `<img class="my-item-img" src="${escHtml(v.image)}" alt="${escHtml(v.title)}" loading="lazy">`
+    : '<div class="my-item-img my-item-img--empty" aria-hidden="true">📷</div>';
+  return `<article class="my-item-tile market-listing-tile" data-id="${escHtml(v.id)}">
+    <a class="my-item-thumb my-item-thumb-link" href="/m/${escHtml(v.id)}">
+      ${thumbInner}
       <span class="card-kind kind-${escHtml(v.kind)}">${kindLabel}</span>
-      <h3><a href="/m/${escHtml(v.id)}">${escHtml(v.title)}</a></h3>
-      <p class="card-cat">${escHtml(catLabel)}${v.location ? ' · ' + escHtml(v.location) : ''}</p>
-      <div class="card-uci">
-        <span class="uci-badge">${v.uci != null ? v.uci.toLocaleString(locale) + ' UCI' : '— UCI'}</span>
-        ${v.verified ? '<span class="card-verified">✓ AE ID</span>' : ''}
-      </div>
-      ${v.condition ? `<p class="card-condition">${mtr('market.condition', null, 'Condition:')} ${escHtml(v.condition)}</p>` : ''}
-      <button class="btn-secondary btn-contact" data-id="${escHtml(v.id)}" data-title="${escHtml(v.title)}">${mtr('market.contact', null, 'Contact')}</button>
+    </a>
+    <div class="my-item-body">
+      <h3 class="my-item-title"><a href="/m/${escHtml(v.id)}">${escHtml(v.title)}</a></h3>
+      ${metaParts.length ? `<p class="my-item-meta">${escHtml(metaParts.join(' · '))}</p>` : ''}
+      ${v.condition ? `<p class="my-item-date">${mtr('market.condition', null, 'Condition:')} ${escHtml(v.condition)}</p>` : ''}
+      ${v.verified ? `<p class="my-item-date my-item-verified">✓ AE ID</p>` : ''}
     </div>
-  </div>`;
+    <div class="my-item-actions">
+      <button type="button" class="btn-primary btn-contact" data-id="${escHtml(v.id)}" data-title="${escHtml(v.title)}">${mtr('market.contact', null, 'Contact')}</button>
+    </div>
+  </article>`;
 }
 
 // ── Registrera objekt ───────────────────────────────
