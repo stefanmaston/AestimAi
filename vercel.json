@@ -12,6 +12,10 @@
     {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
+    },
+    {
+      "source": "/legal/aestimai-user-license-agreement-v2026-06-11.pdf",
+      "destination": "/AestimAi_User_License_Agreement.pdf"
     }
   ],
   "headers": [

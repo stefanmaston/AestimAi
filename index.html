@@ -1269,6 +1269,14 @@
             <option value="USD" data-i18n-label="settings.currency.usd">USD — US dollar</option>
           </select>
         </div>
+        <div class="account-card settings-legal-card">
+          <div class="acct-card-header">
+            <span class="acct-card-icon">📄</span>
+            <h3 data-i18n="legal.settingsTitle">Legal</h3>
+          </div>
+          <p class="settings-card-desc" data-i18n="legal.settingsDesc">User License Agreement for the AestimAi platform and UCI.</p>
+          <a class="acct-legal-link" href="/legal/" target="_blank" rel="noopener" data-i18n="legal.viewAgreement">View User License Agreement</a>
+        </div>
       </div>
     </section>
 
@@ -1311,6 +1319,11 @@
             <span>Konto-ID</span>
             <span id="acctId" class="acct-mono">—</span>
           </div>
+          <div class="account-row">
+            <span data-i18n="legal.acceptedLabel">License agreement</span>
+            <span id="acctLicense">—</span>
+          </div>
+          <a class="acct-legal-link" href="/legal/" target="_blank" rel="noopener" data-i18n="legal.viewAgreement">View User License Agreement</a>
           <button class="btn-primary btn-sm acct-action-btn" onclick="openEditAccount()">Redigera uppgifter</button>
           <button class="btn-secondary btn-sm" onclick="openAuthModal('forgot')">Byt lösenord</button>
         </div>
@@ -1760,6 +1773,10 @@
           <label>Bekräfta lösenord</label>
           <input type="password" id="regPassword2" placeholder="••••••••" autocomplete="new-password">
         </div>
+        <label class="auth-legal-check">
+          <input type="checkbox" id="regAcceptLicense" name="regAcceptLicense">
+          <span data-i18n-html="auth.licenseAccept">I have read and agree to the <a href="/legal/" target="_blank" rel="noopener">AestimAi User License Agreement</a> (version 2026-06-11).</span>
+        </label>
         <p class="auth-error hidden" id="regError"></p>
         <button class="btn-plan btn-plan-pro" id="btnRegister" style="width:100%" onclick="doRegister()">Skapa konto</button>
         <div class="auth-links">

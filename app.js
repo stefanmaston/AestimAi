@@ -2,6 +2,36 @@
    AestimAi — Applikationslogik
    =================================================== */
 
+// ── License agreement (User License Agreement v2026-06-11) ──
+const LICENSE_AGREEMENT = {
+  version: '2026-06-11',
+  id:      'aestimai-user-license-v2026-06-11',
+  pdfUrl:  '/legal/aestimai-user-license-agreement-v2026-06-11.pdf',
+  pageUrl: '/legal/',
+};
+
+function buildLicenseAcceptanceMetadata() {
+  return {
+    license_agreement_version: LICENSE_AGREEMENT.version,
+    license_agreement_id:      LICENSE_AGREEMENT.id,
+    license_accepted_at:       new Date().toISOString(),
+    license_tier:              'general',
+  };
+}
+
+function formatLicenseAcceptance(user) {
+  const i18n = window.AestimI18n;
+  const tr = (k, fb) => i18n?.t?.(k) || fb;
+  const ver = user?.user_metadata?.license_agreement_version;
+  const at  = user?.user_metadata?.license_accepted_at;
+  if (!ver) return tr('legal.notRecorded', 'Not recorded');
+  const locale = i18n?.localeTag?.() || 'en-US';
+  const dateStr = at ? new Date(at).toLocaleDateString(locale) : '';
+  return dateStr ? `${ver} (${dateStr})` : ver;
+}
+
+window.LICENSE_AGREEMENT = LICENSE_AGREEMENT;
+
 // ── State ──────────────────────────────────────────
 const state = {
   currentModule:     'uci',
@@ -2411,6 +2441,8 @@ function refreshAccountSection() {
       ? new Date(periodEnd).toLocaleDateString('sv-SE')
       : '—';
   }
+  const licenseEl = document.getElementById('acctLicense');
+  if (licenseEl) licenseEl.textContent = formatLicenseAcceptance(u);
   const upgradeBtn = document.getElementById('btnUpgradePlan');
   if (upgradeBtn) {
     if (plan === 'pro') {
@@ -2513,6 +2545,10 @@ function switchPanel(name) {
   });
   const target = document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1));
   if (target) target.classList.remove('hidden');
+  if (name === 'register') {
+    const lic = document.getElementById('regAcceptLicense');
+    if (lic) lic.checked = false;
+  }
 }
 
 function setAuthError(id, msg) {
@@ -2544,6 +2580,8 @@ async function doLogin() {
 }
 
 async function doRegister() {
+  const i18n  = window.AestimI18n;
+  const tr    = (k, fb) => i18n?.t?.(k) || fb;
   const name  = document.getElementById('regName')?.value.trim() || '';
   const email = document.getElementById('regEmail').value.trim();
   const pass  = document.getElementById('regPassword').value;
@@ -2553,6 +2591,10 @@ async function doRegister() {
   if (!email) return setAuthError('regError', 'Ange en e-postadress.');
   if (pass.length < 8) return setAuthError('regError', 'Lösenordet måste vara minst 8 tecken.');
   if (pass !== pass2) return setAuthError('regError', 'Lösenorden matchar inte.');
+  if (!document.getElementById('regAcceptLicense')?.checked) {
+    return setAuthError('regError', tr('auth.licenseRequired', 'You must accept the User License Agreement to create an account.'));
+  }
+  const licenseMeta = buildLicenseAcceptanceMetadata();
   const btn = document.getElementById('btnRegister');
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
@@ -2563,7 +2605,7 @@ async function doRegister() {
       const { data, error } = await sb.auth.updateUser({
         email,
         password: pass,
-        data: { full_name: name },
+        data: { full_name: name, ...licenseMeta },
       });
       if (error) return setAuthError('regError', mapAuthError(error.message));
       if (data?.user) onSignIn(data.user);
@@ -2575,7 +2617,7 @@ async function doRegister() {
     const { data, error } = await sb.auth.signUp({
       email,
       password: pass,
-      options: { data: { full_name: name } },
+      options: { data: { full_name: name, ...licenseMeta } },
     });
     if (error) return setAuthError('regError', mapAuthError(error.message));
     if (data?.user && !data.user.email_confirmed_at && data.session === null) {

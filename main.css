@@ -2627,6 +2627,28 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
 }
 .auth-link:hover { text-decoration: underline; }
 .auth-hint { font-size: .78rem; color: var(--gray-400,#888780); font-weight: 400; }
+.auth-legal-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--gray-700, #3a3a37);
+  cursor: pointer;
+}
+.auth-legal-check input { margin-top: 0.2rem; flex-shrink: 0; accent-color: var(--green, #1D6B4E); }
+.auth-legal-check a { color: var(--green, #1D6B4E); font-weight: 500; }
+.acct-legal-link {
+  display: inline-block;
+  margin: 0.35rem 0 0.85rem;
+  color: var(--green, #1D6B4E);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+.acct-legal-link:hover { text-decoration: underline; }
+.settings-legal-card .acct-legal-link { margin-bottom: 0; }
 .auth-error { color: #dc2626; font-size: .84rem; margin: .5rem 0; }
 .auth-success-icon { font-size: 3rem; text-align: center; margin-bottom: 1rem; }
 
