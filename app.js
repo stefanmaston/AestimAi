@@ -180,6 +180,19 @@ function navigateTo(moduleId) {
   if (moduleId === 'settings') {
     initSettingsPanel();
   }
+
+  syncModuleHash(moduleId);
+}
+
+function syncModuleHash(moduleId) {
+  let hash = '#' + moduleId;
+  if (moduleId === 'ucilab') {
+    const tab = state.labTab || 'engine';
+    hash = tab === 'shop' ? '#ucilab-shop' : tab === 'papers' ? '#ucilab-papers' : '#ucilab';
+  }
+  if (location.hash !== hash) {
+    history.replaceState(null, '', location.pathname + location.search + hash);
+  }
 }
 
 function updatePanelHelp(moduleId) {
@@ -2282,17 +2295,9 @@ function applyStartupNavigation() {
     return;
   }
 
-  if (hash === 'ucilab' || hash === 'ucilab-shop' || hash === 'ucilab-papers') {
-    state.labTab = resolveLabTabFromHash();
-    navigateTo('ucilab');
-    return;
-  }
-
+  // Standard: UCI Valuation. Endast #pricing (och checkout-flöden nedan) överstyr.
   const module = resolveStartupModule();
   navigateTo(module);
-  if (module === 'uci') {
-    history.replaceState(null, '', location.pathname + location.search + '#uci');
-  }
 }
 
 // ── Init ─────────────────────────────────────────────
