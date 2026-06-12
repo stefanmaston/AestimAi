@@ -772,12 +772,18 @@
 
       <div class="lab-subnav market-tabs">
         <button type="button" class="tab-btn active" data-lab-tab="engine" onclick="switchLabTab('engine')" data-i18n="lab.tab.engine">UCI Valuation Engine</button>
+        <button type="button" class="tab-btn" data-lab-tab="papers" onclick="switchLabTab('papers')" data-i18n="lab.tab.papers">Scientific papers and Articles</button>
         <button type="button" class="tab-btn" data-lab-tab="shop" onclick="switchLabTab('shop')" data-i18n="lab.tab.shop">Shop · Amazon</button>
       </div>
 
       <!-- Lab: UCI Valuation Engine -->
       <div class="lab-panel" id="lab-panel-engine">
         <div data-i18n-html="lab.engineBody"></div>
+      </div>
+
+      <!-- Lab: Scientific papers -->
+      <div class="lab-panel hidden" id="lab-panel-papers">
+        <div data-i18n-html="lab.papersBody"></div>
       </div>
 
       <!-- Lab: Amazon shop -->

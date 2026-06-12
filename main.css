@@ -2122,6 +2122,120 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   color: var(--gray-700);
   font-size: .95rem;
 }
+
+/* Scientific papers */
+.lab-papers-intro {
+  color: var(--gray-600);
+  font-size: .98rem;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+  max-width: 72ch;
+}
+.lab-paper-featured {
+  background: #fff;
+  border: 1px solid var(--border, #e6e5e1);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.lab-paper-badge {
+  display: inline-block;
+  background: var(--green-faint);
+  color: var(--primary, #1D6B4E);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .25rem .65rem;
+  border-radius: 999px;
+  margin-bottom: .85rem;
+}
+.lab-paper-featured h2 {
+  font-size: 1.35rem;
+  line-height: 1.35;
+  margin: 0 0 .75rem;
+  color: var(--gray-900, #1a1a1a);
+}
+.lab-paper-meta {
+  margin: 0 0 1rem;
+  color: var(--gray-500);
+  font-size: .9rem;
+}
+.lab-paper-draft {
+  font-style: italic;
+}
+.lab-paper-abstract,
+.lab-paper-keywords {
+  color: var(--gray-700);
+  line-height: 1.65;
+  font-size: .95rem;
+  margin: 0 0 1rem;
+}
+.lab-paper-actions {
+  margin: 1.25rem 0 1.5rem;
+}
+.lab-paper-outline h3 {
+  font-size: 1rem;
+  margin: 0 0 .75rem;
+  color: var(--gray-800);
+}
+.lab-paper-outline ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--gray-700);
+  line-height: 1.7;
+  font-size: .92rem;
+}
+.lab-papers-section h2 {
+  font-size: 1.15rem;
+  margin: 0 0 .5rem;
+}
+.lab-papers-section-desc {
+  color: var(--gray-500);
+  font-size: .92rem;
+  margin: 0 0 1.25rem;
+}
+.lab-paper-list {
+  display: grid;
+  gap: .85rem;
+}
+.lab-paper-link {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--border, #e6e5e1);
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+.lab-paper-link:hover {
+  border-color: var(--primary, #1D6B4E);
+  box-shadow: 0 2px 8px rgba(29,107,78,.08);
+}
+.lab-paper-link strong {
+  display: block;
+  color: var(--gray-900);
+  font-size: .98rem;
+  margin-bottom: .35rem;
+}
+.lab-paper-link p {
+  margin: 0;
+  color: var(--gray-600);
+  font-size: .88rem;
+  line-height: 1.5;
+}
+.lab-paper-link-cat {
+  display: inline-block;
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--primary, #1D6B4E);
+  margin-bottom: .4rem;
+}
+
 .lab-shop-intro {
   color: var(--gray-500);
   font-size: .95rem;

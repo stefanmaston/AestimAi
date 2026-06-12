@@ -134,6 +134,242 @@
         <div class="lab-engine-cta"><p>¿Quieres probar el motor de valoración?</p><button type="button" class="btn-primary" onclick="navigateTo(\'uci\')">Iniciar valoración UCI →</button></div>`,
   };
 
+  const PAPER_LINKS = [
+    {
+      catKey: 'standards',
+      title: 'IFRS 13 — Fair Value Measurement',
+      descKey: 'ifrs13',
+      href: 'https://www.ifrs.org/issued-standards/list-of-standards/ifrs-13-fair-value-measurement/',
+    },
+    {
+      catKey: 'standards',
+      title: 'International Valuation Standards (IVS)',
+      descKey: 'ivs',
+      href: 'https://www.ivsc.org/standards/',
+    },
+    {
+      catKey: 'method',
+      title: 'Rosen (1974) — Hedonic Prices and Implicit Markets',
+      descKey: 'rosen',
+      href: 'https://www.journals.uchicago.edu/doi/10.1086/260169',
+    },
+    {
+      catKey: 'method',
+      title: 'OECD — Valuation Guidance for Infrastructure and Other Assets',
+      descKey: 'oecd',
+      href: 'https://www.oecd.org/en/publications/oecd-valuation-guidance_9789264319975-en.htm',
+    },
+    {
+      catKey: 'ai',
+      title: 'Lewis et al. (2020) — Retrieval-Augmented Generation',
+      descKey: 'rag',
+      href: 'https://arxiv.org/abs/2005.11401',
+    },
+    {
+      catKey: 'ai',
+      title: 'Angelopoulos & Bates (2021) — Conformal Prediction',
+      descKey: 'conformal',
+      href: 'https://arxiv.org/abs/2107.07511',
+    },
+    {
+      catKey: 'method',
+      title: 'Appraisal Institute — Automated Valuation Models (AVMs)',
+      descKey: 'avm',
+      href: 'https://www.appraisalinstitute.org/professional-practice/automated-valuation-models/',
+    },
+    {
+      catKey: 'coop',
+      title: 'ICA — Statement on the Co-operative Identity',
+      descKey: 'ica',
+      href: 'https://www.ica.coop/en/coops-cooperation/cooperative-identity',
+    },
+    {
+      catKey: 'legal',
+      title: 'EU MiCA Regulation (2023/1114)',
+      descKey: 'mica',
+      href: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1114',
+    },
+    {
+      catKey: 'legal',
+      title: 'ISO/IEC 18013-5 — Mobile driving licence (mDL)',
+      descKey: 'mdl',
+      href: 'https://www.iso.org/standard/69081.html',
+    },
+  ];
+
+  function buildPapersHtml(lang) {
+    const labels = {
+      sv: {
+        intro: 'Forskning och referenslitteratur kring UCI, AI-assisterad värdering och mätning av verkligt bytevärde — oberoende av valuta.',
+        featured: 'Utvald artikel',
+        draft: 'Manuskriptutkast',
+        author: 'Stefan Larsson-Mastonstråle · AestimAi',
+        readPdf: 'Läs hela PDF →',
+        outline: 'Innehåll',
+        further: 'Vidare läsning — värdering av tillgångar',
+        furtherDesc: 'Externa standarder, metoder och forskning som ligger nära UCI:s design.',
+        cat: { standards: 'Standarder', method: 'Metodik', ai: 'AI & ML', coop: 'Kooperativ ekonomi', legal: 'Regler & identitet' },
+        linkDesc: {
+          ifrs13: 'Internationell redovisningsstandard för verkligt värde — relevant för fastigheter, finansiella instrument och immateriella tillgångar.',
+          ivs: 'Globala värderingsstandarder för fastigheter, företag och finansiella tillgångar.',
+          rosen: 'Klassisk hedonisk prissättning — grund för att modellera pris utifrån objektattribut.',
+          oecd: 'OECD:s vägledning för värdering av infrastruktur och andra tillgångar i offentlig sektor.',
+          rag: 'Retrieval-augmented generation — evidensbaserad AI som hämtar jämförbara marknadsdata.',
+          conformal: 'Conformal prediction — statistiskt kalibrerade konfidensintervall kring värderingar.',
+          avm: 'Automatiserade värderingsmodeller (AVM) inom fastighetsvärdering och massappraisal.',
+          ica: 'Internationella kooperativa principer — demokratisk styrning och medlemsägande.',
+          mica: 'EU:s regelverk för krypto-tillgångar — relevant för UCI:s icke-tokeniserade mätinstrument.',
+          mdl: 'ISO-standard för mobilt körkort — identitetsankare för verifierad motprestation.',
+        },
+      },
+      en: {
+        intro: 'Research and reference literature on UCI, AI-assisted valuation and measuring real trade value — independent of currency.',
+        featured: 'Featured article',
+        draft: 'Draft manuscript',
+        author: 'Stefan Larsson-Mastonstråle · AestimAi',
+        readPdf: 'Read full PDF →',
+        outline: 'Contents',
+        further: 'Further reading — valuation of assets',
+        furtherDesc: 'External standards, methods and research aligned with the UCI design.',
+        cat: { standards: 'Standards', method: 'Methodology', ai: 'AI & ML', coop: 'Cooperative economics', legal: 'Regulation & identity' },
+        linkDesc: {
+          ifrs13: 'International accounting standard for fair value — relevant for property, financial instruments and intangibles.',
+          ivs: 'Global valuation standards for real estate, businesses and financial assets.',
+          rosen: 'Classic hedonic pricing — foundation for modelling price from object attributes.',
+          oecd: 'OECD guidance on valuing infrastructure and other assets in the public sector.',
+          rag: 'Retrieval-augmented generation — evidence-based AI that retrieves comparable market data.',
+          conformal: 'Conformal prediction — statistically calibrated confidence intervals around valuations.',
+          avm: 'Automated Valuation Models (AVMs) in property appraisal and mass appraisal.',
+          ica: 'International cooperative principles — democratic governance and member ownership.',
+          mica: 'EU crypto-asset regulation — relevant to UCI as a non-tokenised measurement instrument.',
+          mdl: 'ISO mobile driving licence standard — identity anchor for verified counterperformance.',
+        },
+      },
+      de: {
+        intro: 'Forschung und Referenzliteratur zu UCI, KI-gestützter Bewertung und Messung echten Tauschwerts — unabhängig von Währung.',
+        featured: 'Ausgewählter Artikel', draft: 'Manuskriptentwurf', author: 'Stefan Larsson-Mastonstråle · AestimAi',
+        readPdf: 'Vollständiges PDF lesen →', outline: 'Inhalt',
+        further: 'Weiterführende Literatur — Bewertung von Vermögenswerten',
+        furtherDesc: 'Externe Standards, Methoden und Forschung im Anschluss an das UCI-Design.',
+        cat: { standards: 'Standards', method: 'Methodik', ai: 'KI & ML', coop: 'Genossenschaftliche Wirtschaft', legal: 'Regulierung & Identität' },
+        linkDesc: {
+          ifrs13: 'Internationaler Rechnungslegungsstandard für beizulegenden Zeitwert.',
+          ivs: 'Globale Bewertungsstandards für Immobilien, Unternehmen und Finanzanlagen.',
+          rosen: 'Klassische hedonische Preisbildung — Grundlage für attributbasierte Preismodelle.',
+          oecd: 'OECD-Leitfaden zur Bewertung von Infrastruktur und anderen Vermögenswerten.',
+          rag: 'Retrieval-Augmented Generation — evidenzbasierte KI mit vergleichbaren Marktdaten.',
+          conformal: 'Conformal Prediction — statistisch kalibrierte Konfidenzintervalle.',
+          avm: 'Automated Valuation Models (AVM) in der Immobilienbewertung.',
+          ica: 'Internationale Genossenschaftsprinzipien — demokratische Governance.',
+          mica: 'EU-Krypto-Asset-Regulierung — relevant für UCI als nicht-tokenisiertes Messinstrument.',
+          mdl: 'ISO-Standard für mobiles Führerscheindokument — Identitätsanker.',
+        },
+      },
+      fr: {
+        intro: 'Recherche et références sur l\'UCI, la valorisation assistée par IA et la mesure de la valeur d\'échange réelle — indépendamment de la monnaie.',
+        featured: 'Article en vedette', draft: 'Manuscrit provisoire', author: 'Stefan Larsson-Mastonstråle · AestimAi',
+        readPdf: 'Lire le PDF complet →', outline: 'Sommaire',
+        further: 'Pour aller plus loin — valorisation des actifs',
+        furtherDesc: 'Normes, méthodes et recherches externes alignées sur la conception UCI.',
+        cat: { standards: 'Normes', method: 'Méthodologie', ai: 'IA & ML', coop: 'Économie coopérative', legal: 'Réglementation & identité' },
+        linkDesc: {
+          ifrs13: 'Norme comptable internationale sur la juste valeur.',
+          ivs: 'Normes internationales de valorisation pour l\'immobilier et les actifs financiers.',
+          rosen: 'Tarification hédonique classique — modélisation du prix par attributs.',
+          oecd: 'Guide OCDE sur la valorisation des infrastructures et autres actifs.',
+          rag: 'Génération augmentée par retrieval — IA fondée sur des comparables.',
+          conformal: 'Prédiction conforme — intervalles de confiance calibrés statistiquement.',
+          avm: 'Modèles de valorisation automatisés (AVM) pour l\'immobilier.',
+          ica: 'Principes coopératifs internationaux — gouvernance démocratique.',
+          mica: 'Réglementation européenne MiCA — pertinente pour l\'UCI non tokenisé.',
+          mdl: 'Norme ISO pour permis de conduire mobile — ancrage d\'identité.',
+        },
+      },
+      it: {
+        intro: 'Ricerca e letteratura di riferimento su UCI, valutazione assistita da IA e misura del valore di scambio reale — indipendente dalla valuta.',
+        featured: 'Articolo in evidenza', draft: 'Bozza di manoscritto', author: 'Stefan Larsson-Mastonstråle · AestimAi',
+        readPdf: 'Leggi PDF completo →', outline: 'Contenuti',
+        further: 'Letture consigliate — valutazione degli asset',
+        furtherDesc: 'Standard, metodi e ricerca esterni allineati al design UCI.',
+        cat: { standards: 'Standard', method: 'Metodologia', ai: 'IA & ML', coop: 'Economia cooperativa', legal: 'Regolamentazione & identità' },
+        linkDesc: {
+          ifrs13: 'Standard contabile internazionale sul fair value.',
+          ivs: 'Standard globali di valutazione per immobili e asset finanziari.',
+          rosen: 'Pricing edonico classico — modellazione del prezzo dagli attributi.',
+          oecd: 'Guida OCSE alla valutazione di infrastrutture e altri asset.',
+          rag: 'Retrieval-augmented generation — IA basata su comparables di mercato.',
+          conformal: 'Conformal prediction — intervalli di confidenza calibrati statisticamente.',
+          avm: 'Automated Valuation Models (AVM) nella valutazione immobiliare.',
+          ica: 'Principi cooperativi internazionali — governance democratica.',
+          mica: 'Regolamento UE MiCA — rilevante per UCI come strumento di misura non tokenizzato.',
+          mdl: 'Standard ISO per patente di guida mobile — ancoraggio identitario.',
+        },
+      },
+      es: {
+        intro: 'Investigación y bibliografía sobre UCI, valoración asistida por IA y medición del valor de intercambio real — independiente de la moneda.',
+        featured: 'Artículo destacado', draft: 'Borrador de manuscrito', author: 'Stefan Larsson-Mastonstråle · AestimAi',
+        readPdf: 'Leer PDF completo →', outline: 'Contenido',
+        further: 'Lecturas recomendadas — valoración de activos',
+        furtherDesc: 'Estándares, métodos e investigación externos alineados con el diseño UCI.',
+        cat: { standards: 'Estándares', method: 'Metodología', ai: 'IA & ML', coop: 'Economía cooperativa', legal: 'Regulación & identidad' },
+        linkDesc: {
+          ifrs13: 'Norma contable internacional sobre valor razonable.',
+          ivs: 'Estándares globales de valoración para inmuebles y activos financieros.',
+          rosen: 'Precios hedónicos clásicos — modelado del precio por atributos.',
+          oecd: 'Guía OCDE para valorar infraestructura y otros activos.',
+          rag: 'Generación aumentada por retrieval — IA basada en comparables de mercado.',
+          conformal: 'Predicción conformal — intervalos de confianza calibrados estadísticamente.',
+          avm: 'Modelos de valoración automatizados (AVM) en tasación inmobiliaria.',
+          ica: 'Principios cooperativos internacionales — gobernanza democrática.',
+          mica: 'Regulación europea MiCA — relevante para UCI como instrumento de medida no tokenizado.',
+          mdl: 'Estándar ISO para permiso de conducir móvil — ancla de identidad.',
+        },
+      },
+    };
+    const L = labels[lang] || labels.en;
+
+    const linksHtml = PAPER_LINKS.map(item => `
+      <a class="lab-paper-link" href="${item.href}" target="_blank" rel="noopener noreferrer">
+        <span class="lab-paper-link-cat">${L.cat[item.catKey]}</span>
+        <strong>${item.title}</strong>
+        <p>${L.linkDesc[item.descKey]}</p>
+      </a>`).join('');
+
+    return `<div class="lab-papers">
+      <p class="lab-papers-intro">${L.intro}</p>
+      <article class="lab-paper-featured">
+        <span class="lab-paper-badge">${L.featured}</span>
+        <h2>AestimAi and the Universal Comparable Index (UCI): A Cooperative, AI-Assisted Architecture for Non-Monetary Value Measurement</h2>
+        <p class="lab-paper-meta">${L.author} · <span class="lab-paper-draft">${L.draft}</span></p>
+        <p class="lab-paper-abstract">This article introduces AestimAi and the Universal Comparable Index (UCI) — a valuation index measure designed explicitly as a non-monetary instrument that quantifies verified counterperformance rather than representing currency or a financial instrument under EU law. It describes the separation of measurement from settlement, a three-layer institutional architecture (technology company, cooperative association, identity layer), an agentic retrieval-grounded AI valuation engine, hash-anchoring for tamper-evidence without tokenization, and positioning outside MiCA scope.</p>
+        <p class="lab-paper-keywords"><strong>Keywords:</strong> cooperative economics; non-monetary value measurement; valuation index; artificial intelligence; retrieval-augmented generation; digital identity; hash-anchoring; MiCA; barter exchange; sustainable development</p>
+        <div class="lab-paper-actions">
+          <a class="btn-primary" href="/papers/aestimai-uci-journal-article.pdf" target="_blank" rel="noopener">${L.readPdf}</a>
+        </div>
+        <div class="lab-paper-outline">
+          <h3>${L.outline}</h3>
+          <ol>
+            <li>Introduction — separating measurement from settlement</li>
+            <li>Background and motivation (LETS, time banks, cooperative governance)</li>
+            <li>Conceptual design: the Universal Comparable Index (UCI)</li>
+            <li>Institutional architecture (Tech AB · Economic Association · AE ID)</li>
+            <li>The AI-assisted valuation engine (8 integrated layers)</li>
+            <li>Legal and regulatory positioning (PSD2, EMD2, MiFID II, MiCA)</li>
+            <li>Cooperative governance and ICA principles</li>
+            <li>Prospective societal benefits and applications</li>
+            <li>Discussion and open questions</li>
+            <li>Conclusion</li>
+          </ol>
+        </div>
+      </article>
+      <section class="lab-papers-section">
+        <h2>${L.further}</h2>
+        <p class="lab-papers-section-desc">${L.furtherDesc}</p>
+        <div class="lab-paper-list">${linksHtml}</div>
+      </section>
+    </div>`;
+  }
+
   function labStrings(lang) {
     return {
       'lab.desc': {
@@ -160,7 +396,16 @@
         sv: 'Shop · Amazon', en: 'Shop · Amazon', de: 'Shop · Amazon',
         fr: 'Shop · Amazon', it: 'Shop · Amazon', es: 'Shop · Amazon',
       }[lang],
+      'lab.tab.papers': {
+        sv: 'Vetenskapliga artiklar och publikationer',
+        en: 'Scientific papers and Articles',
+        de: 'Wissenschaftliche Artikel und Publikationen',
+        fr: 'Articles et publications scientifiques',
+        it: 'Articoli e pubblicazioni scientifiche',
+        es: 'Artículos y publicaciones científicas',
+      }[lang],
       'lab.engineBody': ENGINE[lang] || ENGINE.en,
+      'lab.papersBody': buildPapersHtml(lang),
       'lab.shop.intro': {
         sv: 'Hårdvara för mätning, handel och spårning av verkligt värde — köp via Amazon.',
         en: 'Hardware for measuring, trading and tracking real value — buy via Amazon.',
@@ -248,12 +493,12 @@
         es: '🔗 Compra vía Amazon',
       }[lang],
       'panel.ucilab': {
-        sv: '<h4>AestimAi Lab</h4><p>Forskning kring UCI-värderingsmotorn — agentisk, retrieval-grundad och kalibrerad värdering.</p><p>Under <strong>Shop · Amazon</strong> hittar du rekommenderad hårdvara.</p>',
-        en: '<h4>AestimAi Lab</h4><p>Research on the UCI valuation engine — agentic, retrieval-grounded and calibrated valuation.</p><p>Under <strong>Shop · Amazon</strong> you will find recommended hardware.</p>',
-        de: '<h4>AestimAi Lab</h4><p>Forschung zur UCI-Bewertungsengine — agentische, retrieval-basierte und kalibrierte Bewertung.</p><p>Unter <strong>Shop · Amazon</strong> finden Sie empfohlene Hardware.</p>',
-        fr: '<h4>AestimAi Lab</h4><p>Recherche sur le moteur de valorisation UCI — valorisation agentique, fondée sur la retrieval et calibrée.</p><p>Sous <strong>Shop · Amazon</strong>, matériel recommandé.</p>',
-        it: '<h4>AestimAi Lab</h4><p>Ricerca sul motore di valutazione UCI — valutazione agentica, retrieval-based e calibrata.</p><p>Sotto <strong>Shop · Amazon</strong> trovi hardware consigliato.</p>',
-        es: '<h4>AestimAi Lab</h4><p>Investigación sobre el motor de valoración UCI — valoración agéntica, basada en retrieval y calibrada.</p><p>En <strong>Shop · Amazon</strong> encontrarás hardware recomendado.</p>',
+        sv: '<h4>AestimAi Lab</h4><p>Forskning kring UCI-värderingsmotorn — agentisk, retrieval-grundad och kalibrerad värdering.</p><p>Under <strong>Vetenskapliga artiklar</strong> hittar du vår UCI-artikel och vidare läsning. Under <strong>Shop · Amazon</strong> hittar du rekommenderad hårdvara.</p>',
+        en: '<h4>AestimAi Lab</h4><p>Research on the UCI valuation engine — agentic, retrieval-grounded and calibrated valuation.</p><p>Under <strong>Scientific papers and Articles</strong> you will find our UCI paper and further reading. Under <strong>Shop · Amazon</strong> you will find recommended hardware.</p>',
+        de: '<h4>AestimAi Lab</h4><p>Forschung zur UCI-Bewertungsengine — agentische, retrieval-basierte und kalibrierte Bewertung.</p><p>Unter <strong>Wissenschaftliche Artikel</strong> finden Sie unser UCI-Paper und weiterführende Literatur. Unter <strong>Shop · Amazon</strong> empfohlene Hardware.</p>',
+        fr: '<h4>AestimAi Lab</h4><p>Recherche sur le moteur de valorisation UCI — valorisation agentique, fondée sur la retrieval et calibrée.</p><p>Sous <strong>Articles scientifiques</strong>, notre article UCI et lectures complémentaires. Sous <strong>Shop · Amazon</strong>, matériel recommandé.</p>',
+        it: '<h4>AestimAi Lab</h4><p>Ricerca sul motore di valutazione UCI — valutazione agentica, retrieval-based e calibrata.</p><p>Sotto <strong>Articoli scientifici</strong> trovi il nostro paper UCI e letture consigliate. Sotto <strong>Shop · Amazon</strong> hardware consigliato.</p>',
+        es: '<h4>AestimAi Lab</h4><p>Investigación sobre el motor de valoración UCI — valoración agéntica, basada en retrieval y calibrada.</p><p>En <strong>Artículos científicos</strong> encontrarás nuestro artículo UCI y lecturas recomendadas. En <strong>Shop · Amazon</strong> hardware recomendado.</p>',
       }[lang],
     };
   }

@@ -57,7 +57,7 @@ const state = {
   user:              null,   // Supabase-användare (när inloggad)
   listingFiles:      [],     // valda bildfiler i registrera-formuläret
   listingValuation:  null,   // senaste AI-värdering i registrera-formuläret
-  labTab:            'engine', // ucilab: engine | shop
+  labTab:            'engine', // ucilab: engine | papers | shop
 };
 
 let marketLoaded = false;    // har Bytesmarknaden laddats första gången?
@@ -2263,6 +2263,13 @@ function resolveStartupModule() {
   return 'uci';
 }
 
+function resolveLabTabFromHash() {
+  const hash = location.hash.replace(/^#/, '');
+  if (hash === 'ucilab-shop') return 'shop';
+  if (hash === 'ucilab-papers') return 'papers';
+  return 'engine';
+}
+
 function applyStartupNavigation() {
   const params = new URLSearchParams(location.search);
   const hash = location.hash.replace(/^#/, '');
@@ -2272,6 +2279,12 @@ function applyStartupNavigation() {
     state.labTab = 'shop';
     navigateTo('ucilab');
     cleanCheckoutQuery('#ucilab-shop');
+    return;
+  }
+
+  if (hash === 'ucilab' || hash === 'ucilab-shop' || hash === 'ucilab-papers') {
+    state.labTab = resolveLabTabFromHash();
+    navigateTo('ucilab');
     return;
   }
 
@@ -2352,6 +2365,7 @@ function switchLabTab(tab, opts = {}) {
     btn.classList.toggle('active', btn.dataset.labTab === tab);
   });
   document.getElementById('lab-panel-engine')?.classList.toggle('hidden', tab !== 'engine');
+  document.getElementById('lab-panel-papers')?.classList.toggle('hidden', tab !== 'papers');
   document.getElementById('lab-panel-shop')?.classList.toggle('hidden', tab !== 'shop');
 
   if (tab === 'shop' && !labShopLoaded) {
@@ -2360,7 +2374,8 @@ function switchLabTab(tab, opts = {}) {
   }
 
   if (!opts.skipHash) {
-    const hash = tab === 'shop' ? '#ucilab-shop' : '#ucilab';
+    const hashMap = { shop: '#ucilab-shop', papers: '#ucilab-papers', engine: '#ucilab' };
+    const hash = hashMap[tab] || '#ucilab';
     if (location.hash !== hash) {
       history.replaceState(null, '', location.pathname + location.search + hash);
     }
