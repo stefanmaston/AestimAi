@@ -1618,28 +1618,28 @@
 
         <!-- Vänster — info -->
         <div class="contact-info">
-          <h1 class="contact-title">Kontakta oss</h1>
-          <p class="contact-sub">Har du frågor om AestimAi, värderingsmodeller, partnerskap eller enterprise-lösningar? Vi svarar inom 1–2 arbetsdagar.</p>
+          <h1 class="contact-title" data-i18n="contact.title">Contact us</h1>
+          <p class="contact-sub" data-i18n="contact.sub">Questions about AestimAi, valuation models, partnerships or enterprise solutions? We reply within 1–2 business days.</p>
 
           <div class="contact-channels">
             <div class="contact-channel">
               <span class="contact-channel-icon">✉</span>
               <div>
-                <div class="contact-channel-label">E-post</div>
+                <div class="contact-channel-label" data-i18n="contact.channelEmail">Email</div>
                 <a href="mailto:kontakt@aestimai.org" class="contact-channel-value">kontakt@aestimai.org</a>
               </div>
             </div>
             <div class="contact-channel">
               <span class="contact-channel-icon">⭐</span>
               <div>
-                <div class="contact-channel-label">Enterprise & partnerskap</div>
+                <div class="contact-channel-label" data-i18n="contact.channelEnterprise">Enterprise & partnerships</div>
                 <a href="mailto:enterprise@aestimai.org" class="contact-channel-value">enterprise@aestimai.org</a>
               </div>
             </div>
             <div class="contact-channel">
               <span class="contact-channel-icon">🔧</span>
               <div>
-                <div class="contact-channel-label">Teknisk support</div>
+                <div class="contact-channel-label" data-i18n="contact.channelSupport">Technical support</div>
                 <a href="mailto:support@aestimai.org" class="contact-channel-value">support@aestimai.org</a>
               </div>
             </div>
@@ -1648,36 +1648,36 @@
 
         <!-- Höger — formulär -->
         <div class="contact-form-card">
-          <h2 class="contact-form-title">Skicka ett meddelande</h2>
+          <h2 class="contact-form-title" data-i18n="contact.formTitle">Send a message</h2>
           <div class="form-group">
-            <label>Ditt namn <span class="req">*</span></label>
-            <input type="text" id="cfName" placeholder="Förnamn Efternamn" autocomplete="name">
+            <label><span data-i18n="contact.labelName">Your name</span> <span class="req">*</span></label>
+            <input type="text" id="cfName" data-i18n-placeholder="contact.placeholderName" placeholder="First name Last name" autocomplete="name">
           </div>
           <div class="form-group">
-            <label>E-postadress <span class="req">*</span></label>
-            <input type="email" id="cfEmail" placeholder="din@epost.se" autocomplete="email">
+            <label><span data-i18n="contact.labelEmail">Email address</span> <span class="req">*</span></label>
+            <input type="email" id="cfEmail" data-i18n-placeholder="contact.placeholderEmail" placeholder="you@example.com" autocomplete="email">
           </div>
           <div class="form-group">
-            <label>Ämne</label>
+            <label data-i18n="contact.labelSubject">Subject</label>
             <select id="cfSubject">
-              <option value="Allmän fråga">Allmän fråga</option>
-              <option value="Värdering & UCI">Värdering &amp; UCI</option>
-              <option value="Bytesmarknad">Bytesmarknad</option>
-              <option value="Enterprise & partnerskap">Enterprise &amp; partnerskap</option>
-              <option value="Teknisk support">Teknisk support</option>
-              <option value="Övrigt">Övrigt</option>
+              <option value="Allmän fråga">General inquiry</option>
+              <option value="Värdering & UCI">Valuation & UCI</option>
+              <option value="Bytesmarknad">Marketplace</option>
+              <option value="Enterprise & partnerskap">Enterprise & partnerships</option>
+              <option value="Teknisk support">Technical support</option>
+              <option value="Övrigt">Other</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Meddelande <span class="req">*</span></label>
-            <textarea id="cfMessage" rows="5" placeholder="Beskriv ditt ärende…"></textarea>
+            <label><span data-i18n="contact.labelMessage">Message</span> <span class="req">*</span></label>
+            <textarea id="cfMessage" rows="5" data-i18n-placeholder="contact.placeholderMessage" placeholder="Describe your inquiry…"></textarea>
           </div>
           <!-- Honeypot -->
           <input type="text" id="cfHp" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
           <p class="contact-form-error hidden" id="cfError"></p>
-          <p class="contact-form-success hidden" id="cfSuccess">✓ Ditt meddelande har skickats! Vi återkommer inom 1–2 arbetsdagar.</p>
+          <p class="contact-form-success hidden" id="cfSuccess" data-i18n="contact.success">✓ Your message has been sent! We will get back to you within 1–2 business days.</p>
           <button class="btn-primary contact-submit-btn" id="btnCfSubmit" onclick="submitContact()">
-            <span id="btnCfText">Skicka meddelande</span>
+            <span id="btnCfText" data-i18n="contact.btnSubmit">Send message</span>
           </button>
         </div>
 

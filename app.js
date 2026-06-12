@@ -2763,6 +2763,8 @@ window.navigateTo         = navigateTo;
 
 // ── Kontaktformulär ───────────────────────────────────────────────────────────
 async function submitContact() {
+  const i18n    = window.AestimI18n;
+  const tr      = (k, fb) => i18n?.t?.(k) || fb;
   const name    = document.getElementById('cfName').value.trim();
   const email   = document.getElementById('cfEmail').value.trim();
   const subject = document.getElementById('cfSubject').value;
@@ -2777,11 +2779,11 @@ async function submitContact() {
   okEl.classList.add('hidden');
 
   if (hp) return; // honeypot — trolig bot
-  if (!name)    { errEl.textContent = 'Ange ditt namn.';          errEl.classList.remove('hidden'); return; }
-  if (!email)   { errEl.textContent = 'Ange din e-postadress.';   errEl.classList.remove('hidden'); return; }
-  if (!message) { errEl.textContent = 'Skriv ett meddelande.';    errEl.classList.remove('hidden'); return; }
+  if (!name)    { errEl.textContent = tr('contact.errName', 'Please enter your name.');          errEl.classList.remove('hidden'); return; }
+  if (!email)   { errEl.textContent = tr('contact.errEmail', 'Please enter your email address.'); errEl.classList.remove('hidden'); return; }
+  if (!message) { errEl.textContent = tr('contact.errMessage', 'Please write a message.');    errEl.classList.remove('hidden'); return; }
 
-  btn.disabled = true; btnTxt.textContent = 'Skickar…';
+  btn.disabled = true; btnTxt.textContent = tr('contact.btnSending', 'Sending…');
 
   try {
     const res = await fetch('/api/contact', {
@@ -2790,18 +2792,19 @@ async function submitContact() {
       body: JSON.stringify({ name, email, subject, message }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Något gick fel.');
+    if (!res.ok) throw new Error(data.error || tr('contact.errSend', 'Could not send.'));
 
-    // Rensa formuläret och visa bekräftelse
     document.getElementById('cfName').value    = '';
     document.getElementById('cfEmail').value   = '';
     document.getElementById('cfMessage').value = '';
+    okEl.textContent = tr('contact.success', '✓ Your message has been sent!');
     okEl.classList.remove('hidden');
   } catch (e) {
-    errEl.textContent = e.message || 'Kunde inte skicka. Försök igen eller mejla kontakt@aestimai.org.';
+    errEl.textContent = e.message || tr('contact.errSend', 'Could not send. Try again or email kontakt@aestimai.org.');
     errEl.classList.remove('hidden');
   } finally {
-    btn.disabled = false; btnTxt.textContent = 'Skicka meddelande';
+    btn.disabled = false;
+    btnTxt.textContent = tr('contact.btnSubmit', 'Send message');
   }
 }
 window.submitContact = submitContact;

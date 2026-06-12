@@ -31,6 +31,16 @@
     Övrigt: 'uci.cat.other',
   };
 
+  /** API subject values (Swedish) → i18n label keys */
+  const CONTACT_SUBJECT_KEYS = {
+    'Allmän fråga': 'contact.subject.general',
+    'Värdering & UCI': 'contact.subject.valuation',
+    Bytesmarknad: 'contact.subject.marketplace',
+    'Enterprise & partnerskap': 'contact.subject.enterprise',
+    'Teknisk support': 'contact.subject.support',
+    Övrigt: 'contact.subject.other',
+  };
+
   const STRINGS = {
     sv: {
       'nav.uci': 'UCI Värdering',
@@ -88,6 +98,33 @@
       'uci.btnValuate': 'Värdera',
       'uci.btnLoading': 'Analyserar…',
       'uci.loadingText': 'AestimAi analyserar objektet…',
+      'contact.title': 'Kontakta oss',
+      'contact.sub': 'Har du frågor om AestimAi, värderingsmodeller, partnerskap eller enterprise-lösningar? Vi svarar inom 1–2 arbetsdagar.',
+      'contact.channelEmail': 'E-post',
+      'contact.channelEnterprise': 'Enterprise & partnerskap',
+      'contact.channelSupport': 'Teknisk support',
+      'contact.formTitle': 'Skicka ett meddelande',
+      'contact.labelName': 'Ditt namn',
+      'contact.labelEmail': 'E-postadress',
+      'contact.labelSubject': 'Ämne',
+      'contact.labelMessage': 'Meddelande',
+      'contact.placeholderName': 'Förnamn Efternamn',
+      'contact.placeholderEmail': 'din@epost.se',
+      'contact.placeholderMessage': 'Beskriv ditt ärende…',
+      'contact.success': '✓ Ditt meddelande har skickats! Vi återkommer inom 1–2 arbetsdagar.',
+      'contact.btnSubmit': 'Skicka meddelande',
+      'contact.btnSending': 'Skickar…',
+      'contact.errName': 'Ange ditt namn.',
+      'contact.errEmail': 'Ange din e-postadress.',
+      'contact.errMessage': 'Skriv ett meddelande.',
+      'contact.errSend': 'Kunde inte skicka. Försök igen eller mejla kontakt@aestimai.org.',
+      'contact.subject.general': 'Allmän fråga',
+      'contact.subject.valuation': 'Värdering & UCI',
+      'contact.subject.marketplace': 'Bytesmarknad',
+      'contact.subject.enterprise': 'Enterprise & partnerskap',
+      'contact.subject.support': 'Teknisk support',
+      'contact.subject.other': 'Övrigt',
+      'panel.contact': '<h4>Kontakt</h4><p>Frågor om värdering, bytesmarknad, enterprise eller teknisk support — vi svarar inom 1–2 arbetsdagar.</p>',
     },
     en: {
       'nav.uci': 'UCI Valuation',
@@ -145,6 +182,33 @@
       'uci.btnValuate': 'Valuate',
       'uci.btnLoading': 'Analyzing…',
       'uci.loadingText': 'AestimAi is analyzing the item…',
+      'contact.title': 'Contact us',
+      'contact.sub': 'Questions about AestimAi, valuation models, partnerships or enterprise solutions? We reply within 1–2 business days.',
+      'contact.channelEmail': 'Email',
+      'contact.channelEnterprise': 'Enterprise & partnerships',
+      'contact.channelSupport': 'Technical support',
+      'contact.formTitle': 'Send a message',
+      'contact.labelName': 'Your name',
+      'contact.labelEmail': 'Email address',
+      'contact.labelSubject': 'Subject',
+      'contact.labelMessage': 'Message',
+      'contact.placeholderName': 'First name Last name',
+      'contact.placeholderEmail': 'you@example.com',
+      'contact.placeholderMessage': 'Describe your inquiry…',
+      'contact.success': '✓ Your message has been sent! We will get back to you within 1–2 business days.',
+      'contact.btnSubmit': 'Send message',
+      'contact.btnSending': 'Sending…',
+      'contact.errName': 'Please enter your name.',
+      'contact.errEmail': 'Please enter your email address.',
+      'contact.errMessage': 'Please write a message.',
+      'contact.errSend': 'Could not send. Try again or email kontakt@aestimai.org.',
+      'contact.subject.general': 'General inquiry',
+      'contact.subject.valuation': 'Valuation & UCI',
+      'contact.subject.marketplace': 'Marketplace',
+      'contact.subject.enterprise': 'Enterprise & partnerships',
+      'contact.subject.support': 'Technical support',
+      'contact.subject.other': 'Other',
+      'panel.contact': '<h4>Contact</h4><p>Questions about valuation, marketplace, enterprise or technical support — we reply within 1–2 business days.</p>',
     },
     de: {
       'nav.uci': 'UCI-Bewertung',
@@ -202,6 +266,33 @@
       'uci.btnValuate': 'Bewerten',
       'uci.btnLoading': 'Analysiere…',
       'uci.loadingText': 'AestimAi analysiert den Gegenstand…',
+      'contact.title': 'Kontakt',
+      'contact.sub': 'Fragen zu AestimAi, Bewertungsmodellen, Partnerschaften oder Enterprise-Lösungen? Wir antworten innerhalb von 1–2 Werktagen.',
+      'contact.channelEmail': 'E-Mail',
+      'contact.channelEnterprise': 'Enterprise & Partnerschaften',
+      'contact.channelSupport': 'Technischer Support',
+      'contact.formTitle': 'Nachricht senden',
+      'contact.labelName': 'Ihr Name',
+      'contact.labelEmail': 'E-Mail-Adresse',
+      'contact.labelSubject': 'Betreff',
+      'contact.labelMessage': 'Nachricht',
+      'contact.placeholderName': 'Vorname Nachname',
+      'contact.placeholderEmail': 'ihre@email.de',
+      'contact.placeholderMessage': 'Beschreiben Sie Ihr Anliegen…',
+      'contact.success': '✓ Ihre Nachricht wurde gesendet! Wir melden uns innerhalb von 1–2 Werktagen.',
+      'contact.btnSubmit': 'Nachricht senden',
+      'contact.btnSending': 'Wird gesendet…',
+      'contact.errName': 'Bitte geben Sie Ihren Namen ein.',
+      'contact.errEmail': 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
+      'contact.errMessage': 'Bitte schreiben Sie eine Nachricht.',
+      'contact.errSend': 'Senden fehlgeschlagen. Versuchen Sie es erneut oder mailen Sie kontakt@aestimai.org.',
+      'contact.subject.general': 'Allgemeine Anfrage',
+      'contact.subject.valuation': 'Bewertung & UCI',
+      'contact.subject.marketplace': 'Marktplatz',
+      'contact.subject.enterprise': 'Enterprise & Partnerschaften',
+      'contact.subject.support': 'Technischer Support',
+      'contact.subject.other': 'Sonstiges',
+      'panel.contact': '<h4>Kontakt</h4><p>Fragen zu Bewertung, Marktplatz, Enterprise oder Support — Antwort innerhalb von 1–2 Werktagen.</p>',
     },
     fr: {
       'nav.uci': 'Évaluation UCI',
@@ -259,6 +350,33 @@
       'uci.btnValuate': 'Évaluer',
       'uci.btnLoading': 'Analyse…',
       'uci.loadingText': 'AestimAi analyse l\'objet…',
+      'contact.title': 'Contactez-nous',
+      'contact.sub': 'Des questions sur AestimAi, les modèles de valorisation, les partenariats ou l\'enterprise ? Réponse sous 1–2 jours ouvrés.',
+      'contact.channelEmail': 'E-mail',
+      'contact.channelEnterprise': 'Enterprise & partenariats',
+      'contact.channelSupport': 'Support technique',
+      'contact.formTitle': 'Envoyer un message',
+      'contact.labelName': 'Votre nom',
+      'contact.labelEmail': 'Adresse e-mail',
+      'contact.labelSubject': 'Objet',
+      'contact.labelMessage': 'Message',
+      'contact.placeholderName': 'Prénom Nom',
+      'contact.placeholderEmail': 'vous@exemple.com',
+      'contact.placeholderMessage': 'Décrivez votre demande…',
+      'contact.success': '✓ Votre message a été envoyé ! Nous vous répondrons sous 1–2 jours ouvrés.',
+      'contact.btnSubmit': 'Envoyer le message',
+      'contact.btnSending': 'Envoi…',
+      'contact.errName': 'Veuillez indiquer votre nom.',
+      'contact.errEmail': 'Veuillez indiquer votre adresse e-mail.',
+      'contact.errMessage': 'Veuillez écrire un message.',
+      'contact.errSend': 'Échec de l\'envoi. Réessayez ou écrivez à kontakt@aestimai.org.',
+      'contact.subject.general': 'Question générale',
+      'contact.subject.valuation': 'Valorisation & UCI',
+      'contact.subject.marketplace': 'Marché',
+      'contact.subject.enterprise': 'Enterprise & partenariats',
+      'contact.subject.support': 'Support technique',
+      'contact.subject.other': 'Autre',
+      'panel.contact': '<h4>Contact</h4><p>Questions sur la valorisation, le marché, l\'enterprise ou le support — réponse sous 1–2 jours ouvrés.</p>',
     },
     it: {
       'nav.uci': 'Valutazione UCI',
@@ -316,6 +434,33 @@
       'uci.btnValuate': 'Valuta',
       'uci.btnLoading': 'Analisi…',
       'uci.loadingText': 'AestimAi sta analizzando l\'oggetto…',
+      'contact.title': 'Contattaci',
+      'contact.sub': 'Domande su AestimAi, modelli di valutazione, partnership o soluzioni enterprise? Rispondiamo entro 1–2 giorni lavorativi.',
+      'contact.channelEmail': 'E-mail',
+      'contact.channelEnterprise': 'Enterprise & partnership',
+      'contact.channelSupport': 'Supporto tecnico',
+      'contact.formTitle': 'Invia un messaggio',
+      'contact.labelName': 'Il tuo nome',
+      'contact.labelEmail': 'Indirizzo e-mail',
+      'contact.labelSubject': 'Oggetto',
+      'contact.labelMessage': 'Messaggio',
+      'contact.placeholderName': 'Nome Cognome',
+      'contact.placeholderEmail': 'tu@esempio.com',
+      'contact.placeholderMessage': 'Descrivi la tua richiesta…',
+      'contact.success': '✓ Il tuo messaggio è stato inviato! Ti risponderemo entro 1–2 giorni lavorativi.',
+      'contact.btnSubmit': 'Invia messaggio',
+      'contact.btnSending': 'Invio…',
+      'contact.errName': 'Inserisci il tuo nome.',
+      'contact.errEmail': 'Inserisci il tuo indirizzo e-mail.',
+      'contact.errMessage': 'Scrivi un messaggio.',
+      'contact.errSend': 'Invio non riuscito. Riprova o scrivi a kontakt@aestimai.org.',
+      'contact.subject.general': 'Domanda generale',
+      'contact.subject.valuation': 'Valutazione & UCI',
+      'contact.subject.marketplace': 'Mercato',
+      'contact.subject.enterprise': 'Enterprise & partnership',
+      'contact.subject.support': 'Supporto tecnico',
+      'contact.subject.other': 'Altro',
+      'panel.contact': '<h4>Contatto</h4><p>Domande su valutazione, mercato, enterprise o supporto — risposta entro 1–2 giorni lavorativi.</p>',
     },
     es: {
       'nav.uci': 'Valoración UCI',
@@ -373,6 +518,33 @@
       'uci.btnValuate': 'Valorar',
       'uci.btnLoading': 'Analizando…',
       'uci.loadingText': 'AestimAi está analizando el objeto…',
+      'contact.title': 'Contáctanos',
+      'contact.sub': '¿Preguntas sobre AestimAi, modelos de valoración, partnerships o enterprise? Respondemos en 1–2 días laborables.',
+      'contact.channelEmail': 'Correo electrónico',
+      'contact.channelEnterprise': 'Enterprise y partnerships',
+      'contact.channelSupport': 'Soporte técnico',
+      'contact.formTitle': 'Enviar un mensaje',
+      'contact.labelName': 'Tu nombre',
+      'contact.labelEmail': 'Correo electrónico',
+      'contact.labelSubject': 'Asunto',
+      'contact.labelMessage': 'Mensaje',
+      'contact.placeholderName': 'Nombre Apellido',
+      'contact.placeholderEmail': 'tu@ejemplo.com',
+      'contact.placeholderMessage': 'Describe tu consulta…',
+      'contact.success': '✓ ¡Tu mensaje ha sido enviado! Te responderemos en 1–2 días laborables.',
+      'contact.btnSubmit': 'Enviar mensaje',
+      'contact.btnSending': 'Enviando…',
+      'contact.errName': 'Introduce tu nombre.',
+      'contact.errEmail': 'Introduce tu correo electrónico.',
+      'contact.errMessage': 'Escribe un mensaje.',
+      'contact.errSend': 'No se pudo enviar. Inténtalo de nuevo o escribe a kontakt@aestimai.org.',
+      'contact.subject.general': 'Consulta general',
+      'contact.subject.valuation': 'Valoración y UCI',
+      'contact.subject.marketplace': 'Mercado',
+      'contact.subject.enterprise': 'Enterprise y partnerships',
+      'contact.subject.support': 'Soporte técnico',
+      'contact.subject.other': 'Otros',
+      'panel.contact': '<h4>Contacto</h4><p>Preguntas sobre valoración, mercado, enterprise o soporte — respuesta en 1–2 días laborables.</p>',
     },
   };
 
@@ -416,6 +588,15 @@
     });
   }
 
+  function updateContactSubjectOptions() {
+    const sel = document.getElementById('cfSubject');
+    if (!sel) return;
+    sel.querySelectorAll('option').forEach(opt => {
+      const key = CONTACT_SUBJECT_KEYS[opt.value];
+      if (key) opt.textContent = t(key);
+    });
+  }
+
   function updateUciDynamicLabels() {
     const btn = document.getElementById('btnUciValue');
     const btnText = document.getElementById('btnUciText');
@@ -426,6 +607,12 @@
 
     const addPhoto = document.getElementById('valAddPhotoBtn');
     if (addPhoto) addPhoto.title = t('uci.photoAddTitle');
+  }
+
+  function updateContactDynamicLabels() {
+    const btn = document.getElementById('btnCfSubmit');
+    const btnTxt = document.getElementById('btnCfText');
+    if (btnTxt && btn && !btn.disabled) btnTxt.textContent = t('contact.btnSubmit');
   }
 
   function applyTranslations() {
@@ -448,7 +635,9 @@
     });
     updateCurrencySelectLabels();
     updateUciCategoryOptions();
+    updateContactSubjectOptions();
     updateUciDynamicLabels();
+    updateContactDynamicLabels();
   }
 
   function hydrate() {
