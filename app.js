@@ -77,6 +77,8 @@ function navigateTo(moduleId) {
     moduleId = 'dashboard';
   }
 
+  closeMobileSidebar?.();
+
   document.querySelectorAll('.module').forEach(m => m.classList.add('hidden'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
@@ -450,6 +452,35 @@ function setupProTabs() {
       if (target) target.classList.remove('hidden');
     });
   });
+}
+
+// ── Mobil/tablet-navigation ───────────────────────────────────────
+let closeMobileSidebar = null;
+
+function setupMobileNav() {
+  const btn = document.getElementById('btnMobileMenu');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (!btn) return;
+
+  const close = () => {
+    document.body.classList.remove('sidebar-open');
+    backdrop?.classList.add('hidden');
+    btn.setAttribute('aria-expanded', 'false');
+  };
+  const open = () => {
+    document.body.classList.add('sidebar-open');
+    backdrop?.classList.remove('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+  };
+
+  btn.addEventListener('click', () => {
+    document.body.classList.contains('sidebar-open') ? close() : open();
+  });
+  backdrop?.addEventListener('click', close);
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 1024) close();
+  });
+  closeMobileSidebar = close;
 }
 
 // ── Höger panel ─────────────────────────────────────
@@ -1696,6 +1727,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMarketTabs();
   setupProTabs();
   setupPanel();
+  setupMobileNav();
   setupMarketplace();
   setupAuth();
   setupPhotoUpload();
