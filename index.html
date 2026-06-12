@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css?v=20260612-2">
+  <link rel="stylesheet" href="main.css?v=20260612-3">
   <style data-module-boot>
     /* Visa UCI Värdering direkt — innan main.css (undviker blink) */
     .module { display: none; }
@@ -676,8 +676,83 @@
         <p class="module-desc" data-i18n="module.pro.desc">Professional subscriptions, white-label and OEM integrations</p>
       </div>
 
-      <!-- Intro + sections via i18n -->
-      <div class="pro-content" data-i18n-html="pro.body"></div>
+      <!-- Intro -->
+      <div class="pro-intro">
+        <p>AestimAi:s värderingsmodeller är byggda för att fungera både som en konsumenttjänst och som en underliggande motor i andra system. Nedan beskriver vi hur white-label fungerar och vilka möjligheter som finns för partners som vill integrera UCI-värdering i sina egna produkter.</p>
+      </div>
+
+      <!-- White-label -->
+      <div class="pro-section">
+        <h2>White-label</h2>
+        <p>Enterprise-abonnemanget inkluderar möjligheten att använda AestimAi:s gränssnitt och värderingsmotor under eget varumärke. Lämpligt för:</p>
+        <div class="pro-usecase-grid">
+          <div class="pro-usecase">
+            <h4>Fastighetsmäklare &amp; banker</h4>
+            <p>Erbjud UCI-baserad värdering direkt i din befintliga kundportal eller app under eget namn och logotype.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4>Försäkringsbolag</h4>
+            <p>Integrera neutral objektvärdering i skadehantering och försäkringsteckning utan att bygga egna modeller.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4>Marknadsplatser</h4>
+            <p>Lägg till en "Vad är det värt?"-funktion på din köp- och säljtjänst med automatisk UCI-värdering per annons.</p>
+          </div>
+          <div class="pro-usecase">
+            <h4>Revisionsbyråer</h4>
+            <p>Komplettera balansräkningsvärdering med ett neutralt, maskinläsbart UCI-index som referensram i rapporter.</p>
+          </div>
+        </div>
+        <p class="pro-contact-note">White-label kräver Enterprise-abonnemang. Kontakta oss för anpassad konfiguration av domän, logotype och färger.</p>
+      </div>
+
+      <!-- OEM / Specialistlösningar -->
+      <div class="pro-section">
+        <h2>OEM &amp; specialistintegrationer</h2>
+        <p>Utöver abonnemangen erbjuder vi djupare tekniska integrationer för partners som vill bädda in AestimAi:s värderingsmodeller direkt i sina egna produkter — utan att exponera AestimAi-varumärket alls.</p>
+        <div class="pro-oem-grid">
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">API-first integration</div>
+            <p>Anropa våra värderingsmodeller direkt via REST API från vilket system som helst. Resultaten returneras som strukturerad JSON med UCI-värde, konfidensintervall och källhänvisningar. Ingen UI krävs.</p>
+            <div class="pro-oem-tags">
+              <span>REST API</span><span>JSON</span><span>Webhook</span>
+            </div>
+          </div>
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">Inbäddad värderingsmotor</div>
+            <p>Licensiera AestimAi:s Bayesianska värderingsmodell för lokal körning i din infrastruktur. Passar regulatoriska miljöer där data inte får lämna organisationen.</p>
+            <div class="pro-oem-tags">
+              <span>On-premise</span><span>Docker</span><span>Dataskydd</span>
+            </div>
+          </div>
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">Branschspecifik kalibrering</div>
+            <p>Vi kalibrerar värderingsmodellen mot din branschs specifika data — exempelvis jordbruksfastigheter, marina tillgångar, industriutrustning eller immateriella rättigheter.</p>
+            <div class="pro-oem-tags">
+              <span>Anpassad modell</span><span>Träningsdata</span><span>Validering</span>
+            </div>
+          </div>
+
+          <div class="pro-oem-card">
+            <div class="pro-oem-title">UCI-index som referens i IoT</div>
+            <p>Koppla mätdata från energimätare, sensorer och spårningssystem direkt till UCI-indexet för automatisk realtidsvärdering av fysiska tillgångar.</p>
+            <div class="pro-oem-tags">
+              <span>IoT</span><span>MQTT</span><span>Realtid</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Kontakt-CTA -->
+      <div class="pro-cta">
+        <h3>Intresserad av white-label eller OEM?</h3>
+        <p>Kontakta oss för en teknisk genomgång och prisförslag anpassat efter er volym och integration.</p>
+        <a class="btn-plan btn-plan-enterprise" href="mailto:kontakt@aestimai.org?subject=White-label%20%2F%20OEM-förfrågan">Kontakta oss →</a>
+      </div>
 
     </section>
 
@@ -1655,7 +1730,6 @@
   <script src="market-i18n.js"></script>
   <script src="site-i18n.js"></script>
   <script src="about-i18n.js"></script>
-  <script src="pro-i18n.js"></script>
   <script src="i18n.js"></script>
   <!-- Auth-modal -->
   <div class="auth-overlay hidden" id="authOverlay" onclick="closeAuthModal(event)">
