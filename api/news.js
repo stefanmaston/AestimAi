@@ -1,5 +1,5 @@
 // GET /api/news?cat=all|valuation|energy|...
-// Server-side cache — uppdateras högst 1 gång/timme per kategori.
+// Server-side cache — uppdateras högst 1 gång/2 timmar per kategori.
 
 const { getNewsArticles, CACHE_TTL_MS } = require('../news-service');
 
@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   try {
     const { articles, cachedAt, fromCache } = await getNewsArticles(cat);
     const maxAge = Math.max(0, Math.floor((CACHE_TTL_MS - (Date.now() - cachedAt)) / 1000));
-    res.setHeader('Cache-Control', `public, max-age=${maxAge || 3600}, stale-while-revalidate=86400`);
+    res.setHeader('Cache-Control', `public, max-age=${maxAge || 7200}, stale-while-revalidate=86400`);
     res.setHeader('X-News-Cache', fromCache ? 'HIT' : 'MISS');
     return res.status(200).json({
       articles,

@@ -2150,10 +2150,18 @@ body.panel-open .btn-toggle-panel { right: var(--panel-w); }
   margin-bottom: 2rem;
   color: #fff;
 }
-.lab-header-left h1 {
+.lab-header-left h1,
+.lab-page-title {
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.8rem;
+  font-weight: 700;
   margin: 0 0 .3rem;
   color: #fff;
+  line-height: 1.2;
+}
+.lab-title-glyph {
+  font-family: 'Source Sans 3', system-ui, sans-serif;
+  font-weight: 400;
 }
 .lab-header-left p  { margin: 0; color: rgba(255,255,255,.7); font-size: .9rem; }
 .lab-header-right   { display: flex; flex-direction: column; gap: .5rem; align-items: flex-end; }

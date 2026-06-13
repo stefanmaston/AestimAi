@@ -1,9 +1,9 @@
 /**
- * Delad nyhetstjänst — cache 1 gång/timme per kategori.
+ * Delad nyhetstjänst — cache 1 gång/2 timmar per kategori.
  * Används av Vercel /api/news och Railway news-proxy.
  */
 
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 timme
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar — max en NewsAPI-uppdatering per kategori
 const KEY = process.env.NEWS_API_KEY;
 const BASE = 'https://newsapi.org/v2/everything';
 
@@ -118,12 +118,11 @@ async function fetchAll() {
   if (inflight.has('all')) return inflight.get('all');
 
   const job = (async () => {
-    const cats = Object.keys(QUERIES).filter(k => k !== 'all');
-    const parts = await Promise.all(cats.map(c => fetchCategory(c)));
-    const articles = mergeArticles(parts.map(p => p.articles)).slice(0, 20);
+    console.log('[news] cache MISS: all — hämtar från NewsAPI');
+    const articles = await fetchFromNewsApi('all');
     cacheSet('all', articles);
     const entry = cache.get('all');
-    console.log(`[news] cache MISS: all — ${articles.length} artiklar aggregerade`);
+    console.log(`[news] cache MISS: all — ${articles.length} artiklar`);
     return { articles, cachedAt: entry.ts, fromCache: false };
   })();
 

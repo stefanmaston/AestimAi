@@ -372,6 +372,14 @@
 
   function labStrings(lang) {
     return {
+      'lab.title': {
+        sv: 'AestimAi Lab',
+        en: 'AestimAi Lab',
+        de: 'AestimAi Lab',
+        fr: 'AestimAi Lab',
+        it: 'AestimAi Lab',
+        es: 'AestimAi Lab',
+      }[lang],
       'lab.desc': {
         sv: 'Forskning, värderingsmotor och hårdvara för mätning av verkligt värde',
         en: 'Research, valuation engine and hardware for measuring real value',

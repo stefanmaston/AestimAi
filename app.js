@@ -836,8 +836,8 @@ function showToast(msg) {
 
 // ── Nyheter ──────────────────────────────────────────
 const NEWS_PROXY = IS_LOCAL ? 'http://localhost:3002/api/news' : '/api/news';
-const NEWS_TTL_MS = 60 * 60 * 1000; // 1 timme — matchar server-cache
-const NEWS_STORAGE_KEY = 'aestimai_news_v1';
+const NEWS_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar — matchar server-cache
+const NEWS_STORAGE_KEY = 'aestimai_news_v2';
 let newsCache = {};    // cat → { articles, fetchedAt }
 let newsLoaded = false;
 let newsPrefetchStarted = false;
@@ -862,17 +862,31 @@ function persistNewsCache() {
   } catch (_) {}
 }
 
+function updateNewsDateLine() {
+  const dateEl = document.getElementById('newsDate');
+  if (!dateEl) return;
+  dateEl.textContent = new Date().toLocaleDateString(appLocale(), {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+}
+
+function refreshNewsLanguage() {
+  updateNewsDateLine();
+  const active = document.querySelector('.news-cat-btn.active');
+  const cat = active?.dataset.cat || 'all';
+  const cached = newsCache[cat];
+  if (newsLoaded && cached?.articles?.length) {
+    renderNews(cached.articles, cat);
+    return;
+  }
+  if (!newsLoaded) filterNewsStatic(cat);
+}
+
 function setupNews() {
   restoreNewsCache();
   prefetchNews();
 
-  const dateEl = document.getElementById('newsDate');
-  if (dateEl) {
-    const d = new Date();
-    dateEl.textContent = d.toLocaleDateString(appLocale(), {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-  }
+  updateNewsDateLine();
 
   document.querySelectorAll('.news-cat-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -883,7 +897,7 @@ function setupNews() {
   });
 }
 
-/** Förladdar nyheter i bakgrunden — högst 1 gång/timme per session. */
+/** Förladdar nyheter i bakgrunden — högst 1 gång/2 timmar per session. */
 function prefetchNews() {
   if (newsPrefetchStarted) return;
   newsPrefetchStarted = true;
@@ -1053,12 +1067,12 @@ function buildNewsHTML(articles, cat) {
 
   // Kortnotiser
   if (briefs.length) {
-    html += `<div class="news-briefs"><h4 class="news-briefs-title">Fler nyheter</h4>`;
+    html += `<div class="news-briefs"><h4 class="news-briefs-title">${str('news.briefsTitle', null, 'More news')}</h4>`;
     briefs.forEach(a => {
       html += `<div class="news-brief-item" data-cat="${a.cat || cat}" onclick="window.open('${escHtml(a.url)}','_blank')" style="cursor:pointer">
         ${label(a)}
         <p><strong>${escHtml(a.source || '')}</strong> — ${escHtml(a.title)}</p>
-        <span class="news-time">${a.publishedAt ? new Date(a.publishedAt).toLocaleDateString('sv-SE') : ''}</span>
+        <span class="news-time">${a.publishedAt ? new Date(a.publishedAt).toLocaleDateString(appLocale()) : ''}</span>
       </div>`;
     });
     html += `</div>`;
@@ -2325,12 +2339,9 @@ function setupSettings() {
       if (marketLoaded) searchMarket();
       if (state.currentModule === 'market') loadMyItems();
       if (state.currentModule === 'account' && currentUser) refreshAccountSection();
-      if (state.currentModule === 'news') {
-        const active = document.querySelector('.news-cat-btn.active');
-        if (active) loadNews(active.dataset.cat);
-      }
       if (state.currentModule === 'dashboard') loadChartForCat();
       i18n.applyTranslations();
+      if (state.currentModule === 'news') refreshNewsLanguage();
       updatePanelHelp(state.currentModule);
     } else if (kind === 'currency') {
       showToast(i18n.t('settings.currency.saved'));

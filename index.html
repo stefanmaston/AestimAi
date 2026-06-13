@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css?v=20260612-5">
+  <link rel="stylesheet" href="main.css?v=20260612-6">
   <style data-module-boot>
     /* Visa UCI Värdering direkt — innan main.css (undviker blink) */
     .module { display: none; }
@@ -108,34 +108,6 @@
         <span class="nav-label" data-i18n="nav.contact">Contact</span>
       </button>
     </nav>
-
-    <div class="sidebar-footer">
-      <!-- Wallet-widget -->
-      <div class="wallet-widget" id="walletWidget">
-        <div class="wallet-disconnected" id="walletDisconnected">
-          <button class="btn-wallet-connect" id="btnConnectWallet">
-            <span class="wallet-icon">⬡</span> Connect MetaMask
-          </button>
-        </div>
-        <div class="wallet-connected hidden" id="walletConnected">
-          <div class="wallet-info">
-            <span class="wallet-dot" id="walletDot"></span>
-            <div class="wallet-details">
-              <span class="wallet-address" id="walletAddress">—</span>
-              <span class="wallet-network" id="walletNetwork">—</span>
-            </div>
-            <button class="wallet-disconnect-btn" id="btnDisconnectWallet" data-i18n-title="wallet.disconnectTitle" title="Disconnect">×</button>
-          </div>
-          <div class="wallet-balance-row">
-            <span class="wallet-balance-label">ETH</span>
-            <span class="wallet-balance" id="walletBalance">—</span>
-          </div>
-          <button class="btn-switch-network hidden" id="btnSwitchNetwork" data-i18n="wallet.switchNetwork">
-            Switch to Base Sepolia
-          </button>
-        </div>
-      </div>
-    </div>
   </aside>
 
   <!-- ===== HUVUDYTA ===== -->
@@ -753,7 +725,7 @@
 
       <div class="lab-header">
         <div class="lab-header-left">
-          <h1 data-i18n="lab.title">⚗ AestimAi Lab</h1>
+          <h1 class="lab-page-title"><span class="lab-title-glyph" aria-hidden="true">⚗</span> <span data-i18n="lab.title">AestimAi Lab</span></h1>
           <p data-i18n="lab.desc">Research, valuation engine and hardware for measuring real value</p>
         </div>
         <div class="lab-header-right">
@@ -839,7 +811,7 @@
               </div>
             </div>
             <div class="news-lead-body">
-              <span class="news-section-label valuation">Värdering</span>
+              <span class="news-section-label valuation" data-i18n="news.cat.valuation">Valuation</span>
               <h2 class="news-lead-headline">UCI-indexet når rekordnivå — byteshandeln ökar med 34 procent under andra kvartalet</h2>
               <p class="news-lead-deck">Det universella bytesindexet UCI steg till 64,80 SEK per enhet under juni, drivet av stark efterfrågan på energiutrustning och immateriella rättigheter. Plattformar som erbjuder valuta-oberoende värdering upplever ett genombrott i Europa.</p>
               <div class="news-byline">
@@ -847,7 +819,7 @@
                 <span class="news-dot">·</span>
                 <span class="news-time">6 juni 2026</span>
                 <span class="news-dot">·</span>
-                <span class="news-read">4 min läsning</span>
+                <span class="news-read" data-i18n="news.readMin4">4 min read</span>
               </div>
             </div>
           </article>
@@ -862,7 +834,7 @@
                 <span class="img-icon">⚡</span>
               </div>
               <div class="news-card-body">
-                <span class="news-section-label energy">Energi</span>
+                <span class="news-section-label energy" data-i18n="news.cat.energy">Energy</span>
                 <h3 class="news-card-headline">CHP2X-teknik slår solceller i nordisk vinterproduktion — Sunthetics S-100 noterar 1 480 drifttimmar</h3>
                 <p class="news-card-deck">Kombinations­generatorer visar sig mer robusta än solcellstak under lågsäsongens soltimmar. EaaS-avtal ökar kraftigt.</p>
                 <div class="news-byline">
@@ -878,7 +850,7 @@
                 <span class="img-icon">⊙</span>
               </div>
               <div class="news-card-body">
-                <span class="news-section-label coop">Kooperativ</span>
+                <span class="news-section-label coop" data-i18n="news.cat.coop">Cooperative</span>
                 <h3 class="news-card-headline">AE ID barter or pay passerar 12 000 kortinnehavare i Norden — web-of-trust-nätverket växer organiskt</h3>
                 <p class="news-card-deck">Det kryptografiska kooperativet nådde kritisk massa i Sverige och Finland. Introduktionskvoterna är stängda i Stockholm.</p>
                 <div class="news-byline">
@@ -894,7 +866,7 @@
                 <span class="img-icon">⇄</span>
               </div>
               <div class="news-card-body">
-                <span class="news-section-label market">Marknad</span>
+                <span class="news-section-label market" data-i18n="news.cat.market">Market</span>
                 <h3 class="news-card-headline">Bytesmarknadens mest eftertraktade kategori: energiutrustning går om fordon för första gången</h3>
                 <p class="news-card-deck">Solcellspaket, batterilager och elverk dominerar nu topp 10-listan på AestimAi-plattformen. UCI-priserna är stabila.</p>
                 <div class="news-byline">
@@ -915,7 +887,7 @@
               <span class="img-icon">▣</span>
             </div>
             <div class="news-feature-body">
-              <span class="news-section-label tech">Fintech</span>
+              <span class="news-section-label tech" data-i18n="news.cat.tech">Fintech</span>
               <h3 class="news-feature-headline">WebAuthn ersätter bankID i kooperativa plattformar — säkerhetsanalytiker välkomnar skiftet</h3>
               <p class="news-feature-deck">Hårdvarubaserad autentisering via NFC-kort eliminerar beroendet av centraliserade identitetstjänster. Rättslig granskning pågår i tre EU-länder.</p>
               <div class="news-byline">
@@ -923,7 +895,7 @@
                 <span class="news-dot">·</span>
                 <span class="news-time">2 juni 2026</span>
                 <span class="news-dot">·</span>
-                <span class="news-read">6 min läsning</span>
+                <span class="news-read" data-i18n="news.readMin6">6 min read</span>
               </div>
             </div>
           </article>
@@ -935,7 +907,7 @@
 
             <article class="news-card" data-cat="valuation">
               <div class="news-card-body no-img">
-                <span class="news-section-label valuation">Värdering</span>
+                <span class="news-section-label valuation" data-i18n="news.cat.valuation">Valuation</span>
                 <h3 class="news-card-headline">EU-kommissionen föreslår standardiserat bytesindex för cirkulär ekonomi — UCI pekas ut som modell</h3>
                 <div class="news-byline">
                   <span class="news-author">Reuters / AestimAi</span>
@@ -947,7 +919,7 @@
 
             <article class="news-card" data-cat="energy">
               <div class="news-card-body no-img">
-                <span class="news-section-label energy">Energi</span>
+                <span class="news-section-label energy" data-i18n="news.cat.energy">Energy</span>
                 <h3 class="news-card-headline">Norska kommuner testar EaaS-modellen — Sunthetics tecknar pilotavtal med tre fjällkommuner</h3>
                 <div class="news-byline">
                   <span class="news-author">Karin Nylund</span>
@@ -959,7 +931,7 @@
 
             <article class="news-card" data-cat="coop">
               <div class="news-card-body no-img">
-                <span class="news-section-label coop">Kooperativ</span>
+                <span class="news-section-label coop" data-i18n="news.cat.coop">Cooperative</span>
                 <h3 class="news-card-headline">"Do ut des" — den romerska principen som driver den moderna delningsekonomins nästa fas</h3>
                 <div class="news-byline">
                   <span class="news-author">David Larsson</span>
@@ -975,24 +947,24 @@
 
           <!-- Lång lista — kortnotiser -->
           <div class="news-briefs">
-            <h4 class="news-briefs-title">Kortnotiser</h4>
+            <h4 class="news-briefs-title" data-i18n="news.briefsTitle">Briefs</h4>
             <div class="news-brief-item" data-cat="market">
-              <span class="news-section-label market">Marknad</span>
+              <span class="news-section-label market" data-i18n="news.cat.market">Market</span>
               <p><strong>Tokeniserade fastigheter:</strong> UCI-värdet på tokeniserade nyttjanderätter i Stockholm steg 8 procent under maj efter att tre kommuner godkänt upplägget.</p>
               <span class="news-time">28 maj 2026</span>
             </div>
             <div class="news-brief-item" data-cat="tech">
-              <span class="news-section-label tech">Fintech</span>
+              <span class="news-section-label tech" data-i18n="news.cat.tech">Fintech</span>
               <p><strong>Offline-autentisering:</strong> AestimAi Pro stöder nu fullständig offline-drift via OTP-matris — kritiskt för glesbygdsanvändare utan stabil uppkoppling.</p>
               <span class="news-time">27 maj 2026</span>
             </div>
             <div class="news-brief-item" data-cat="valuation">
-              <span class="news-section-label valuation">Värdering</span>
+              <span class="news-section-label valuation" data-i18n="news.cat.valuation">Valuation</span>
               <p><strong>API-lansering:</strong> AestimAi Pro API når version 2.0 med stöd för batch-värdering av upp till 500 objekt per anrop och webhook-notifieringar.</p>
               <span class="news-time">26 maj 2026</span>
             </div>
             <div class="news-brief-item" data-cat="energy">
-              <span class="news-section-label energy">Energi</span>
+              <span class="news-section-label energy" data-i18n="news.cat.energy">Energy</span>
               <p><strong>UCI-energiindex:</strong> Genomsnittligt UCI-värde för 1 kWh el i Norden uppgår till 0,016 UCI — stabilt sedan mars trots volatila elpriser.</p>
               <span class="news-time">25 maj 2026</span>
             </div>
@@ -1035,9 +1007,9 @@
                 <img src="sunthetics-logo.png" alt="Sunthetics" class="sunthetics-logo-img">
               </div>
               <div class="ad-body">
-                <span class="ad-source">Sunthetics AB — Officiell partner</span>
-                <p class="ad-text">EaaS-avtal för din fastighet — solceller + CHP2X från €0,70/L. 7-årskontrakt med garanterad produktion.</p>
-                <span class="ad-cta">www.sunthetics.se →</span>
+                <span class="ad-source" data-i18n="news.ad.suntheticsOfficial">Sunthetics AB — Official partner</span>
+                <p class="ad-text" data-i18n="news.ad.suntheticsBody">EaaS for your property — solar + CHP2X from €0.70/L. 7-year contract with guaranteed production.</p>
+                <span class="ad-cta" data-i18n="news.ad.suntheticsCta">www.sunthetics.se →</span>
               </div>
             </a>
           </div>
@@ -1104,7 +1076,7 @@
 
           <!-- Prenumerations-CTA -->
           <div class="news-subscribe">
-            <h4>AestimAi Pro</h4>
+            <h4 data-i18n="news.sidebar.proTitle">AestimAi Pro</h4>
             <p data-i18n="news.sidebar.proDesc">Get signed market reports and UCI data via API.</p>
             <button class="btn-primary" style="width:100%;justify-content:center;" data-module="pro" data-i18n="news.sidebar.activatePro">Activate Pro →</button>
           </div>
@@ -1840,8 +1812,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260612-5"></script>
-  <script type="module" src="wallet-ui.js"></script>
+  <script src="app.js?v=20260612-6"></script>
 
   <!-- Aktivera AdSense-annonser -->
   <script>
