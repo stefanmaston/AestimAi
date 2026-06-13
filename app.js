@@ -57,7 +57,7 @@ const state = {
   user:              null,   // Supabase-användare (när inloggad)
   listingFiles:      [],     // valda bildfiler i registrera-formuläret
   listingValuation:  null,   // senaste AI-värdering i registrera-formuläret
-  labTab:            'engine', // ucilab: engine | papers | shop
+  labTab:            'engine', // ucilab: engine | papers
 };
 
 let marketLoaded = false;    // har Bytesmarknaden laddats första gången?
@@ -188,7 +188,7 @@ function syncModuleHash(moduleId) {
   let hash = '#' + moduleId;
   if (moduleId === 'ucilab') {
     const tab = state.labTab || 'engine';
-    hash = tab === 'shop' ? '#ucilab-shop' : tab === 'papers' ? '#ucilab-papers' : '#ucilab';
+    hash = tab === 'papers' ? '#ucilab-papers' : '#ucilab';
   }
   if (location.hash !== hash) {
     history.replaceState(null, '', location.pathname + location.search + hash);
@@ -2335,7 +2335,6 @@ function setupSettings() {
       showToast(i18n.t('settings.language.saved'));
       syncLanguageToSupabase(value);
       refreshDashboardCaps();
-      if (labShopLoaded) renderLabProducts();
       if (marketLoaded) searchMarket();
       if (state.currentModule === 'market') loadMyItems();
       if (state.currentModule === 'account' && currentUser) refreshAccountSection();
@@ -2365,26 +2364,7 @@ function resolveStartupModule() {
   return 'uci';
 }
 
-function resolveLabTabFromHash() {
-  const hash = location.hash.replace(/^#/, '');
-  if (hash === 'ucilab-shop') return 'shop';
-  if (hash === 'ucilab-papers') return 'papers';
-  return 'engine';
-}
-
 function applyStartupNavigation() {
-  const params = new URLSearchParams(location.search);
-  const hash = location.hash.replace(/^#/, '');
-
-  // Stripe shop — avbruten checkout (cancel_url pekar hit)
-  if (params.get('checkout') === 'cancel' && hash === 'ucilab-shop') {
-    state.labTab = 'shop';
-    navigateTo('ucilab');
-    cleanCheckoutQuery('#ucilab-shop');
-    return;
-  }
-
-  // Standard: UCI Valuation. Endast #pricing (och checkout-flöden nedan) överstyr.
   const module = resolveStartupModule();
   navigateTo(module);
 }
@@ -2441,18 +2421,6 @@ window.updateSliderPreview = updateSliderPreview;
 
 // ─── AestimAi Lab ─────────────────────────────────────────────────────────────
 
-const BADGE_CLASS = {
-  energy:   'lab-badge-energy',
-  nfc:      'lab-badge-nfc',
-  compute:  'lab-badge-compute',
-  iot:      'lab-badge-iot',
-  security: 'lab-badge-security',
-};
-
-let labProducts   = [];
-let labActiveCat  = 'all';
-let labShopLoaded = false;
-
 function switchLabTab(tab, opts = {}) {
   state.labTab = tab;
   document.querySelectorAll('.lab-subnav .tab-btn').forEach(btn => {
@@ -2460,97 +2428,15 @@ function switchLabTab(tab, opts = {}) {
   });
   document.getElementById('lab-panel-engine')?.classList.toggle('hidden', tab !== 'engine');
   document.getElementById('lab-panel-papers')?.classList.toggle('hidden', tab !== 'papers');
-  document.getElementById('lab-panel-shop')?.classList.toggle('hidden', tab !== 'shop');
-
-  if (tab === 'shop' && !labShopLoaded) {
-    labShopLoaded = true;
-    loadLabProducts();
-  }
 
   if (!opts.skipHash) {
-    const hashMap = { shop: '#ucilab-shop', papers: '#ucilab-papers', engine: '#ucilab' };
-    const hash = hashMap[tab] || '#ucilab';
+    const hash = tab === 'papers' ? '#ucilab-papers' : '#ucilab';
     if (location.hash !== hash) {
       history.replaceState(null, '', location.pathname + location.search + hash);
     }
   }
 }
 
-async function loadLabProducts() {
-  const area = document.getElementById('labShopArea');
-  if (!area) return;
-  const tr = (k, fb) => window.AestimI18n?.t?.(k) || fb;
-
-  try {
-    const res  = await fetch('/api/shop/products');
-    const data = await res.json();
-    labProducts = data.products || [];
-    renderLabProducts();
-  } catch (err) {
-    area.innerHTML = `<div class="lab-error">${tr('lab.shop.error', 'Could not load products. Try again later.')}</div>`;
-  }
-}
-
-function renderLabProducts() {
-  const area = document.getElementById('labShopArea');
-  if (!area || !labProducts.length) return;
-  const tr = (k, fb) => window.AestimI18n?.t?.(k) || fb;
-
-  const visible = labActiveCat === 'all'
-    ? labProducts
-    : labProducts.filter(p => p.category === labActiveCat);
-
-  if (!visible.length) {
-    area.innerHTML = `<div class="lab-empty">${tr('lab.shop.empty', 'No products in this category.')}</div>`;
-    return;
-  }
-
-  const buyLabel = tr('lab.shop.buyAmazon', 'Buy on Amazon →');
-  const buyTitleTpl = tr('lab.shop.buyTitle', 'Buy {name} on Amazon');
-
-  area.innerHTML = visible.map(p => {
-    const badgeCls = BADGE_CLASS[p.category] || '';
-    const specs    = (p.specs || []).map(s => `<li>${s}</li>`).join('');
-    const buyTitle = buyTitleTpl.replace('{name}', p.name);
-    const thumbInner = p.imageUrl
-      ? `<img class="lab-product-img" src="${escHtml(p.imageUrl)}" alt="${escHtml(p.name)}" loading="lazy">`
-      : `<span class="lab-product-emoji" aria-hidden="true">${p.icon || '📦'}</span>`;
-    const priceNote = p.priceLive ? '' : '';
-    return `
-      <div class="lab-product-row" data-cat="${p.category}">
-        <div class="lab-product-thumb">${thumbInner}</div>
-        <div class="lab-product-info">
-          <span class="lab-badge ${badgeCls}">${p.categoryLabel}</span>
-          <h3>${escHtml(p.name)}</h3>
-          <p>${escHtml(p.description)}</p>
-          <ul class="lab-specs">${specs}</ul>
-        </div>
-        <div class="lab-buy-area">
-          <div class="lab-price-block">
-            <span class="lab-price-sek">${escHtml(p.priceSEK)} kr${priceNote}</span>
-            <span class="lab-price-uci">≈ ${escHtml(p.priceUCI)} ⊙</span>
-          </div>
-          <a class="btn-buy-amazon"
-             href="${escHtml(p.buyUrl)}"
-             target="_blank"
-             rel="noopener sponsored"
-             title="${escHtml(buyTitle)}">
-            ${buyLabel}
-          </a>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function filterLab(cat) {
-  labActiveCat = cat;
-  document.querySelectorAll('.lab-cat-btn').forEach(btn =>
-    btn.classList.toggle('active', btn.dataset.cat === cat)
-  );
-  renderLabProducts();
-}
-
-window.filterLab = filterLab;
 window.switchLabTab = switchLabTab;
 
 // ─── Auth & Konto ─────────────────────────────────────────────────────────────

@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css?v=20260612-6">
+  <link rel="stylesheet" href="main.css?v=20260612-7">
   <style data-module-boot>
     /* Visa UCI Värdering direkt — innan main.css (undviker blink) */
     .module { display: none; }
@@ -736,7 +736,6 @@
       <div class="lab-subnav market-tabs">
         <button type="button" class="tab-btn active" data-lab-tab="engine" onclick="switchLabTab('engine')" data-i18n="lab.tab.engine">UCI Valuation Engine</button>
         <button type="button" class="tab-btn" data-lab-tab="papers" onclick="switchLabTab('papers')" data-i18n="lab.tab.papers">Scientific papers and Articles</button>
-        <button type="button" class="tab-btn" data-lab-tab="shop" onclick="switchLabTab('shop')" data-i18n="lab.tab.shop">Shop · Amazon</button>
       </div>
 
       <!-- Lab: UCI Valuation Engine -->
@@ -747,32 +746,6 @@
       <!-- Lab: Scientific papers -->
       <div class="lab-panel hidden" id="lab-panel-papers">
         <div data-i18n-html="lab.papersBody"></div>
-      </div>
-
-      <!-- Lab: Amazon shop -->
-      <div class="lab-panel hidden" id="lab-panel-shop">
-
-        <p class="lab-shop-intro" data-i18n="lab.shop.intro">Hardware for measuring, trading and tracking real value — buy via Amazon.</p>
-
-        <div class="lab-categories" id="labCatFilter">
-          <button class="lab-cat-btn active" data-cat="all" onclick="filterLab('all')" data-i18n="lab.cat.all">All</button>
-          <button class="lab-cat-btn" data-cat="energy" onclick="filterLab('energy')" data-i18n="lab.cat.energy">Energy</button>
-          <button class="lab-cat-btn" data-cat="nfc" onclick="filterLab('nfc')" data-i18n="lab.cat.nfc">NFC &amp; Trade</button>
-          <button class="lab-cat-btn" data-cat="iot" onclick="filterLab('iot')" data-i18n="lab.cat.iot">IoT &amp; Sensors</button>
-          <button class="lab-cat-btn" data-cat="compute" onclick="filterLab('compute')" data-i18n="lab.cat.compute">Compute</button>
-          <button class="lab-cat-btn" data-cat="security" onclick="filterLab('security')" data-i18n="lab.cat.security">Security</button>
-        </div>
-
-        <div class="lab-shop-area" id="labShopArea">
-          <div class="lab-loading" data-i18n="lab.shop.loading">Open the shop tab to see products…</div>
-        </div>
-
-        <div class="lab-footer">
-          <div class="lab-footer-item" data-i18n="lab.footer.shipping">🚚 Free shipping over 500 SEK</div>
-          <div class="lab-footer-item" data-i18n="lab.footer.returns">↩️ 30-day returns</div>
-          <div class="lab-footer-item" data-i18n="lab.footer.price">⊙ Price in SEK and UCI</div>
-          <div class="lab-footer-item" data-i18n="lab.footer.amazon">🔗 Buy via Amazon</div>
-        </div>
       </div>
 
     </section>
@@ -1812,7 +1785,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260612-6"></script>
+  <script src="app.js?v=20260612-7"></script>
 
   <!-- Aktivera AdSense-annonser -->
   <script>
