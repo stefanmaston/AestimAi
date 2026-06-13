@@ -3,7 +3,7 @@
   const ENGINE = {
     sv: `<div class="lab-engine-intro">
           <p class="lab-engine-lead">AestimAi Lab baseras på en kontinuerlig utveckling av en avancerad AI-arkitektur för agentisk, retrieval-grundad och kalibrerad värdering med gradvis självförbättrande (autodidaktisk) precision.</p>
-          <p>Inom AestimAi Lab har vi avsikten att uppnå ett universellt giltigt värdeindex (UCI) som kan användas i många olika tillämpningar, både privat och publikt.</p>
+          <p>Inom AestimAi Lab har vi avsikten att uppnå Universal Coin Index (UCI) — ett universellt giltigt värdeindex som kan användas i många olika tillämpningar, både privat och publikt.</p>
         </div>
         <div class="lab-engine-section">
           <h2>Kärnskifte</h2>
@@ -25,7 +25,7 @@
 
     en: `<div class="lab-engine-intro">
           <p class="lab-engine-lead">AestimAi Lab is built on continuous development of an advanced AI architecture for agentic, retrieval-grounded and calibrated valuation with gradually self-improving (autodidactic) precision.</p>
-          <p>Within AestimAi Lab we aim to achieve a universally valid value index (UCI) that can be used in many different applications, both private and public.</p>
+          <p>Within AestimAi Lab we aim to achieve Universal Coin Index (UCI) — a universally valid value index that can be used in many different applications, both private and public.</p>
         </div>
         <div class="lab-engine-section">
           <h2>Core shift</h2>
@@ -47,7 +47,7 @@
 
     de: `<div class="lab-engine-intro">
           <p class="lab-engine-lead">AestimAi Lab basiert auf der kontinuierlichen Entwicklung einer fortgeschrittenen KI-Architektur für agentische, retrieval-basierte und kalibrierte Bewertung mit schrittweise selbstverbessernder (autodidaktischer) Präzision.</p>
-          <p>In AestimAi Lab streben wir einen universell gültigen Werteindex (UCI) an, der in vielen Anwendungen — privat und öffentlich — genutzt werden kann.</p>
+          <p>In AestimAi Lab streben wir den Universal Coin Index (UCI) an — einen universell gültigen Werteindex, der in vielen Anwendungen — privat und öffentlich — genutzt werden kann.</p>
         </div>
         <div class="lab-engine-section">
           <h2>Kernwandel</h2>
@@ -69,7 +69,7 @@
 
     fr: `<div class="lab-engine-intro">
           <p class="lab-engine-lead">AestimAi Lab repose sur le développement continu d'une architecture IA avancée pour une valorisation agentique, fondée sur la retrieval et calibrée, avec une précision auto-améliorante progressive.</p>
-          <p>Dans AestimAi Lab, nous visons un indice de valeur universel (UCI) utilisable dans de nombreuses applications, privées et publiques.</p>
+          <p>Dans AestimAi Lab, nous visons l'Universal Coin Index (UCI) — un indice de valeur universel utilisable dans de nombreuses applications, privées et publiques.</p>
         </div>
         <div class="lab-engine-section">
           <h2>Changement de cap</h2>
@@ -91,7 +91,7 @@
 
     it: `<div class="lab-engine-intro">
           <p class="lab-engine-lead">AestimAi Lab si basa sullo sviluppo continuo di un'architettura IA avanzata per valutazioni agentiche, retrieval-based e calibrate, con precisione auto-migliorante progressiva.</p>
-          <p>In AestimAi Lab puntiamo a un indice di valore universalmente valido (UCI) utilizzabile in molte applicazioni, private e pubbliche.</p>
+          <p>In AestimAi Lab puntiamo all'Universal Coin Index (UCI) — un indice di valore universalmente valido utilizzabile in molte applicazioni, private e pubbliche.</p>
         </div>
         <div class="lab-engine-section">
           <h2>Cambio di paradigma</h2>
@@ -113,7 +113,7 @@
 
     es: `<div class="lab-engine-intro">
           <p class="lab-engine-lead">AestimAi Lab se basa en el desarrollo continuo de una arquitectura IA avanzada para valoración agéntica, basada en retrieval y calibrada, con precisión auto-mejorante gradual.</p>
-          <p>En AestimAi Lab buscamos un índice de valor universalmente válido (UCI) utilizable en muchas aplicaciones, privadas y públicas.</p>
+          <p>En AestimAi Lab buscamos el Universal Coin Index (UCI) — un índice de valor universalmente válido utilizable en muchas aplicaciones, privadas y públicas.</p>
         </div>
         <div class="lab-engine-section">
           <h2>Cambio fundamental</h2>
@@ -339,9 +339,9 @@
       <p class="lab-papers-intro">${L.intro}</p>
       <article class="lab-paper-featured">
         <span class="lab-paper-badge">${L.featured}</span>
-        <h2>AestimAi and the Universal Comparable Index (UCI): A Cooperative, AI-Assisted Architecture for Non-Monetary Value Measurement</h2>
+        <h2>AestimAi and the Universal Coin Index (UCI): A Cooperative, AI-Assisted Architecture for Non-Monetary Value Measurement</h2>
         <p class="lab-paper-meta">${L.author} · <span class="lab-paper-draft">${L.draft}</span></p>
-        <p class="lab-paper-abstract">This article introduces AestimAi and the Universal Comparable Index (UCI) — a valuation index measure designed explicitly as a non-monetary instrument that quantifies verified counterperformance rather than representing currency or a financial instrument under EU law. It describes the separation of measurement from settlement, a three-layer institutional architecture (technology company, cooperative association, identity layer), an agentic retrieval-grounded AI valuation engine, hash-anchoring for tamper-evidence without tokenization, and positioning outside MiCA scope.</p>
+        <p class="lab-paper-abstract">This article introduces AestimAi and the Universal Coin Index (UCI) — a valuation index measure designed explicitly as a non-monetary instrument that quantifies verified counterperformance rather than representing currency or a financial instrument under EU law. It describes the separation of measurement from settlement, a three-layer institutional architecture (technology company, cooperative association, identity layer), an agentic retrieval-grounded AI valuation engine, hash-anchoring for tamper-evidence without tokenization, and positioning outside MiCA scope.</p>
         <p class="lab-paper-keywords"><strong>Keywords:</strong> cooperative economics; non-monetary value measurement; valuation index; artificial intelligence; retrieval-augmented generation; digital identity; hash-anchoring; MiCA; barter exchange; sustainable development</p>
         <div class="lab-paper-actions">
           <a class="btn-primary" href="/papers/aestimai-uci-journal-article.pdf" target="_blank" rel="noopener">${L.readPdf}</a>
@@ -351,7 +351,7 @@
           <ol>
             <li>Introduction — separating measurement from settlement</li>
             <li>Background and motivation (LETS, time banks, cooperative governance)</li>
-            <li>Conceptual design: the Universal Comparable Index (UCI)</li>
+            <li>Conceptual design: the Universal Coin Index (UCI)</li>
             <li>Institutional architecture (Tech AB · Economic Association · AE ID)</li>
             <li>The AI-assisted valuation engine (8 integrated layers)</li>
             <li>Legal and regulatory positioning (PSD2, EMD2, MiFID II, MiCA)</li>
