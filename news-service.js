@@ -3,10 +3,8 @@
  * Används av Vercel /api/news och Railway news-proxy.
  */
 
-const { createClient } = require('@supabase/supabase-js');
-
 const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar
-const KEY = process.env.NEWS_API_KEY;
+const KEY = process.env.NEWS_API_KEY || process.env.NEWSAPI_KEY || '';
 const BASE = 'https://newsapi.org/v2/everything';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vaxtylcqnscnflsucyiv.supabase.co';
@@ -16,6 +14,14 @@ const httpFetch = (...args) => {
   if (typeof fetch === 'function') return fetch(...args);
   return require('node-fetch')(...args);
 };
+
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SERVICE_ROLE,
+    Authorization: `Bearer ${SERVICE_ROLE}`,
+    ...extra,
+  };
+}
 
 const QUERIES = {
   valuation:      '"circular economy" OR "asset valuation" OR "barter economy" OR "peer-to-peer exchange" OR "exchange economy"',
@@ -30,17 +36,6 @@ const QUERIES = {
 
 const cache = new Map();   // key → { data, ts }
 const inflight = new Map(); // key → Promise
-
-let _admin = null;
-
-function getAdmin() {
-  if (_admin) return _admin;
-  if (!SUPABASE_URL || !SERVICE_ROLE) return null;
-  _admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  return _admin;
-}
 
 function isKeyConfigured() {
   return !!(KEY && KEY !== 'din_nyckel_här');
@@ -61,18 +56,16 @@ function cacheSet(key, data, ts = Date.now()) {
 }
 
 async function dbGetCache(cat) {
-  const admin = getAdmin();
-  if (!admin) return null;
+  if (!SUPABASE_URL || !SERVICE_ROLE) return null;
   try {
-    const { data, error } = await admin
-      .from('aestimai_news_cache')
-      .select('articles, fetched_at')
-      .eq('category', cat)
-      .maybeSingle();
-    if (error) {
-      console.warn('[news] db read failed:', error.message);
+    const url = `${SUPABASE_URL}/rest/v1/aestimai_news_cache?category=eq.${encodeURIComponent(cat)}&select=articles,fetched_at`;
+    const res = await httpFetch(url, { headers: supabaseHeaders() });
+    if (!res.ok) {
+      console.warn('[news] db read HTTP', res.status);
       return null;
     }
+    const rows = await res.json();
+    const data = Array.isArray(rows) ? rows[0] : null;
     if (!data) return null;
     const ts = new Date(data.fetched_at).getTime();
     if (Number.isNaN(ts)) return null;
@@ -89,16 +82,25 @@ async function dbGetCache(cat) {
 }
 
 async function dbSetCache(cat, articles) {
-  const admin = getAdmin();
-  if (!admin) return;
+  if (!SUPABASE_URL || !SERVICE_ROLE) return;
   try {
-    const { error } = await admin.from('aestimai_news_cache').upsert({
-      category: cat,
-      articles,
-      fetched_at: new Date().toISOString(),
-      source: 'newsapi',
-    }, { onConflict: 'category' });
-    if (error) console.warn('[news] db write failed:', error.message);
+    const res = await httpFetch(`${SUPABASE_URL}/rest/v1/aestimai_news_cache`, {
+      method: 'POST',
+      headers: supabaseHeaders({
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      }),
+      body: JSON.stringify({
+        category: cat,
+        articles,
+        fetched_at: new Date().toISOString(),
+        source: 'newsapi',
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.warn('[news] db write HTTP', res.status, body.slice(0, 120));
+    }
   } catch (e) {
     console.warn('[news] db write error:', e?.message || e);
   }
