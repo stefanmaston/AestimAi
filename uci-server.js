@@ -696,7 +696,7 @@ function todayStr() { return new Date().toISOString().slice(0, 10); }
 // Hämtar dagens finansnyhetsrubriker från news-tjänsten (best-effort).
 async function fetchNewsHeadlines() {
   try {
-    const url = process.env.NEWS_URL || `http://127.0.0.1:${PORT}/api/news?cat=all`;
+    const url = process.env.NEWS_URL || 'https://news-production-370c.up.railway.app/api/news?cat=all';
     const r = await fetch(url);
     if (!r.ok) return [];
     const d = await r.json();
