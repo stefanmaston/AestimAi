@@ -1492,6 +1492,178 @@ const CAT_SYNONYMS = {
 
 const COND_LABELS = { 1: '1 — Poor', 2: '2 — Worn', 3: '3 — OK', 4: '4 — Good', 5: '5 — Excellent' };
 
+const MY_ITEMS_SIZE_KEY = 'aestimai_my_items_size';
+let myItemsCache = [];
+let myItemsRates = null;
+let myItemModalOpenId = null;
+
+function getMyItemsViewSize() {
+  const v = localStorage.getItem(MY_ITEMS_SIZE_KEY);
+  return v === 'm' || v === 'l' ? v : 's';
+}
+
+function setMyItemsViewSize(size) {
+  localStorage.setItem(MY_ITEMS_SIZE_KEY, size === 'm' || size === 'l' ? size : 's');
+  applyMyItemsViewSize();
+}
+
+function applyMyItemsViewSize() {
+  const size = getMyItemsViewSize();
+  const grid = document.getElementById('myItemsGrid');
+  if (grid) {
+    grid.classList.remove('my-items-grid--s', 'my-items-grid--m', 'my-items-grid--l');
+    grid.classList.add(`my-items-grid--${size}`);
+  }
+  document.querySelectorAll('.my-items-size-btn').forEach(btn => {
+    const active = btn.dataset.size === size;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
+function buildMyItemsToolbar() {
+  const size = getMyItemsViewSize();
+  const mkBtn = (s, key) =>
+    `<button type="button" class="my-items-size-btn${size === s ? ' active' : ''}" data-size="${s}" aria-pressed="${size === s ? 'true' : 'false'}">${mtr(key, null, s)}</button>`;
+  const label = mtr('market.viewSizeLabel', null, 'Grid size');
+  return `<div class="my-items-toolbar">
+    <span class="my-items-size-label">${label}</span>
+    <div class="my-items-size-toggle" role="group" aria-label="${escHtml(label)}">
+      ${mkBtn('s', 'market.viewSizeS')}
+      ${mkBtn('m', 'market.viewSizeM')}
+      ${mkBtn('l', 'market.viewSizeL')}
+    </div>
+  </div>`;
+}
+
+function formatMarketDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString(marketLocaleTag(), {
+    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+function myItemDetailBodyHTML(row, rates) {
+  const v = listingView(row);
+  const r = row.result || {};
+  const pub = !!row.is_public;
+  const locale = marketLocaleTag();
+  const fmt = n => Math.round(n).toLocaleString(locale);
+
+  const images = [...(row.marketplace?.images || [])];
+  if (row.image_url && !images.includes(row.image_url)) images.unshift(row.image_url);
+  const hero = images[0]
+    ? `<img class="my-item-detail-hero" id="myItemDetailHero" src="${escHtml(images[0])}" alt="${escHtml(v.title)}">`
+    : '<div class="my-item-detail-hero my-item-detail-hero--empty" aria-hidden="true">📷</div>';
+  const gallery = images.length > 1
+    ? `<div class="my-item-detail-gallery">${images.map((url, i) =>
+        `<img src="${escHtml(url)}" alt="" data-hero="${escHtml(url)}" class="${i === 0 ? 'is-active' : ''}" loading="lazy">`
+      ).join('')}</div>`
+    : '';
+
+  let uciBlock = '';
+  if (v.uci != null) {
+    let fiat = '';
+    if (rates) {
+      const sek = fmt(v.uci * (rates.SEK || 0));
+      const eur = fmt(v.uci * (rates.EUR || 0));
+      const usd = fmt(v.uci * (rates.USD || 0));
+      fiat = `<p class="my-item-detail-fiat">${mtr('market.portfolioFiat', { sek, eur, usd }, `${sek} SEK · ${eur} EUR · ${usd} USD`)}</p>`;
+    }
+    const conf = (r.uci_low != null && r.uci_high != null)
+      ? `<p class="my-item-detail-fiat">${mtr('market.detailConfidence', null, 'Confidence interval (90%)')}: ${Number(r.uci_low).toLocaleString(locale)} – ${Number(r.uci_high).toLocaleString(locale)} UCI</p>`
+      : '';
+    uciBlock = `<div class="my-item-detail-section">
+      <p class="my-item-detail-uci">${v.uci.toLocaleString(locale)} <small>UCI</small></p>
+      ${fiat}${conf}
+    </div>`;
+  }
+
+  const kindLabel = v.kind === 'wanted'
+    ? mtr('market.kindWanted', null, 'Wanted')
+    : mtr('market.kindOffer', null, 'Offered');
+  const statusLabel = pub
+    ? mtr('market.statusPublic', null, 'Public')
+    : mtr('market.statusPrivate', null, 'Not public');
+  const condLabel = mtr('market.condition', null, 'Condition:').replace(/:+$/, '');
+
+  const metaRows = [
+    [mtr('market.detailKind', null, 'Type'), kindLabel],
+    [mtr('market.detailStatus', null, 'Status'), statusLabel],
+    v.category ? [mtr('market.detailCategory', null, 'Category'), translateMarketCategory(v.category)] : null,
+    v.condition ? [condLabel, v.condition] : null,
+    v.location ? [mtr('market.detailLocation', null, 'Location'), v.location] : null,
+    row.created_at ? [mtr('market.detailValuedOn', null, 'Valued'), formatMarketDate(row.created_at)] : null,
+    row.published_at ? [mtr('market.detailPublishedOn', null, 'Published'), formatMarketDate(row.published_at)] : null,
+  ].filter(Boolean);
+
+  const metaHtml = `<dl class="my-item-detail-meta-grid">${metaRows.map(([dt, dd]) =>
+    `<div><dt>${escHtml(dt)}</dt><dd>${escHtml(String(dd))}</dd></div>`
+  ).join('')}</dl>`;
+
+  const desc = v.desc || mtr('market.detailNoDescription', null, 'No description provided.');
+  const note = !pub ? `<p class="my-item-detail-note">${mtr('market.detailNotPublic', null, '')}</p>` : '';
+  const reasoning = r.reasoning
+    ? `<div class="my-item-detail-section"><h3>${mtr('market.detailReasoning', null, 'Reasoning')}</h3><p>${escHtml(r.reasoning)}</p></div>`
+    : '';
+  const factors = Array.isArray(r.key_factors) && r.key_factors.length
+    ? `<div class="my-item-detail-section"><h3>${mtr('market.detailFactors', null, 'Key factors')}</h3><div class="my-item-detail-factors">${r.key_factors.map(f => `<span>${escHtml(f)}</span>`).join('')}</div></div>`
+    : '';
+
+  return `${hero}${gallery}${uciBlock}${metaHtml}${note}
+    <div class="my-item-detail-section"><h3>${mtr('market.detailDescription', null, 'Description')}</h3><p>${escHtml(desc)}</p></div>
+    ${reasoning}${factors}`;
+}
+
+function myItemDetailFooterHTML(row) {
+  const v = listingView(row);
+  const pub = !!row.is_public;
+  const viewLink = pub
+    ? `<a class="btn-secondary mi-link" href="/m/${escHtml(row.id)}" target="_blank" rel="noopener">${mtr('market.btnViewPage', null, 'View page')}</a>`
+    : '';
+  return `<div class="my-item-detail-footer-actions">
+    <select class="mi-kind" data-id="${escHtml(row.id)}">
+      <option value="offer"${v.kind === 'offer' ? ' selected' : ''}>${mtr('market.kindOffer', null, 'Offered')}</option>
+      <option value="wanted"${v.kind === 'wanted' ? ' selected' : ''}>${mtr('market.kindWanted', null, 'Wanted')}</option>
+    </select>
+    <button type="button" class="btn-primary mi-toggle" data-id="${escHtml(row.id)}" data-public="${pub ? '1' : '0'}">${pub ? mtr('market.btnHide', null, 'Hide') : mtr('market.btnShow', null, 'Show on marketplace')}</button>
+    ${viewLink}
+    <button type="button" class="btn-text mi-delete" data-id="${escHtml(row.id)}">${mtr('market.btnDelete', null, 'Delete')}</button>
+    <button type="button" class="btn-secondary" id="btnCloseMyItemFooter">${mtr('market.btnCloseDetail', null, 'Close')}</button>
+  </div>`;
+}
+
+function openMyItemModal(id) {
+  const row = myItemsCache.find(r => r.id === id);
+  if (!row) return;
+  myItemModalOpenId = id;
+  const v = listingView(row);
+  const titleEl = document.getElementById('myItemModalTitle');
+  const bodyEl = document.getElementById('myItemModalBody');
+  const footerEl = document.getElementById('myItemModalFooter');
+  const overlay = document.getElementById('myItemModalOverlay');
+  if (!titleEl || !bodyEl || !footerEl || !overlay) return;
+  titleEl.textContent = v.title;
+  bodyEl.innerHTML = myItemDetailBodyHTML(row, myItemsRates);
+  footerEl.innerHTML = myItemDetailFooterHTML(row);
+  overlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('btnCloseMyItem')?.focus();
+}
+
+function closeMyItemModal() {
+  myItemModalOpenId = null;
+  document.getElementById('myItemModalOverlay')?.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function refreshMyItemModalIfOpen() {
+  if (!myItemModalOpenId) return;
+  const still = myItemsCache.some(r => r.id === myItemModalOpenId);
+  if (still) openMyItemModal(myItemModalOpenId);
+  else closeMyItemModal();
+}
+
 function categoryMatches(rowCat, filterVal) {
   if (!filterVal) return true;
   const c = String(rowCat || '').toLowerCase();
@@ -2116,9 +2288,16 @@ async function loadMyItems() {
       return;
     }
 
-    const rates = await fetchUciExchangeRates();
+    myItemsCache = data;
+    myItemsRates = rates;
+    const size = getMyItemsViewSize();
     const header = buildMyItemsHeader(data, rates);
-    container.innerHTML = header + '<div class="my-items-grid">' + data.map(myItemRowHTML).join('') + '</div>';
+    const toolbar = buildMyItemsToolbar();
+    container.innerHTML = header + toolbar
+      + `<div class="my-items-grid my-items-grid--${size}" id="myItemsGrid">`
+      + data.map(myItemRowHTML).join('')
+      + '</div>';
+    refreshMyItemModalIfOpen();
   } catch (e) {
     container.innerHTML = `<div class="market-error">${mtr('market.myItemsError', { msg: escHtml(e?.message || mtr('market.unknownError', null, 'unknown error')) }, 'Could not load items.')}</div>`;
   }
@@ -2140,7 +2319,11 @@ function myItemRowHTML(row) {
   const viewLink = pub
     ? `<a class="btn-text mi-link" href="/m/${escHtml(row.id)}" target="_blank" rel="noopener">${mtr('market.btnViewPage', null, 'View page')}</a>`
     : '';
-  return `<article class="my-item-tile" data-id="${escHtml(row.id)}">
+  const preview = v.desc
+    ? `<p class="my-item-preview">${escHtml(v.desc)}</p>`
+    : '';
+  return `<article class="my-item-tile my-item-tile--interactive" data-id="${escHtml(row.id)}" tabindex="0" role="button" aria-label="${escHtml(v.title)}">
+    <div class="my-item-open-area">
     <div class="my-item-thumb">
       ${thumb}
       <span class="status-pill ${pub ? 'pill-public' : 'pill-private'}">${pub ? mtr('market.statusPublic', null, 'Public') : mtr('market.statusPrivate', null, 'Not public')}</span>
@@ -2149,6 +2332,8 @@ function myItemRowHTML(row) {
       <h3 class="my-item-title" title="${escHtml(v.title)}">${escHtml(v.title)}</h3>
       ${metaParts.length ? `<p class="my-item-meta">${escHtml(metaParts.join(' · '))}</p>` : ''}
       ${dateStr ? `<p class="my-item-date">${mtr('market.valuedOn', { date: escHtml(dateStr) }, `Valued ${dateStr}`)}</p>` : ''}
+      ${preview}
+    </div>
     </div>
     <div class="my-item-actions">
       <select class="mi-kind" data-id="${escHtml(row.id)}">
@@ -2165,7 +2350,8 @@ function myItemRowHTML(row) {
 }
 
 async function toggleMyItem(id, makePublic) {
-  const kindSel = document.querySelector(`.mi-kind[data-id="${id}"]`);
+  const kindSel = document.querySelector(`#myItemModalFooter .mi-kind[data-id="${id}"]`)
+    || document.querySelector(`.my-items-grid .mi-kind[data-id="${id}"]`);
   const kind = kindSel ? kindSel.value : 'offer';
 
   if (makePublic) {
@@ -2202,6 +2388,7 @@ async function deleteMyItem(id) {
     const { error } = await sb.from('aestimai_valuations').delete().eq('id', id);
     if (error) throw error;
     showToast(mtr('market.toastDeleted', null, 'Item deleted.'));
+    if (myItemModalOpenId === id) closeMyItemModal();
     loadMyItems();
   } catch (e) {
     showToast(mtr('market.toastDeleteFailed', { msg: e?.message || mtr('market.unknownError', null, 'unknown error') }, 'Could not delete.'));
@@ -2284,10 +2471,51 @@ function setupMarketplace() {
 
   // Mina objekt-åtgärder (delegering)
   document.getElementById('myItemsContent')?.addEventListener('click', e => {
+    const sizeBtn = e.target.closest('.my-items-size-btn');
+    if (sizeBtn) {
+      setMyItemsViewSize(sizeBtn.dataset.size);
+      return;
+    }
     const toggle = e.target.closest('.mi-toggle');
     if (toggle) { toggleMyItem(toggle.dataset.id, toggle.dataset.public !== '1'); return; }
     const del = e.target.closest('.mi-delete');
     if (del) { deleteMyItem(del.dataset.id); return; }
+    if (e.target.closest('.my-item-actions, .mi-link, a, button, select')) return;
+    const tile = e.target.closest('.my-item-tile');
+    if (tile?.dataset.id) openMyItemModal(tile.dataset.id);
+  });
+  document.getElementById('myItemsContent')?.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const tile = e.target.closest('.my-item-tile');
+    if (!tile || e.target.closest('.my-item-actions, select')) return;
+    e.preventDefault();
+    if (tile.dataset.id) openMyItemModal(tile.dataset.id);
+  });
+
+  document.getElementById('btnCloseMyItem')?.addEventListener('click', closeMyItemModal);
+  document.getElementById('myItemModalOverlay')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('myItemModalOverlay')) closeMyItemModal();
+  });
+  document.getElementById('myItemModalFooter')?.addEventListener('click', e => {
+    if (e.target.id === 'btnCloseMyItemFooter') { closeMyItemModal(); return; }
+    const toggle = e.target.closest('.mi-toggle');
+    if (toggle) { toggleMyItem(toggle.dataset.id, toggle.dataset.public !== '1'); return; }
+    const del = e.target.closest('.mi-delete');
+    if (del) deleteMyItem(del.dataset.id);
+  });
+  document.getElementById('myItemModalBody')?.addEventListener('click', e => {
+    const thumb = e.target.closest('.my-item-detail-gallery img');
+    if (!thumb) return;
+    const hero = document.getElementById('myItemDetailHero');
+    if (hero?.tagName === 'IMG') {
+      hero.src = thumb.dataset.hero || thumb.src;
+      document.querySelectorAll('.my-item-detail-gallery img').forEach(img => {
+        img.classList.toggle('is-active', img === thumb);
+      });
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && myItemModalOpenId) closeMyItemModal();
   });
 
   // Kontaktmodal
@@ -2337,6 +2565,7 @@ function setupSettings() {
       refreshDashboardCaps();
       if (marketLoaded) searchMarket();
       if (state.currentModule === 'market') loadMyItems();
+      if (myItemModalOpenId) refreshMyItemModalIfOpen();
       if (state.currentModule === 'account' && currentUser) refreshAccountSection();
       if (state.currentModule === 'dashboard') loadChartForCat();
       i18n.applyTranslations();
