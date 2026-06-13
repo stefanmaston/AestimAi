@@ -71,7 +71,7 @@ const CATEGORY_TERMS = {
 
 /** Uppenbara falska träffar per kategori (titel + ingress). */
 const CATEGORY_EXCLUDE = {
-  valuation:  ['disneyland', 'theme park', 'celebrity', 'reality tv', 'sports betting', 'nfl ', 'nba '],
+  valuation:  ['disneyland', 'theme park', 'celebrity', 'reality tv', 'sports betting', 'nfl ', 'nba ', 'goes public', 'ipo', 'funding talks', 'stock price', 'shares rose', 'nasdaq', 'dow jones', 'billion valuation', 'trillion valuation', 'class action', 'investor news'],
   energy:     ['disneyland', 'theme park', 'celebrity', 'reality tv', 'sports betting', 'movie', 'concert'],
   coop:       ['disneyland', 'theme park', 'celebrity gossip', 'reality tv'],
   market:     ['disneyland', 'theme park', 'celebrity', 'sports score'],
