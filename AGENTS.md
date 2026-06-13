@@ -60,7 +60,7 @@ Stripe-helper: `api/_stripe.js` (lazy init). Billing-planlogik: `api/billing/_pl
 
 ## Övrigt
 
-- **Nyheter:** `/api/news` — cache 1/h (`NEWS_API_KEY`)
+- **Nyheter:** `/api/news` — Supabase `aestimai_news_cache`, TTL 2h (`NEWS_API_KEY` + `SUPABASE_SERVICE_ROLE_KEY`)
 - **UCI Lab shop:** Stripe API finns men UI länkar Amazon
 - **Railway:** `/api/uci/*` proxas via `vercel.json`
 
