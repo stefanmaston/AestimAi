@@ -837,7 +837,7 @@ function showToast(msg) {
 // ── Nyheter ──────────────────────────────────────────
 const NEWS_PROXY = IS_LOCAL ? 'http://localhost:3002/api/news' : '/api/news';
 const NEWS_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar — matchar server/DB-cache
-const NEWS_STORAGE_KEY = 'aestimai_news_v3';
+const NEWS_STORAGE_KEY = 'aestimai_news_v4';
 let newsCache = {};    // cat → { articles, fetchedAt }
 let newsLoaded = false;
 let newsPrefetchStarted = false;
@@ -919,6 +919,7 @@ async function fetchNewsFromServer(cat, opts = {}) {
 function getStaleNewsArticles(cat) {
   const entry = newsCache[cat];
   if (entry?.articles?.length) return entry.articles;
+  if (cat !== 'all') return null;
   const all = newsCache.all?.articles;
   return all?.length ? all : null;
 }
@@ -975,8 +976,16 @@ function renderNews(articles, cat) {
   const main = document.querySelector('.news-main');
   if (!main) return;
 
-  // Töm och ersätt med live-innehåll
-  main.innerHTML = buildNewsHTML(articles, cat);
+  const scoped = cat === 'all'
+    ? articles
+    : articles.filter((a) => (a.cat || cat) === cat);
+
+  if (!scoped.length) {
+    filterNewsStatic(cat);
+    return;
+  }
+
+  main.innerHTML = buildNewsHTML(scoped, cat);
   newsLoaded = true;
 }
 
