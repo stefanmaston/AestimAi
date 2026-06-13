@@ -123,7 +123,7 @@ async function dbGetCache(cat) {
     if (!data) return null;
     const ts = new Date(data.fetched_at).getTime();
     if (Number.isNaN(ts)) return null;
-    const articles = Array.isArray(data.articles) ? data.articles : [];
+    const articles = Array.isArray(data.articles) ? refineCachedArticles(data.articles, cat) : [];
     return {
       articles,
       ts,
@@ -222,6 +222,19 @@ function classifyArticle(a) {
   return normalizeArticle(a, bestCat);
 }
 
+function refineCachedArticles(articles, cat) {
+  if (!articles?.length) return [];
+  if (cat === 'all') {
+    if (articles.some((a) => a.cat && a.cat !== 'all')) {
+      return mergeArticles(articles).slice(0, RESULT_LIMIT);
+    }
+    return mergeArticles(
+      articles.map(classifyArticle).filter(Boolean),
+    ).slice(0, RESULT_LIMIT);
+  }
+  return articles.filter((a) => scoreArticleForCategory(a, cat) >= 1).slice(0, RESULT_LIMIT);
+}
+
 function mergeArticles(articles) {
   const byUrl = new Map();
   for (const a of articles) {
@@ -292,7 +305,8 @@ async function resolveCategory(cat) {
   const mem = cacheGet(cat);
   if (mem) {
     console.log(`[news] memory HIT: ${cat}`);
-    return packResult(mem.data, mem.ts, true, 'memory');
+    const articles = refineCachedArticles(mem.data, cat);
+    if (articles.length) return packResult(articles, mem.ts, true, 'memory');
   }
 
   const db = await dbGetCache(cat);
@@ -332,7 +346,10 @@ async function resolveCategory(cat) {
 
 async function fetchCategory(cat) {
   const hit = cacheGet(cat);
-  if (hit) return packResult(hit.data, hit.ts, true, 'memory');
+  if (hit) {
+    const articles = refineCachedArticles(hit.data, cat);
+    if (articles.length) return packResult(articles, hit.ts, true, 'memory');
+  }
 
   if (inflight.has(cat)) return inflight.get(cat);
 
