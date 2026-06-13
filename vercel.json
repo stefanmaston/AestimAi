@@ -2,6 +2,10 @@
   "installCommand": "npm install && npm install --prefix api",
   "rewrites": [
     {
+      "source": "/api/news",
+      "destination": "https://feisty-curiosity-production-609f.up.railway.app/api/news"
+    },
+    {
       "source": "/api/uci/:path*",
       "destination": "https://feisty-curiosity-production-609f.up.railway.app/api/uci/:path*"
     },

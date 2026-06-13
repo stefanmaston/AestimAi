@@ -696,7 +696,7 @@ function todayStr() { return new Date().toISOString().slice(0, 10); }
 // Hämtar dagens finansnyhetsrubriker från news-tjänsten (best-effort).
 async function fetchNewsHeadlines() {
   try {
-    const url = process.env.NEWS_URL || 'https://aestimai.org/api/news?cat=all';
+    const url = process.env.NEWS_URL || `http://127.0.0.1:${PORT}/api/news?cat=all`;
     const r = await fetch(url);
     if (!r.ok) return [];
     const d = await r.json();
@@ -1165,6 +1165,31 @@ app.get('/api/uci/assets', async (req, res) => {
   res.json(data);
 });
 
+// ── GET /api/news — NewsAPI-cache (samma nycklar som Railway .env) ──
+app.get('/api/news', async (req, res) => {
+  const { getNewsArticles, CACHE_TTL_MS } = require('./news-service');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const cat = (req.query.cat || 'all').toString();
+  try {
+    const { articles, cachedAt, fromCache, source } = await getNewsArticles(cat);
+    const maxAge = Math.max(0, Math.floor((CACHE_TTL_MS - (Date.now() - cachedAt)) / 1000));
+    res.setHeader('Cache-Control', `public, max-age=${maxAge || 7200}, stale-while-revalidate=86400`);
+    res.setHeader('X-News-Cache', fromCache ? 'HIT' : 'MISS');
+    if (source) res.setHeader('X-News-Source', source);
+    return res.json({
+      articles,
+      total: articles.length,
+      cachedAt: new Date(cachedAt).toISOString(),
+      fromCache,
+      source,
+    });
+  } catch (e) {
+    return res.status(e.status || 500).json({ error: e.message });
+  }
+});
+
 // ── GET /api/uci/health ────────────────────────────────────
 app.get('/api/uci/health', (req, res) => {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -1179,6 +1204,7 @@ app.get('/api/uci/health', (req, res) => {
       'GET  /api/uci/history',
       'POST /api/uci/check',
       'POST /api/uci/camera-analyze',
+      'GET  /api/news',
     ],
   });
 });

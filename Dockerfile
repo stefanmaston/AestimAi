@@ -8,6 +8,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Kopiera serverkod (ej frontend-filer)
+COPY news-service.js     ./
 COPY news-proxy.js        ./
 COPY uci-server.js        ./
 COPY uci-index-updater.js ./

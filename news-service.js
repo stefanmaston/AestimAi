@@ -4,7 +4,6 @@
  */
 
 const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar
-const KEY = process.env.NEWS_API_KEY || process.env.NEWSAPI_KEY || '';
 const BASE = 'https://newsapi.org/v2/everything';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vaxtylcqnscnflsucyiv.supabase.co';
@@ -37,8 +36,13 @@ const QUERIES = {
 const cache = new Map();   // key → { data, ts }
 const inflight = new Map(); // key → Promise
 
+function newsApiKey() {
+  return process.env.NEWS_API_KEY || process.env.NEWSAPI_KEY || '';
+}
+
 function isKeyConfigured() {
-  return !!(KEY && KEY !== 'din_nyckel_här');
+  const k = newsApiKey();
+  return !!(k && k !== 'din_nyckel_här');
 }
 
 function cacheGet(key) {
@@ -119,7 +123,7 @@ async function fetchFromNewsApi(cat) {
   url.searchParams.set('language', 'en');
   url.searchParams.set('sortBy', 'publishedAt');
   url.searchParams.set('pageSize', '10');
-  url.searchParams.set('apiKey', KEY);
+  url.searchParams.set('apiKey', newsApiKey());
 
   const res = await httpFetch(url.toString());
   const data = await res.json();

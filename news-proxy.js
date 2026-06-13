@@ -16,10 +16,6 @@ app.use(cors({ origin: true }));
 app.use(express.json());
 
 app.get('/api/news', async (req, res) => {
-  if (!isKeyConfigured()) {
-    return res.status(503).json({ error: 'API-nyckel saknas — lägg till NEWS_API_KEY i .env' });
-  }
-
   const cat = req.query.cat || 'all';
 
   try {
