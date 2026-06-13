@@ -1,11 +1,16 @@
 /**
- * Delad nyhetstjänst — cache 1 gång/2 timmar per kategori.
+ * Delad nyhetstjänst — cache i Supabase + minne, max 1 NewsAPI-uppdatering / 2h / kategori.
  * Används av Vercel /api/news och Railway news-proxy.
  */
 
-const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar — max en NewsAPI-uppdatering per kategori
+const { createClient } = require('@supabase/supabase-js');
+
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar
 const KEY = process.env.NEWS_API_KEY;
 const BASE = 'https://newsapi.org/v2/everything';
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vaxtylcqnscnflsucyiv.supabase.co';
+const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const httpFetch = (...args) => {
   if (typeof fetch === 'function') return fetch(...args);
@@ -26,6 +31,17 @@ const QUERIES = {
 const cache = new Map();   // key → { data, ts }
 const inflight = new Map(); // key → Promise
 
+let _admin = null;
+
+function getAdmin() {
+  if (_admin) return _admin;
+  if (!SUPABASE_URL || !SERVICE_ROLE) return null;
+  _admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  return _admin;
+}
+
 function isKeyConfigured() {
   return !!(KEY && KEY !== 'din_nyckel_här');
 }
@@ -40,20 +56,56 @@ function cacheGet(key) {
   return entry;
 }
 
-function cacheSet(key, data) {
-  cache.set(key, { data, ts: Date.now() });
+function cacheSet(key, data, ts = Date.now()) {
+  cache.set(key, { data, ts });
 }
 
-function mergeArticles(lists) {
-  const seen = new Set();
-  return lists
-    .flat()
-    .filter(a => {
-      if (!a?.url || seen.has(a.url)) return false;
-      seen.add(a.url);
-      return true;
-    })
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+async function dbGetCache(cat) {
+  const admin = getAdmin();
+  if (!admin) return null;
+  try {
+    const { data, error } = await admin
+      .from('aestimai_news_cache')
+      .select('articles, fetched_at')
+      .eq('category', cat)
+      .maybeSingle();
+    if (error) {
+      console.warn('[news] db read failed:', error.message);
+      return null;
+    }
+    if (!data) return null;
+    const ts = new Date(data.fetched_at).getTime();
+    if (Number.isNaN(ts)) return null;
+    const articles = Array.isArray(data.articles) ? data.articles : [];
+    return {
+      articles,
+      ts,
+      fresh: Date.now() - ts <= CACHE_TTL_MS,
+    };
+  } catch (e) {
+    console.warn('[news] db read error:', e?.message || e);
+    return null;
+  }
+}
+
+async function dbSetCache(cat, articles) {
+  const admin = getAdmin();
+  if (!admin) return;
+  try {
+    const { error } = await admin.from('aestimai_news_cache').upsert({
+      category: cat,
+      articles,
+      fetched_at: new Date().toISOString(),
+      source: 'newsapi',
+    }, { onConflict: 'category' });
+    if (error) console.warn('[news] db write failed:', error.message);
+  } catch (e) {
+    console.warn('[news] db write error:', e?.message || e);
+  }
+}
+
+function packResult(articles, cachedAt, fromCache, source) {
+  return { articles, cachedAt, fromCache, source };
 }
 
 async function fetchFromNewsApi(cat) {
@@ -83,21 +135,58 @@ async function fetchFromNewsApi(cat) {
   }));
 }
 
+async function resolveCategory(cat) {
+  const mem = cacheGet(cat);
+  if (mem) {
+    console.log(`[news] memory HIT: ${cat}`);
+    return packResult(mem.data, mem.ts, true, 'memory');
+  }
+
+  const db = await dbGetCache(cat);
+  if (db?.fresh && db.articles.length) {
+    console.log(`[news] db HIT: ${cat}`);
+    cacheSet(cat, db.articles, db.ts);
+    return packResult(db.articles, db.ts, true, 'db');
+  }
+
+  if (isKeyConfigured()) {
+    console.log(`[news] refresh: ${cat} — NewsAPI`);
+    const articles = await fetchFromNewsApi(cat);
+    const ts = Date.now();
+    cacheSet(cat, articles, ts);
+    await dbSetCache(cat, articles);
+    return packResult(articles, ts, false, 'newsapi');
+  }
+
+  if (db?.articles?.length) {
+    console.log(`[news] db STALE: ${cat} (ingen API-nyckel)`);
+    cacheSet(cat, db.articles, db.ts);
+    return packResult(db.articles, db.ts, true, 'db-stale');
+  }
+
+  const err = new Error('API-nyckel saknas — lägg till NEWS_API_KEY (ingen sparad cache)');
+  err.status = 503;
+  throw err;
+}
+
 async function fetchCategory(cat) {
   const hit = cacheGet(cat);
-  if (hit) {
-    console.log(`[news] cache HIT: ${cat}`);
-    return { articles: hit.data, cachedAt: hit.ts, fromCache: true };
-  }
+  if (hit) return packResult(hit.data, hit.ts, true, 'memory');
 
   if (inflight.has(cat)) return inflight.get(cat);
 
   const job = (async () => {
-    console.log(`[news] cache MISS: ${cat} — hämtar från NewsAPI`);
-    const articles = await fetchFromNewsApi(cat);
-    cacheSet(cat, articles);
-    const entry = cache.get(cat);
-    return { articles, cachedAt: entry.ts, fromCache: false };
+    try {
+      return await resolveCategory(cat);
+    } catch (e) {
+      const db = await dbGetCache(cat);
+      if (db?.articles?.length) {
+        console.warn(`[news] NewsAPI misslyckades för ${cat}, använder db-stale:`, e.message);
+        cacheSet(cat, db.articles, db.ts);
+        return packResult(db.articles, db.ts, true, 'db-stale');
+      }
+      throw e;
+    }
   })();
 
   inflight.set(cat, job);
@@ -109,38 +198,10 @@ async function fetchCategory(cat) {
 }
 
 async function fetchAll() {
-  const hit = cacheGet('all');
-  if (hit) {
-    console.log('[news] cache HIT: all');
-    return { articles: hit.data, cachedAt: hit.ts, fromCache: true };
-  }
-
-  if (inflight.has('all')) return inflight.get('all');
-
-  const job = (async () => {
-    console.log('[news] cache MISS: all — hämtar från NewsAPI');
-    const articles = await fetchFromNewsApi('all');
-    cacheSet('all', articles);
-    const entry = cache.get('all');
-    console.log(`[news] cache MISS: all — ${articles.length} artiklar`);
-    return { articles, cachedAt: entry.ts, fromCache: false };
-  })();
-
-  inflight.set('all', job);
-  try {
-    return await job;
-  } finally {
-    inflight.delete('all');
-  }
+  return fetchCategory('all');
 }
 
 async function getNewsArticles(cat = 'all') {
-  if (!isKeyConfigured()) {
-    const err = new Error('API-nyckel saknas — lägg till NEWS_API_KEY');
-    err.status = 503;
-    throw err;
-  }
-
   if (cat === 'all') return fetchAll();
   if (!QUERIES[cat]) {
     const err = new Error(`Okänd kategori: ${cat}`);

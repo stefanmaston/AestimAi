@@ -836,8 +836,8 @@ function showToast(msg) {
 
 // ── Nyheter ──────────────────────────────────────────
 const NEWS_PROXY = IS_LOCAL ? 'http://localhost:3002/api/news' : '/api/news';
-const NEWS_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar — matchar server-cache
-const NEWS_STORAGE_KEY = 'aestimai_news_v2';
+const NEWS_TTL_MS = 2 * 60 * 60 * 1000; // 2 timmar — matchar server/DB-cache
+const NEWS_STORAGE_KEY = 'aestimai_news_v3';
 let newsCache = {};    // cat → { articles, fetchedAt }
 let newsLoaded = false;
 let newsPrefetchStarted = false;
@@ -907,13 +907,20 @@ function prefetchNews() {
 
 async function fetchNewsFromServer(cat, opts = {}) {
   const res = await fetch(`${NEWS_PROXY}?cat=${encodeURIComponent(cat)}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
   if (data.error) throw new Error(data.error);
   const fetchedAt = data.cachedAt ? Date.parse(data.cachedAt) : Date.now();
   newsCache[cat] = { articles: data.articles || [], fetchedAt };
   persistNewsCache();
   return newsCache[cat];
+}
+
+function getStaleNewsArticles(cat) {
+  const entry = newsCache[cat];
+  if (entry?.articles?.length) return entry.articles;
+  const all = newsCache.all?.articles;
+  return all?.length ? all : null;
 }
 
 // Hämta nyheter — anropas första gången modulen visas
@@ -925,14 +932,19 @@ async function loadNews(cat = 'all') {
     return;
   }
 
+  const stale = getStaleNewsArticles(cat);
   setNewsLoading(true);
 
   try {
     const entry = await fetchNewsFromServer(cat);
     renderNews(entry.articles, cat);
   } catch (err) {
-    console.warn('[AestimAi news] Proxy inte nåbar — visar demo-innehåll:', err.message);
+    console.warn('[AestimAi news] Kunde inte hämta nyheter:', err.message);
     setNewsLoading(false);
+    if (stale) {
+      renderNews(stale, cat);
+      return;
+    }
     filterNewsStatic(cat);
   }
 }

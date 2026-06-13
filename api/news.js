@@ -11,15 +11,17 @@ module.exports = async (req, res) => {
   const cat = (req.query?.cat || 'all').toString();
 
   try {
-    const { articles, cachedAt, fromCache } = await getNewsArticles(cat);
+    const { articles, cachedAt, fromCache, source } = await getNewsArticles(cat);
     const maxAge = Math.max(0, Math.floor((CACHE_TTL_MS - (Date.now() - cachedAt)) / 1000));
     res.setHeader('Cache-Control', `public, max-age=${maxAge || 7200}, stale-while-revalidate=86400`);
     res.setHeader('X-News-Cache', fromCache ? 'HIT' : 'MISS');
+    if (source) res.setHeader('X-News-Source', source);
     return res.status(200).json({
       articles,
       total: articles.length,
       cachedAt: new Date(cachedAt).toISOString(),
       fromCache,
+      source,
     });
   } catch (e) {
     const status = e.status || 500;
