@@ -1,7 +1,9 @@
 // GET /api/news?cat=all|valuation|energy|...
-// Server-side cache — uppdateras högst 1 gång/2 timmar per kategori.
+// Proxies to Railway news service (NEWS_API_KEY lives there, not on Vercel).
 
-const { getNewsArticles, CACHE_TTL_MS } = require('../news-service');
+const UPSTREAM =
+  process.env.NEWS_UPSTREAM_URL ||
+  'https://news-production-370c.up.railway.app/api/news';
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,22 +11,20 @@ module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   const cat = (req.query?.cat || 'all').toString();
+  const url = `${UPSTREAM}?cat=${encodeURIComponent(cat)}`;
 
   try {
-    const { articles, cachedAt, fromCache, source } = await getNewsArticles(cat);
-    const maxAge = Math.max(0, Math.floor((CACHE_TTL_MS - (Date.now() - cachedAt)) / 1000));
-    res.setHeader('Cache-Control', `public, max-age=${maxAge || 7200}, stale-while-revalidate=86400`);
-    res.setHeader('X-News-Cache', fromCache ? 'HIT' : 'MISS');
-    if (source) res.setHeader('X-News-Source', source);
-    return res.status(200).json({
-      articles,
-      total: articles.length,
-      cachedAt: new Date(cachedAt).toISOString(),
-      fromCache,
-      source,
-    });
+    const r = await fetch(url, { headers: { Accept: 'application/json' } });
+    const data = await r.json();
+    const cacheCtrl = r.headers.get('cache-control');
+    const newsCache = r.headers.get('x-news-cache');
+    const newsSource = r.headers.get('x-news-source');
+    if (cacheCtrl) res.setHeader('Cache-Control', cacheCtrl);
+    if (newsCache) res.setHeader('X-News-Cache', newsCache);
+    if (newsSource) res.setHeader('X-News-Source', newsSource);
+    res.setHeader('X-News-Proxy', 'railway');
+    return res.status(r.status).json(data);
   } catch (e) {
-    const status = e.status || 500;
-    return res.status(status).json({ error: e.message });
+    return res.status(502).json({ error: e.message || 'Nyhetstjänsten svarar inte' });
   }
 };
