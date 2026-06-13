@@ -2288,6 +2288,7 @@ async function loadMyItems() {
       return;
     }
 
+    const rates = await fetchUciExchangeRates();
     myItemsCache = data;
     myItemsRates = rates;
     const size = getMyItemsViewSize();
