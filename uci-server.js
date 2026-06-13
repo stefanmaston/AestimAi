@@ -678,18 +678,115 @@ app.get('/api/uci/portfolio-stats', async (req, res) => {
 });
 
 // ── Daglig UCI-kommentar (8 teman) ─────────────────────────
-const COMMENTARY_THEMES = [
-  'Inflation & köpkraft',
-  'Centralbankspolitik',
-  'Valuta & FX',
-  'Råvaror & reala tillgångar',
-  'Krypto & tokenisering',
-  'Cirkulär ekonomi',
-  'Kooperativ & ägande',
-  'Beteende & folkvärdering',
-];
+const COMMENTARY_LANGS = ['sv', 'en', 'de', 'fr', 'it', 'es'];
 
-let _commentary = { date: null, items: [] };
+const COMMENTARY_THEMES = {
+  sv: [
+    'Inflation & köpkraft',
+    'Centralbankspolitik',
+    'Valuta & FX',
+    'Råvaror & reala tillgångar',
+    'Krypto & tokenisering',
+    'Cirkulär ekonomi',
+    'Kooperativ & ägande',
+    'Beteende & folkvärdering',
+  ],
+  en: [
+    'Inflation & purchasing power',
+    'Central bank policy',
+    'Currency & FX',
+    'Commodities & real assets',
+    'Crypto & tokenization',
+    'Circular economy',
+    'Cooperatives & ownership',
+    'Behaviour & crowd valuation',
+  ],
+  de: [
+    'Inflation & Kaufkraft',
+    'Zentralbankpolitik',
+    'Währung & FX',
+    'Rohstoffe & Sachwerte',
+    'Krypto & Tokenisierung',
+    'Kreislaufwirtschaft',
+    'Genossenschaften & Eigentum',
+    'Verhalten & Crowd-Bewertung',
+  ],
+  fr: [
+    'Inflation & pouvoir d\'achat',
+    'Politique des banques centrales',
+    'Devises & FX',
+    'Matières premières & actifs réels',
+    'Crypto & tokenisation',
+    'Économie circulaire',
+    'Coopératives & propriété',
+    'Comportement & valorisation participative',
+  ],
+  it: [
+    'Inflazione & potere d\'acquisto',
+    'Politica delle banche centrali',
+    'Valute & FX',
+    'Materie prime & asset reali',
+    'Crypto & tokenizzazione',
+    'Economia circolare',
+    'Cooperative & proprietà',
+    'Comportamento & valutazione collettiva',
+  ],
+  es: [
+    'Inflación & poder adquisitivo',
+    'Política de bancos centrales',
+    'Divisas & FX',
+    'Materias primas & activos reales',
+    'Cripto & tokenización',
+    'Economía circular',
+    'Cooperativas & propiedad',
+    'Comportamiento & valoración colectiva',
+  ],
+};
+
+const COMMENTARY_PROMPTS = {
+  sv: {
+    role: 'Du är finansredaktör för AestimAi och UCI (Universal Coin Index) – ett valutaoberoende, nyttobaserat bytesvärdesindex som ägs av en ekonomisk förening där användarna är delägare.',
+    tasks: 'Skriv åtta korta dagliga kommentarer (2–3 meningar var) för datumet {date}, en för varje tema nedan. Varje kommentar ska:\n- förankras i dagens nyheter nedan där det är relevant för temat,\n- knyta temat till UCI:s perspektiv (realt bytevärde, valutaoberoende, folkvaliderat, kooperativt ägt),\n- kännas aktuell och engagerande, på svenska,\n- INTE ge finansiell rådgivning.',
+    themesLabel: 'Teman (behåll exakt denna ordning och dessa rubriker):',
+    newsLabel: 'DAGENS FINANSNYHETER (förankra kommentarerna i dessa där det passar temat – tvinga inte in en rubrik som inte hör hemma):',
+  },
+  en: {
+    role: 'You are financial editor for AestimAi and UCI (Universal Coin Index) — a currency-independent, utility-based trade-value index owned by an economic cooperative where users are co-owners.',
+    tasks: 'Write eight short daily comments (2–3 sentences each) for {date}, one per theme below. Each comment should:\n- anchor in today\'s headlines below where relevant,\n- connect the theme to UCI (real trade value, currency-independent, crowd-validated, cooperatively owned),\n- feel timely and engaging, in English,\n- NOT provide financial advice.',
+    themesLabel: 'Themes (keep exactly this order and these headings):',
+    newsLabel: 'TODAY\'S FINANCIAL HEADLINES (anchor comments where relevant — do not force unrelated headlines):',
+  },
+  de: {
+    role: 'Du bist Finanzredakteur für AestimAi und UCI (Universal Coin Index) — ein währungsunabhängiger, nutzenbasierter Tauschwertindex in genossenschaftlichem Eigentum.',
+    tasks: 'Schreibe acht kurze tägliche Kommentare (2–3 Sätze) für {date}, je eines pro Thema. Jeder Kommentar soll:\n- bei Passung in den Schlagzeilen unten verankert sein,\n- das Thema mit UCI verbinden (realer Tauschwert, währungsunabhängig, crowd-validiert, genossenschaftlich),\n- aktuell und engagiert auf Deutsch klingen,\n- KEINE Finanzberatung geben.',
+    themesLabel: 'Themen (exakt diese Reihenfolge und Überschriften beibehalten):',
+    newsLabel: 'HEUTIGE FINANZSCHLAGZEILEN (nur passende Headlines einbeziehen):',
+  },
+  fr: {
+    role: 'Vous êtes rédacteur financier pour AestimAi et l\'UCI (Universal Coin Index) — indice de valeur d\'échange indépendant des devises, détenu par une coopérative économique.',
+    tasks: 'Rédigez huit brefs commentaires quotidiens (2–3 phrases) pour {date}, un par thème. Chaque commentaire doit :\n- s\'ancrer dans les titres ci-dessous si pertinent,\n- relier le thème à l\'UCI (valeur d\'échange réelle, indépendante des devises, validée par la foule, coopérative),\n- être actuel et engageant, en français,\n- NE PAS constituer un conseil financier.',
+    themesLabel: 'Thèmes (conserver exactement cet ordre et ces titres) :',
+    newsLabel: 'TITRES FINANCIERS DU JOUR (n\'utiliser que ceux pertinents) :',
+  },
+  it: {
+    role: 'Sei redattore finanziario per AestimAi e UCI (Universal Coin Index) — indice di valore di scambio indipendente dalla valuta, di proprietà cooperativa.',
+    tasks: 'Scrivi otto brevi commenti giornalieri (2–3 frasi) per {date}, uno per tema. Ogni commento deve:\n- ancorarsi alle notizie sotto se pertinente,\n- collegare il tema all\'UCI (valore di scambio reale, indipendente dalla valuta, validato dalla folla, cooperativo),\n- essere attuale e coinvolgente, in italiano,\n- NON fornire consulenza finanziaria.',
+    themesLabel: 'Temi (mantieni esattamente questo ordine e questi titoli):',
+    newsLabel: 'TITOLI FINANZIARI DI OGGI (usa solo quelli pertinenti):',
+  },
+  es: {
+    role: 'Eres editor financiero de AestimAi y UCI (Universal Coin Index) — índice de valor de intercambio independiente de la moneda, propiedad de una cooperativa económica.',
+    tasks: 'Escribe ocho comentarios diarios breves (2–3 frases) para {date}, uno por tema. Cada comentario debe:\n- anclarse en las noticias de abajo si es relevante,\n- conectar el tema con UCI (valor de intercambio real, independiente de moneda, validado colectivamente, cooperativo),\n- sonar actual y atractivo, en español,\n- NO dar asesoramiento financiero.',
+    themesLabel: 'Temas (mantén exactamente este orden y estos títulos):',
+    newsLabel: 'TITULARES FINANCIEROS DE HOY (solo los pertinentes):',
+  },
+};
+
+let _commentaryByLang = {};
+
+function normalizeCommentaryLang(lang) {
+  return COMMENTARY_LANGS.includes(lang) ? lang : 'en';
+}
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 
@@ -704,25 +801,24 @@ async function fetchNewsHeadlines() {
   } catch { return []; }
 }
 
-async function generateCommentary() {
+async function generateCommentary(lang) {
+  lang = normalizeCommentaryLang(lang);
   const today = todayStr();
-  const themeList = COMMENTARY_THEMES.map((t, i) => `${i + 1}. ${t}`).join('\n');
+  const themes = COMMENTARY_THEMES[lang] || COMMENTARY_THEMES.en;
+  const cfg = COMMENTARY_PROMPTS[lang] || COMMENTARY_PROMPTS.en;
+  const themeList = themes.map((t, i) => `${i + 1}. ${t}`).join('\n');
 
   const headlines = await fetchNewsHeadlines();
   const newsBlock = headlines.length
-    ? `\n\nDAGENS FINANSNYHETER (förankra kommentarerna i dessa där det passar temat – tvinga inte in en rubrik som inte hör hemma):\n${headlines.map(h => '- ' + h).join('\n')}`
+    ? `\n\n${cfg.newsLabel}\n${headlines.map(h => '- ' + h).join('\n')}`
     : '';
 
   const prompt =
-`Du är finansredaktör för AestimAi och UCI (Universal Coin Index) – ett valutaoberoende, nyttobaserat bytesvärdesindex som ägs av en ekonomisk förening där användarna är delägare.
+`${cfg.role}
 
-Skriv åtta korta dagliga kommentarer (2–3 meningar var) för datumet ${today}, en för varje tema nedan. Varje kommentar ska:
-- förankras i dagens nyheter nedan där det är relevant för temat,
-- knyta temat till UCI:s perspektiv (realt bytevärde, valutaoberoende, folkvaliderat, kooperativt ägt),
-- kännas aktuell och engagerande, på svenska,
-- INTE ge finansiell rådgivning.
+${cfg.tasks.replace('{date}', today)}
 
-Teman (behåll exakt denna ordning och dessa rubriker):
+${cfg.themesLabel}
 ${themeList}${newsBlock}
 
 Svara ENBART med giltig JSON, en array med åtta objekt i samma ordning, inga kodblock:
@@ -737,28 +833,30 @@ Svara ENBART med giltig JSON, en array med åtta objekt i samma ordning, inga ko
   const json = raw.match(/\[[\s\S]*\]/);
   if (!json) throw new Error('Claude returnerade inte giltig JSON');
   const items = JSON.parse(json[0]);
-  _commentary = { date: today, items };
-  console.log(`[Commentary] genererade ${items.length} kommentarer för ${today}`);
-  return _commentary;
+  _commentaryByLang[lang] = { date: today, items, lang };
+  console.log(`[Commentary] genererade ${items.length} kommentarer (${lang}) för ${today}`);
+  return _commentaryByLang[lang];
 }
 
-async function getCommentary() {
-  if (_commentary.date !== todayStr() || !_commentary.items.length) {
-    try { await generateCommentary(); }
-    catch (e) { console.warn('[Commentary] generering misslyckades:', e.message); }
-  }
-  return _commentary;
+async function getCommentary(lang = 'en') {
+  lang = normalizeCommentaryLang(lang);
+  const cached = _commentaryByLang[lang];
+  if (cached?.date === todayStr() && cached.items?.length) return cached;
+  try { await generateCommentary(lang); }
+  catch (e) { console.warn(`[Commentary] generering misslyckades (${lang}):`, e.message); }
+  return _commentaryByLang[lang] || { date: null, items: [], lang };
 }
 
 // ── GET /api/uci/commentary ────────────────────────────────
 app.get('/api/uci/commentary', async (req, res) => {
-  const c = await getCommentary();
+  const lang = normalizeCommentaryLang(req.query.lang);
+  const c = await getCommentary(lang);
   if (!c.items.length) return res.status(503).json({ error: 'kommentarer ej tillgängliga än' });
   res.json(c);
 });
 
-// Generera om automatiskt varje dag kl 06:00 (server-tid)
-cron.schedule('0 6 * * *', () => { generateCommentary().catch(() => {}); });
+generateCommentary('sv').catch(() => {});
+cron.schedule('0 6 * * *', () => { generateCommentary('sv').catch(() => {}); });
 
 // Synka FX-data dagligen kl 18 (efter att europeiska marknader stängt)
 cron.schedule('0 18 * * *', () => {

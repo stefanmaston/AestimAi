@@ -757,6 +757,9 @@
       'panel.pro': '<h4>AestimAi Pro</h4><p>Professionelle Bewertung für Immobilien, Energieanlagen und Portfolios.</p>',
       'panel.news': '<h4>AestimAi Nachrichten</h4><p>Nachrichten zu Bewertung, Tausch, Energie und genossenschaftlicher Wirtschaft.</p>',
       'panel.about': '<h4>Über AestimAi</h4><p>AestimAi schafft das fehlende Maß für Wert — den Universal Coin Index (UCI).</p>',
+      'dash.commentaryTitle': 'Täglicher UCI-Kommentar',
+      'dash.commentaryLoading': 'Lade heutige Kommentare…',
+      'dash.commentaryUnavailable': 'Kommentare derzeit nicht verfügbar.',
     };
     const fr = {
       ...L.en,
@@ -785,6 +788,9 @@
       'panel.pro': '<h4>AestimAi Pro</h4><p>Valorisation professionnelle pour l\'immobilier, l\'énergie et les portefeuilles.</p>',
       'panel.news': '<h4>AestimAi Actualités</h4><p>Actualités sur la valorisation, l\'échange, l\'énergie et l\'économie coopérative.</p>',
       'panel.about': '<h4>À propos d\'AestimAi</h4><p>AestimAi construit la mesure manquante de la valeur — l\'Universal Coin Index (UCI).</p>',
+      'dash.commentaryTitle': 'Commentaire UCI quotidien',
+      'dash.commentaryLoading': 'Chargement du commentaire du jour…',
+      'dash.commentaryUnavailable': 'Commentaire indisponible pour le moment.',
     };
     const it = {
       ...L.en,
@@ -813,6 +819,9 @@
       'panel.pro': '<h4>AestimAi Pro</h4><p>Valutazione professionale per immobili, energia e portafogli.</p>',
       'panel.news': '<h4>AestimAi Notizie</h4><p>Notizie su valutazione, scambio, energia ed economia cooperativa.</p>',
       'panel.about': '<h4>Informazioni su AestimAi</h4><p>AestimAi costruisce la misura mancante del valore — l\'Universal Coin Index (UCI).</p>',
+      'dash.commentaryTitle': 'Commento UCI giornaliero',
+      'dash.commentaryLoading': 'Caricamento commenti di oggi…',
+      'dash.commentaryUnavailable': 'Commento non disponibile al momento.',
     };
     const es = {
       ...L.en,
@@ -841,6 +850,9 @@
       'panel.pro': '<h4>AestimAi Pro</h4><p>Valoración profesional para inmuebles, energía y carteras.</p>',
       'panel.news': '<h4>AestimAi Noticias</h4><p>Noticias sobre valoración, intercambio, energía y economía cooperativa.</p>',
       'panel.about': '<h4>Acerca de AestimAi</h4><p>AestimAi construye la medida que faltaba del valor — el Universal Coin Index (UCI).</p>',
+      'dash.commentaryTitle': 'Comentario UCI diario',
+      'dash.commentaryLoading': 'Cargando comentarios de hoy…',
+      'dash.commentaryUnavailable': 'Comentario no disponible en este momento.',
     };
 
     const map = { sv: L.sv, en: L.en, de, fr, it, es };

@@ -1200,13 +1200,19 @@ async function loadChartForCat() {
 async function loadCommentary() {
   const grid = document.getElementById('commentaryGrid');
   if (!grid) return;
+  const lang = window.AestimI18n?.getLanguage?.() || 'en';
+  grid.innerHTML = `<div class="commentary-loading">${str('dash.commentaryLoading', null, 'Loading today\'s commentary…')}</div>`;
   try {
-    const res  = await fetch(`${UCI_SERVER}/api/uci/commentary`);
+    const res  = await fetch(`${UCI_SERVER}/api/uci/commentary?lang=${encodeURIComponent(lang)}`);
     const data = await res.json();
     if (!res.ok || !data.items) throw new Error(data.error || 'inga kommentarer');
 
     const dateEl = document.getElementById('commentaryDate');
-    if (dateEl && data.date) dateEl.textContent = data.date;
+    if (dateEl && data.date) {
+      dateEl.textContent = new Date(`${data.date}T12:00:00`).toLocaleDateString(appLocale(), {
+        year: 'numeric', month: 'long', day: 'numeric',
+      });
+    }
 
     grid.innerHTML = data.items.map(item => `
       <div class="commentary-card">
@@ -2589,7 +2595,10 @@ function setupSettings() {
       if (state.currentModule === 'market') loadMyItems();
       if (myItemModalOpenId) refreshMyItemModalIfOpen();
       if (state.currentModule === 'account' && currentUser) refreshAccountSection();
-      if (state.currentModule === 'dashboard') loadChartForCat();
+      if (state.currentModule === 'dashboard') {
+        loadChartForCat();
+        if (dashLoaded) loadCommentary();
+      }
       i18n.applyTranslations();
       if (state.currentModule === 'news') refreshNewsLanguage();
       updatePanelHelp(state.currentModule);
